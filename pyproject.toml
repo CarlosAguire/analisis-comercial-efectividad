@@ -1,0 +1,37 @@
+# === Ruff Configuration ===
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["src"]
+exclude = [
+    ".venv",
+    "venv",
+    "_pycache_",
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    "*.egg-info",
+    "dist",
+    "build",
+    "alembic/versions",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # Pyflakes
+    "I",     # isort (import sorting)
+    "UP",    # pyupgrade (modern Python syntax)
+    "B",     # flake8-bugbear (common bugs)
+    "SIM",   # flake8-simplify
+    "ASYNC", # flake8-async
+]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

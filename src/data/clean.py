@@ -56,7 +56,19 @@ class CleanData:
         - Planta residencial.
         """
 
-        # 1. Filtramos para eliminar filas que no necesitamos
+        # 1. Removemos columnas duplicada
+        # Log init
+        time_stamp = get_time_stamp()
+        message = "Removiendo columnas duplicadas..."
+        print(f"{time_stamp} [ INFO ] {message}")
+        # Log end
+
+        self.df_ofsc_dispatch = remove_duplicate_columns(
+            df=self.df_ofsc_dispatch,
+            columna_objetivo="Notas de Cierre",
+        )
+
+        # 2. Filtramos para eliminar filas que no necesitamos
         # Log init
         time_stamp = get_time_stamp()
         message = "Filtrando datos..."
@@ -84,15 +96,6 @@ class CleanData:
             filters={"NOMBRE": self.df_ofsc_capacity["Asesor comercial"].tolist()},
         )
 
-        # 2. Removemos columnas duplicada
-        # Log init
-        time_stamp = get_time_stamp()
-        message = "Removiendo columnas duplicadas..."
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
-
-        self.df_ofsc_dispatch = remove_duplicate_columns(df=self.df_ofsc_dispatch)
-
         # 3. Eliminamos columnas que no necesitamos
         # Log init
         time_stamp = get_time_stamp()
@@ -113,27 +116,7 @@ class CleanData:
             df=self.df_residential_plant,
         )
 
-        # 4. Eliminamos filas duplicadas
-        # Log init
-        time_stamp = get_time_stamp()
-        message = "Removiendo filas que no se necesitan..."
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
-
-        self.df_residential_plant = drop_duplicates_by_column(
-            df=self.df_residential_plant,
-            column="NOMBRE",
-        )
-
-    def create_tabla(self) -> None:
-        """
-        Crea el archivo de Excel del `DataFrame` que contiene los datos unificados y
-        limpios de las tablas:
-        - OFSC de despacho y capacidad.
-        - Planta residencial.
-        """
-
-        # 1. Unimos el OFSC de despacho y capacidades en uno solo
+        # 5. Unimos el OFSC de despacho y capacidades en uno solo
         # Log init
         time_stamp = get_time_stamp()
         message = "Uniendo el OFSC de despacho y capacidades en uno solo..."
@@ -148,8 +131,39 @@ class CleanData:
             columns_df2=parameters.OFSC_CAPACITY_COLUMNS,
         )
 
+    @classmethod
+    def create_tabla(
+        cls,
+        df_ofsc_list: list[pd.DataFrame],
+        df_residential_plant_list: list[pd.DataFrame],
+    ) -> None:
+        """
+        Crea el archivo de Excel del `DataFrame` que contiene los datos unificados y
+        limpios de las tablas:
+        - OFSC de despacho y capacidad.
+        - Planta residencial.
+        """
+
+        df_ofsc_final = pd.concat(objs=df_ofsc_list, ignore_index=True)
+        df_residential_plant_final = pd.concat(
+            objs=df_residential_plant_list,
+            ignore_index=True,
+        )
+
+        # 4. Eliminamos filas duplicadas
+        # Log init
+        time_stamp = get_time_stamp()
+        message = "Removiendo filas que no se necesitan..."
+        print(f"{time_stamp} [ INFO ] {message}")
+        # Log end
+
+        df_residential_plant_final = drop_duplicates_by_column(
+            df=df_residential_plant_final,
+            column="NOMBRE",
+        )
+
         # 2. Cmabiamos el nombre de la llave foranea
-        self.df_residential_plant = self.df_residential_plant.rename(
+        df_residential_plant_final = df_residential_plant_final.rename(
             columns={"NOMBRE": "Asesor comercial"}
         )
 
@@ -166,33 +180,17 @@ class CleanData:
         RESIDENTIAL_PLANT_COLUMNS.append("Asesor comercial")
 
         # 3. Creamos la tabla final
-        self.df_output = join(
-            df1=self.df_ofsc,
-            df2=self.df_residential_plant,
+        df_output = join(
+            df1=df_ofsc_final,
+            df2=df_residential_plant_final,
             foreign_key="Asesor comercial",
             columns_df1=set(
                 parameters.OFSC_CAPACITY_COLUMNS + parameters.OFSC_DISPATCH_COLUMNS
             ),
             columns_df2=RESIDENTIAL_PLANT_COLUMNS,
         )
-        self.df_output["Razón sugerida"] = None
-        self.df_output["Estado del análisis"] = None
-
-        if parameters.DEBUG:
-            self.__create_file(
-                path=parameters.CLEAN_OFSC_PATH,
-                df=self.df_ofsc,
-                engine="openpyxl",
-                sheet_name="DATOS",
-                is_excel_table=False,
-            )
-            self.__create_file(
-                path=parameters.CLEAN_RESIDENTIAL_PLANT_PATH,
-                df=self.df_residential_plant,
-                engine="openpyxl",
-                sheet_name="DATOS",
-                is_excel_table=False,
-            )
+        df_output["Razón sugerida"] = None
+        df_output["Estado del análisis"] = None
 
         # Log init
         time_stamp = get_time_stamp()
@@ -200,41 +198,27 @@ class CleanData:
         print(f"{time_stamp} [ INFO ] {message}")
         # Log end
 
-        self.__create_file(
+        with pd.ExcelWriter(
             path=parameters.OUTPUT_FILE_PATH,
-            df=self.df_output,
             engine="xlsxwriter",
-            sheet_name="DATOS",
-            is_excel_table=True,
-        )
+            mode="w",
+        ) as w:
+            sheet_name = "DATOS"
+            df_output.to_excel(excel_writer=w, index=False, sheet_name=sheet_name)
 
-    @staticmethod
-    def __create_file(
-        path: Path,
-        df: pd.DataFrame,
-        engine: str,
-        sheet_name: str,
-        is_excel_table: bool,
-    ) -> None:
-        """Crea el archivo de Excel de un `DataFrame` en la ruta indicada."""
+            worksheet = w.sheets[sheet_name]
 
-        with pd.ExcelWriter(path=path, engine=engine, mode="w") as w:  # type: ignore
-            df.to_excel(excel_writer=w, index=False, sheet_name=sheet_name)
+            # Dimensiones del rango
+            (n_rows, n_columns) = df_output.shape
 
-            if is_excel_table:
-                worksheet = w.sheets[sheet_name]
+            # Encabezados para la tabla
+            columns = [{"header": col} for col in df_output.columns]
 
-                # Dimensiones del rango
-                (n_rows, n_columns) = df.shape
-
-                # Encabezados para la tabla
-                columns = [{"header": col} for col in df.columns]
-
-                # La creamos como tabla de Excel
-                worksheet.add_table(
-                    0,
-                    0,
-                    n_rows,
-                    n_columns - 1,
-                    {"name": "TablaDatos", "columns": columns, "style": None},
-                )
+            # La creamos como tabla de Excel
+            worksheet.add_table(
+                0,
+                0,
+                n_rows,
+                n_columns - 1,
+                {"name": "TablaDatos", "columns": columns, "style": None},
+            )

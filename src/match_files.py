@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-# Busca un patrón de tres números (d/m/y o m/d/y) con separadores _ o -
+# Regex ORIGINAL (con separadores): tres números con _ o - o espacio
 DATE_RE = re.compile(r"(?<!\d)(\d{1,2})[ _-](\d{1,2})[ _-](\d{2,4})(?!\d)")
 
 
@@ -13,7 +13,6 @@ class AmbiguousDateError(Exception):
 
 def _coerce_year(y: int) -> int:
     """Convierte año de 2 dígitos a 2000+YY. Ajusta aquí si necesitas otra regla."""
-
     if y < 100:
         return 2000 + y
     return y
@@ -24,11 +23,8 @@ def parse_date_from_name(
     preferred_order: str | None = None,  # 'dmy' o 'mdy'
 ) -> date:
     """
-    Extrae una fecha desde el nombre del archivo asumiendo un patrón numérico.
-    - preferred_order: si 'dmy' la 1ª cifra es día; si 'mdy' la 1ª cifra es mes.
-    - Si no se pasa y hay ambigüedad (ambas cifras <= 12), lanza AmbiguousDateError.
+    (Se deja tal cual tu implementación original para compatibilidad con otros usos.)
     """
-
     name = Path(filename).name
     m = DATE_RE.search(name)
 
@@ -39,22 +35,17 @@ def parse_date_from_name(
     a, b, y = int(a), int(b), int(y)
     y = _coerce_year(y)
 
-    # Si podemos desambiguar por rango (mes <= 12; día 1..31)
     a_gt_12 = a > 12
     b_gt_12 = b > 12
 
     if preferred_order is None:
         if a_gt_12 and not b_gt_12:
-            # a es día (>=13..31) -> dmy
-            d, m = a, b
+            d, m_ = a, b
         elif b_gt_12 and not a_gt_12:
-            # b es día -> mdy
-            d, m = b, a
+            d, m_ = b, a
         elif a_gt_12 and b_gt_12:
-            # Ambos >12 no debería pasar con fechas reales
             raise ValueError(f"Ambigüedad no resolvible (>12 en ambos): {name}")
         else:
-            # Ambos <= 12 => ambigua sin preferencia
             raise AmbiguousDateError(
                 f"Fecha ambigua (ambas partes <=12) en: {name}. "
                 f"Especifica preferred_order='dmy' o 'mdy'."
@@ -64,72 +55,22 @@ def parse_date_from_name(
         if pref not in ("dmy", "mdy"):
             raise ValueError("preferred_order debe ser 'dmy' o 'mdy'")
         if pref == "dmy":
-            d, m = a, b
+            d, m_ = a, b
         else:  # 'mdy'
-            d, m = b, a
+            d, m_ = b, a
 
-    # Validaciones básicas
-    if not (1 <= m <= 12):
-        raise ValueError(f"Mes inválido ({m}) en: {name}")
+    if not (1 <= m_ <= 12):
+        raise ValueError(f"Mes inválido ({m_}) en: {name}")
     if not (1 <= d <= 31):
         raise ValueError(f"Día inválido ({d}) en: {name}")
     if y < 1900 or y > 2100:
-        # Ajusta rangos si hace falta
         raise ValueError(f"Año fuera de rango razonable ({y}) en: {name}")
 
-    return date(y, m, d)
-
-
-def infer_order_for_folder(folder: Path, sample_limit: int = 100) -> str | None:
-    """
-    Intenta inferir el orden ('dmy' o 'mdy') para una carpeta.
-    - Usa casos NO ambiguos (cuando uno de los dos primeros números > 12)
-    - Si hay conflicto o insuficiencia de evidencia, devuelve None.
-    """
-
-    votes = {"dmy": 0, "mdy": 0}
-    checked = 0
-
-    for p in folder.iterdir():
-        if not p.is_file():
-            continue
-
-        m = DATE_RE.search(p.name)
-
-        if not m:
-            continue
-
-        a, b, _ = m.groups()
-        a, b = int(a), int(b)
-
-        a_gt_12 = a > 12
-        b_gt_12 = b > 12
-
-        if a_gt_12 and not b_gt_12:
-            votes["dmy"] += 1
-        elif b_gt_12 and not a_gt_12:
-            votes["mdy"] += 1
-
-        # si ambos <=12 o ambos >12 => no aporta evidencia
-        checked += 1
-
-        if checked >= sample_limit:
-            break
-
-    if votes["dmy"] > 0 and votes["mdy"] == 0:
-        return "dmy"
-    if votes["mdy"] > 0 and votes["dmy"] == 0:
-        return "mdy"
-
-    # Indeterminado o mixto
-    return None
+    return date(y, m_, d)
 
 
 def normalize_without_date(filename: str) -> str:
-    """
-    Reemplaza el trozo de fecha (numérica) por un token fijo para comparar nombres
-    independientemente del orden de la fecha.
-    """
+    """Reemplaza el trozo de fecha por un token fijo para comparar nombres."""
 
     name = Path(filename).name
 
@@ -146,12 +87,48 @@ class PairingResult:
     errors: list[str]
 
 
-def pair_files(
-    dir1: Path,
-    dir2: Path,
-    order1: str | None = None,
-    order2: str | None = None,
-) -> PairingResult:
+def _extract_tokens(filename: str) -> tuple[int, int, int]:
+    """
+    Devuelve (a, b, y) tal como aparecen en el nombre, coaccionando el año.
+    Solo valida el año; no decide si a es día o mes.
+    """
+
+    name = Path(filename).name
+    m = DATE_RE.search(name)
+
+    if not m:
+        raise ValueError(f"No se encontró fecha en el nombre: {name}")
+
+    a, b, y = map(int, m.groups())
+    y = _coerce_year(y)
+
+    if y < 1900 or y > 2100:
+        raise ValueError(f"Año fuera de rango razonable ({y}) en: {name}")
+
+    return a, b, y
+
+
+def _is_impossible_date(a: int, b: int) -> bool:
+    """Si a > 12 y b > 12, no puede ser fecha d/m válida en ningún orden."""
+
+    return a > 12 and b > 12
+
+
+def _is_ambiguous(a: int, b: int) -> bool:
+    """Verdadero si tanto a como b son <= 12 (ambigüedad d/m)."""
+
+    return a <= 12 and b <= 12
+
+
+def _date_signature(a: int, b: int, y: int) -> tuple[int, int, int]:
+    """Firma independiente del orden: (año, min(d,m), max(d,m))."""
+
+    lo, hi = sorted((a, b))
+
+    return (y, lo, hi)
+
+
+def pair_files(dir1: Path, dir2: Path) -> PairingResult:
 
     d1 = Path(dir1)
     d2 = Path(dir2)
@@ -159,45 +136,60 @@ def pair_files(
     if not d1.is_dir() or not d2.is_dir():
         raise NotADirectoryError("Alguna de las rutas no es carpeta.")
 
-    # Intento de inferencia automática si no se indicó orden
-    ord1 = order1 or infer_order_for_folder(d1)
-    ord2 = order2 or infer_order_for_folder(d2)
+    files_dir1 = [p for p in d1.iterdir() if p.is_file()]
+    files_dir2 = [p for p in d2.iterdir() if p.is_file()]
 
-    # Índices por fecha
-    idx1: dict[date, list[Path]] = {}
-    idx2: dict[date, list[Path]] = {}
+    # Índices por firma de fecha (y, min(a,b), max(a,b))
+    idx1: dict[tuple[int, int, int], list[Path]] = {}
+    idx2: dict[tuple[int, int, int], list[Path]] = {}
 
-    ambiguous_in_dir1, ambiguous_in_dir2 = [], []
-    errors = []
+    ambiguous_in_dir1: list[Path] = []
+    ambiguous_in_dir2: list[Path] = []
+    errors: list[str] = []
 
-    # Construir índices
-    for p in d1.iterdir():
-        if not p.is_file():
-            continue
-
+    # Construir índices tolerantes al orden d/m
+    for p in files_dir1:
         try:
-            dt = parse_date_from_name(p.name, preferred_order=ord1)
-            idx1.setdefault(dt, []).append(p)
-        except AmbiguousDateError:
-            ambiguous_in_dir1.append(p)
+            a, b, y = _extract_tokens(p.name)
+
+            if _is_impossible_date(a, b):
+                errors.append(
+                    f"[dir1] {p.name}: ambos componentes >12; no es una fecha válida."
+                )
+                continue
+            if _is_ambiguous(a, b):
+                ambiguous_in_dir1.append(p)
+
+            sig = _date_signature(a, b, y)
+            idx1.setdefault(sig, []).append(p)
         except Exception as e:
             errors.append(f"[dir1] {p.name}: {e}")
 
-    for p in d2.iterdir():
-        if not p.is_file():
-            continue
-
+    for p in files_dir2:
         try:
-            dt = parse_date_from_name(p.name, preferred_order=ord2)
-            idx2.setdefault(dt, []).append(p)
-        except AmbiguousDateError:
-            ambiguous_in_dir2.append(p)
+            a, b, y = _extract_tokens(p.name)
+
+            if _is_impossible_date(a, b):
+                errors.append(
+                    f"[dir2] {p.name}: ambos componentes >12; no es una fecha válida."
+                )
+                continue
+            if _is_ambiguous(a, b):
+                ambiguous_in_dir2.append(p)
+
+            sig = _date_signature(a, b, y)
+            idx2.setdefault(sig, []).append(p)
         except Exception as e:
             errors.append(f"[dir2] {p.name}: {e}")
 
-    # Validación 1: "Exactamente los mismos archivos" (independiente del orden de fecha)
-    norm1 = {normalize_without_date(p.name) for p in d1.iterdir() if p.is_file()}
-    norm2 = {normalize_without_date(p.name) for p in d2.iterdir() if p.is_file()}
+    # Validación: mismos nombres "sin fecha" en ambas carpetas
+    if not files_dir1:
+        errors.append(f"No se encontraron archivos dentro de dir1: {d1}")
+    if not files_dir2:
+        errors.append(f"No se encontraron archivos dentro de dir2: {d2}")
+
+    norm1 = {normalize_without_date(p.name) for p in files_dir1}
+    norm2 = {normalize_without_date(p.name) for p in files_dir2}
 
     if norm1 != norm2:
         only1 = norm1 - norm2
@@ -212,32 +204,34 @@ def pair_files(
                 f"Nombres (sin fecha) presentes solo en dir2: {sorted(only2)}"
             )
 
-    # Emparejar por fecha
-    all_dates = set(idx1.keys()) | set(idx2.keys())
+    # Emparejar por firma de fecha
+    all_sigs = set(idx1.keys()) | set(idx2.keys())
     pairs: list[tuple[Path, Path]] = []
     only_in_dir1: list[Path] = []
     only_in_dir2: list[Path] = []
 
-    for dt in sorted(all_dates):
-        files1 = idx1.get(dt, [])
-        files2 = idx2.get(dt, [])
+    def _sig_to_str(sig: tuple[int, int, int]) -> str:
+        y, lo, hi = sig
 
-        # Si hay exactamente uno y uno, emparejamos directo
+        return f"{lo:02d}/{hi:02d}/{y} ~ {hi:02d}/{lo:02d}/{y}"
+
+    for sig in sorted(all_sigs):
+        files1 = idx1.get(sig, [])
+        files2 = idx2.get(sig, [])
+
         if len(files1) == 1 and len(files2) == 1:
             pairs.append((files1[0], files2[0]))
         else:
-            # Si alguno de los lados está vacío, los restantes quedan sin pareja
             if not files2:
                 only_in_dir1.extend(files1)
             if not files1:
                 only_in_dir2.extend(files2)
-            # Si hay múltiples por fecha en alguno de los lados, reportamos
             if len(files1) > 1 or len(files2) > 1:
                 errors.append(
-                    f"Hay {len(files1)} archivo(s) en dir1 y {len(files2)} en dir2 "
-                    f"para la fecha {dt.isoformat()}. Se esperaba 1 y 1."
+                    f"Hay {len(files1)} archivo(s) en dir1 y "
+                    f"{len(files2)} en dir2 para la fecha {_sig_to_str(sig)}. "
+                    "Se esperaba 1 y 1."
                 )
-                # Sin lógica adicional para decidir emparejamiento en duplicados
 
     return PairingResult(
         pairs=pairs,

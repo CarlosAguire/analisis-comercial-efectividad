@@ -1,7 +1,7 @@
+import re
 from collections.abc import Iterable
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 
@@ -26,31 +26,60 @@ def drop_columns(df: pd.DataFrame, columns_preserve: list[str]) -> pd.DataFrame:
     return df.drop(columns=df.columns.difference(columns_preserve))
 
 
-def remove_duplicate_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Elimina columnas duplicadas en un `DataFrame`, manteniendo siempre las que contienen
-    datos. Para cada grupo de columnas con el mismo nombre, se eliminan únicamente las
-    duplicadas que estén completamente vacías. No se modifica el nombre ni el orden
-    original de las columnas, solo se quitan las duplicadas vacías.
-    """
+def remove_duplicate_columns(
+    df: pd.DataFrame,
+    columna_objetivo: str,
+    *,
+    tratar_cadenas_vacias_como_na: bool = True,
+    considerar_espacios_vacios: bool = True,
+    inplace: bool = False,
+) -> pd.DataFrame:
 
-    columns = df.columns
-    duplicates = [column for column in columns if (columns == column).sum() > 1]
+    if not inplace:
+        df = df.copy()
 
-    # Máscara de columnas a conservar (por posición); comenzamos conservando todas
-    keep_mask = np.ones(len(columns), dtype=bool)
+    patron = re.compile(rf"^{re.escape(columna_objetivo)}(?:\.(\d+))?$")
+    familia = [c for c in df.columns if patron.fullmatch(c)]
+    if not familia:
+        return df  # No hay columnas de esa familia; no hacemos nada.
 
-    # Para cada nombre duplicado, revisa los índices de sus apariciones
-    for column in set(duplicates):
-        indices = [i for i, c in enumerate(columns) if c == column]
+    def _columna_esta_vacia(serie: pd.Series) -> bool:
+        s = serie
+        if tratar_cadenas_vacias_como_na and s.dtype == "object":
+            if considerar_espacios_vacios:
+                s = s.replace(r"^\s*$", pd.NA, regex=True)
+            else:
+                s = s.replace("", pd.NA)
+        return not s.notna().any()
 
-        # Mantiene la primera ocurrencia; evalúa las posteriores
-        for idx in indices[1:]:
-            # Si esta columna duplicada está totalmente vacía, se marca para eliminar
-            if df.iloc[:, idx].isna().all():
-                keep_mask[idx] = False
+    # 1) Identificar vacías y no vacías dentro de la familia
+    vacias = [c for c in familia if _columna_esta_vacia(df[c])]
+    no_vacias = [c for c in familia if c not in vacias]
 
-    return df.loc[:, keep_mask]
+    # 2) Eliminar columnas vacías
+    if vacias:
+        df.drop(columns=vacias, inplace=True)
+
+    # 3) Si queda exactamente UNA no vacía y su nombre tiene sufijo, renombrar al base
+    if len(no_vacias) == 1:
+        col_restante = no_vacias[0]
+        # Si la única no vacía fue renombrada por el drop (no, el nombre no cambia),
+        # sigue igual.
+        # Verificamos si tiene sufijo
+        if col_restante != columna_objetivo:
+            # Solo renombrar si el nombre base no existe o si era la columna vacía que
+            # ya eliminamos.
+            # En este punto, la base puede no existir o haber sido eliminada; si aún
+            # existe y tiene datos,
+            # significaría que hay más de una no_vacía, lo cual no entra al len==1.
+            if columna_objetivo not in df.columns:
+                df.rename(columns={col_restante: columna_objetivo}, inplace=True)
+            else:
+                # Por seguridad, evitamos sobreescribir una columna existente.
+                # (Esto no debería ocurrir cuando len(no_vacias) == 1.)
+                pass
+
+    return df
 
 
 def drop_duplicates_by_column(df: pd.DataFrame, column: str) -> pd.DataFrame:

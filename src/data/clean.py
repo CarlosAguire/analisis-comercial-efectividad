@@ -1,224 +1,164 @@
-from copy import deepcopy
-from pathlib import Path
+import re
 
 import pandas as pd
 
 from config import parameters
-from data.operations import (
-    drop_columns,
-    drop_duplicates_by_column,
-    filter,
-    join,
-    read_excel,
-    remove_duplicate_columns,
-)
-from logs_setup import get_time_stamp
 
 
-class CleanData:
-    def __init__(
-        self,
-        ofsc_dispatch_path: Path,
-        ofsc_capacity_path: Path,
-        residential_plant_path: Path,
-    ) -> None:
-        # Log init
-        time_stamp = get_time_stamp()
-        message = f"Leyendo datos del archivo: {ofsc_dispatch_path}"
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
+class CleanDataFrame:
+    @staticmethod
+    def drop_columns(df: pd.DataFrame, columns_preserve: list[str]) -> pd.DataFrame:
+        """Devuelve un `DataFrame` con solo las columnas a preservar."""
 
-        self.df_ofsc_dispatch = read_excel(path=ofsc_dispatch_path, sheet=0)
+        return df.drop(columns=df.columns.difference(columns_preserve))
 
-        # Log init
-        time_stamp = get_time_stamp()
-        message = f"Leyendo datos del archivo: {ofsc_capacity_path}"
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
+    @staticmethod
+    def drop_duplicate_columns(
+        df: pd.DataFrame,
+        target_column: str,
+        *,
+        treat_empty_strings: bool = True,
+        consider_empty_spaces: bool = True,
+        inplace: bool = False,
+    ) -> pd.DataFrame:
 
-        self.df_ofsc_capacity = read_excel(path=ofsc_capacity_path, sheet=0)
+        if not inplace:
+            df = df.copy()
 
-        # Log init
-        time_stamp = get_time_stamp()
-        message = f"Leyendo datos del archivo: {residential_plant_path}"
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
+        pattern = re.compile(rf"^{re.escape(target_column)}(?:\.(\d+))?$")
+        family = [c for c in df.columns if pattern.fullmatch(c)]
 
-        self.df_residential_plant = read_excel(path=residential_plant_path, sheet=0)
+        if not family:
+            return df
 
-        self.df_ofsc = None
-        self.df_output = None
+        def __column_is_empty(serie: pd.Series) -> bool:
+            s = serie
 
-    def clean(self) -> None:
+            if treat_empty_strings and s.dtype == "object":
+                if consider_empty_spaces:
+                    s = s.replace(r"^\s*$", pd.NA, regex=True)
+                else:
+                    s = s.replace("", pd.NA)
+
+            return not s.notna().any()
+
+        # 1) Identificar vacías y no vacías.
+        empty_columns = [c for c in family if __column_is_empty(serie=df[c])]
+        not_empty_columns = [c for c in family if c not in empty_columns]
+
+        # 2) Eliminar columnas vacías.
+        if empty_columns:
+            df.drop(columns=empty_columns, inplace=True)
+
+        # 3) Si la columna restante en su nombre tiene sufijo, renombrar al base.
+        if len(not_empty_columns) == 1:
+            remaining_column = not_empty_columns[0]
+
+            if remaining_column != target_column:
+                if target_column not in df.columns:
+                    df.rename(columns={remaining_column: target_column}, inplace=True)
+                else:
+                    # Por seguridad, evitamos sobreescribir una columna existente.
+                    pass
+
+        return df
+
+    @staticmethod
+    def drop_duplicate_rows_by_column(df: pd.DataFrame, column: str) -> pd.DataFrame:
         """
-        Crea los `DataFrame` y limpia los datos de las tablas:
-        - OFSC de despacho y capacidad.
-        - Planta residencial.
-        """
-
-        # 1. Removemos columnas duplicada
-        # Log init
-        time_stamp = get_time_stamp()
-        message = "Removiendo columnas duplicadas..."
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
-
-        self.df_ofsc_dispatch = remove_duplicate_columns(
-            df=self.df_ofsc_dispatch,
-            columna_objetivo="Notas de Cierre",
-        )
-
-        # 2. Filtramos para eliminar filas que no necesitamos
-        # Log init
-        time_stamp = get_time_stamp()
-        message = "Filtrando datos..."
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
-
-        self.df_ofsc_dispatch = filter(
-            df=self.df_ofsc_dispatch,
-            filters={
-                "Estado": "No completado",
-                "Tipo de Actividad": "Instalaciones",
-                "Tipo de Red": "Pymes",
-            },
-        )
-        self.df_ofsc_capacity = filter(
-            df=self.df_ofsc_capacity,
-            filters={
-                "Estado": "No completado",
-                "Tipo de Actividad": "Instalaciones",
-                "Tipo de Red": "Pymes",
-            },
-        )
-        self.df_residential_plant = filter(
-            df=self.df_residential_plant,
-            filters={"NOMBRE": self.df_ofsc_capacity["Asesor comercial"].tolist()},
-        )
-
-        # 3. Eliminamos columnas que no necesitamos
-        # Log init
-        time_stamp = get_time_stamp()
-        message = "Removiendo columnas que no se necesitan..."
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
-
-        self.df_ofsc_dispatch = drop_columns(
-            columns_preserve=parameters.OFSC_DISPATCH_COLUMNS,
-            df=self.df_ofsc_dispatch,
-        )
-        self.df_ofsc_capacity = drop_columns(
-            columns_preserve=parameters.OFSC_CAPACITY_COLUMNS,
-            df=self.df_ofsc_capacity,
-        )
-        self.df_residential_plant = drop_columns(
-            columns_preserve=parameters.RESIDENTIAL_PLANT_COLUMNS,
-            df=self.df_residential_plant,
-        )
-
-        # 5. Unimos el OFSC de despacho y capacidades en uno solo
-        # Log init
-        time_stamp = get_time_stamp()
-        message = "Uniendo el OFSC de despacho y capacidades en uno solo..."
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
-
-        self.df_ofsc = join(
-            df1=self.df_ofsc_dispatch,
-            df2=self.df_ofsc_capacity,
-            foreign_key="Orden de trabajo",
-            columns_df1=parameters.OFSC_DISPATCH_COLUMNS,
-            columns_df2=parameters.OFSC_CAPACITY_COLUMNS,
-        )
-
-    @classmethod
-    def create_tabla(
-        cls,
-        df_ofsc_list: list[pd.DataFrame],
-        df_residential_plant_list: list[pd.DataFrame],
-    ) -> None:
-        """
-        Crea el archivo de Excel del `DataFrame` que contiene los datos unificados y
-        limpios de las tablas:
-        - OFSC de despacho y capacidad.
-        - Planta residencial.
+        Elimina filas duplicadas basándose en una única columna, conservando la primera
+        aparición.
         """
 
-        df_ofsc_final = pd.concat(objs=df_ofsc_list, ignore_index=True)
-        df_residential_plant_final = pd.concat(
-            objs=df_residential_plant_list,
-            ignore_index=True,
-        )
+        return df.drop_duplicates(subset=[column], keep="first").reset_index(drop=True)
 
-        # 4. Eliminamos filas duplicadas
-        # Log init
-        time_stamp = get_time_stamp()
-        message = "Removiendo filas que no se necesitan..."
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
+    @staticmethod
+    def filter(df: pd.DataFrame, filters: dict[str, str | list[str]]) -> pd.DataFrame:
+        """
+        Filtra un `DataFrame` usando filtros dinámicos, devuelve solo las filas que
+        cumplen todos los filtros.
+        """
 
-        df_residential_plant_final = drop_duplicates_by_column(
-            df=df_residential_plant_final,
-            column="NOMBRE",
-        )
+        if not filters:
+            return df
 
-        # 2. Cmabiamos el nombre de la llave foranea
-        df_residential_plant_final = df_residential_plant_final.rename(
-            columns={"NOMBRE": "Asesor comercial"}
-        )
+        mask = pd.Series(True, index=df.index)
 
-        index = 0
+        for field, value in filters.items():
+            # Si la columna no existe, simplemente la ignoramos
+            if field not in df.columns:
+                continue
 
-        for campo in parameters.RESIDENTIAL_PLANT_COLUMNS:
-            if campo == "NOMBRE":
-                break
+            # Si es lista o conjunto de filtros
+            if isinstance(value, (list, set, tuple)):
+                mask &= df[field].isin(value)
 
-            index = index + 1
+            # Si es un valor único
+            else:
+                mask &= df[field] == value
 
-        RESIDENTIAL_PLANT_COLUMNS = deepcopy(parameters.RESIDENTIAL_PLANT_COLUMNS)
-        RESIDENTIAL_PLANT_COLUMNS.pop(index)
-        RESIDENTIAL_PLANT_COLUMNS.append("Asesor comercial")
+        return df[mask]
 
-        # 3. Creamos la tabla final
-        df_output = join(
-            df1=df_ofsc_final,
-            df2=df_residential_plant_final,
-            foreign_key="Asesor comercial",
-            columns_df1=set(
-                parameters.OFSC_CAPACITY_COLUMNS + parameters.OFSC_DISPATCH_COLUMNS
-            ),
-            columns_df2=RESIDENTIAL_PLANT_COLUMNS,
-        )
-        df_output["Razón sugerida"] = None
-        df_output["Estado del análisis"] = None
 
-        # Log init
-        time_stamp = get_time_stamp()
-        message = f"Creando earchivo final: {parameters.OUTPUT_FILE_PATH}"
-        print(f"{time_stamp} [ INFO ] {message}")
-        # Log end
+def clean_df_ofsc_dispatch(df: pd.DataFrame) -> pd.DataFrame:
+    # Removemos columnas duplicadas que no necesitamos
+    df_ofsc_dispatch = CleanDataFrame.drop_duplicate_columns(
+        target_column="Notas de Cierre",
+        df=df,
+    )
 
-        with pd.ExcelWriter(
-            path=parameters.OUTPUT_FILE_PATH,
-            engine="xlsxwriter",
-            mode="w",
-        ) as w:
-            sheet_name = "DATOS"
-            df_output.to_excel(excel_writer=w, index=False, sheet_name=sheet_name)
+    # Filtramos para eliminar filas que no necesitamos
+    df_ofsc_dispatch = CleanDataFrame.filter(
+        df=df_ofsc_dispatch,
+        filters=parameters.OFSC_DISPATCH_FILTERS,  # type: ignore
+    )
 
-            worksheet = w.sheets[sheet_name]
+    # Removemos columnas que no necesitamos
+    df_ofsc_dispatch = CleanDataFrame.drop_columns(
+        columns_preserve=parameters.OFSC_DISPATCH_COLUMNS,
+        df=df_ofsc_dispatch,
+    )
 
-            # Dimensiones del rango
-            (n_rows, n_columns) = df_output.shape
+    return df_ofsc_dispatch
 
-            # Encabezados para la tabla
-            columns = [{"header": col} for col in df_output.columns]
 
-            # La creamos como tabla de Excel
-            worksheet.add_table(
-                0,
-                0,
-                n_rows,
-                n_columns - 1,
-                {"name": "TablaDatos", "columns": columns, "style": None},
-            )
+def clean_df_ofsc_capacity(df: pd.DataFrame) -> pd.DataFrame:
+    # Filtramos para eliminar filas que no necesitamos
+    df_ofsc_capacity = CleanDataFrame.filter(
+        filters=parameters.OFSC_CAPACITY_FILTERS,  # type: ignore
+        df=df,
+    )
+
+    # 3. Removemos columnas que no necesitamos
+    df_ofsc_capacity = CleanDataFrame.drop_columns(
+        columns_preserve=parameters.OFSC_CAPACITY_COLUMNS,
+        df=df_ofsc_capacity,
+    )
+
+    return df_ofsc_capacity
+
+
+def clean_df_residential_plant(
+    df: pd.DataFrame,
+    df_ofsc_capacity: pd.DataFrame,
+) -> pd.DataFrame:
+
+    # Filtramos para eliminar filas que no necesitamos
+    df_residential_plant = CleanDataFrame.filter(
+        filters={"NOMBRE": df_ofsc_capacity["Asesor comercial"].tolist()},
+        df=df,
+    )
+
+    # Removemos columnas que no necesitamos
+    df_residential_plant = CleanDataFrame.drop_columns(
+        columns_preserve=parameters.RESIDENTIAL_PLANT_COLUMNS,
+        df=df_residential_plant,
+    )
+
+    # Removemos filas duplicadas que no necesitamos
+    df_residential_plant = CleanDataFrame.drop_duplicate_rows_by_column(
+        df=df_residential_plant,
+        column="NOMBRE",
+    )
+
+    return df_residential_plant

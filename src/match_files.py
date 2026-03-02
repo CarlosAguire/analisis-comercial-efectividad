@@ -11,7 +11,7 @@ class AmbiguousDateError(Exception):
     pass
 
 
-def _coerce_year(y: int) -> int:
+def __coerce_year(y: int) -> int:
     """Convierte año de 2 dígitos a 2000+YY. Ajusta aquí si necesitas otra regla."""
     if y < 100:
         return 2000 + y
@@ -33,7 +33,7 @@ def parse_date_from_name(
 
     a, b, y = m.groups()
     a, b, y = int(a), int(b), int(y)
-    y = _coerce_year(y)
+    y = __coerce_year(y)
 
     a_gt_12 = a > 12
     b_gt_12 = b > 12
@@ -87,7 +87,7 @@ class PairingResult:
     errors: list[str]
 
 
-def _extract_tokens(filename: str) -> tuple[int, int, int]:
+def __extract_tokens(filename: str) -> tuple[int, int, int]:
     """
     Devuelve (a, b, y) tal como aparecen en el nombre, coaccionando el año.
     Solo valida el año; no decide si a es día o mes.
@@ -100,7 +100,7 @@ def _extract_tokens(filename: str) -> tuple[int, int, int]:
         raise ValueError(f"No se encontró fecha en el nombre: {name}")
 
     a, b, y = map(int, m.groups())
-    y = _coerce_year(y)
+    y = __coerce_year(y)
 
     if y < 1900 or y > 2100:
         raise ValueError(f"Año fuera de rango razonable ({y}) en: {name}")
@@ -108,19 +108,19 @@ def _extract_tokens(filename: str) -> tuple[int, int, int]:
     return a, b, y
 
 
-def _is_impossible_date(a: int, b: int) -> bool:
+def __is_impossible_date(a: int, b: int) -> bool:
     """Si a > 12 y b > 12, no puede ser fecha d/m válida en ningún orden."""
 
     return a > 12 and b > 12
 
 
-def _is_ambiguous(a: int, b: int) -> bool:
+def __is_ambiguous(a: int, b: int) -> bool:
     """Verdadero si tanto a como b son <= 12 (ambigüedad d/m)."""
 
     return a <= 12 and b <= 12
 
 
-def _date_signature(a: int, b: int, y: int) -> tuple[int, int, int]:
+def __date_signature(a: int, b: int, y: int) -> tuple[int, int, int]:
     """Firma independiente del orden: (año, min(d,m), max(d,m))."""
 
     lo, hi = sorted((a, b))
@@ -150,34 +150,34 @@ def pair_files(dir1: Path, dir2: Path) -> PairingResult:
     # Construir índices tolerantes al orden d/m
     for p in files_dir1:
         try:
-            a, b, y = _extract_tokens(p.name)
+            a, b, y = __extract_tokens(p.name)
 
-            if _is_impossible_date(a, b):
+            if __is_impossible_date(a, b):
                 errors.append(
                     f"[dir1] {p.name}: ambos componentes >12; no es una fecha válida."
                 )
                 continue
-            if _is_ambiguous(a, b):
+            if __is_ambiguous(a, b):
                 ambiguous_in_dir1.append(p)
 
-            sig = _date_signature(a, b, y)
+            sig = __date_signature(a, b, y)
             idx1.setdefault(sig, []).append(p)
         except Exception as e:
             errors.append(f"[dir1] {p.name}: {e}")
 
     for p in files_dir2:
         try:
-            a, b, y = _extract_tokens(p.name)
+            a, b, y = __extract_tokens(p.name)
 
-            if _is_impossible_date(a, b):
+            if __is_impossible_date(a, b):
                 errors.append(
                     f"[dir2] {p.name}: ambos componentes >12; no es una fecha válida."
                 )
                 continue
-            if _is_ambiguous(a, b):
+            if __is_ambiguous(a, b):
                 ambiguous_in_dir2.append(p)
 
-            sig = _date_signature(a, b, y)
+            sig = __date_signature(a, b, y)
             idx2.setdefault(sig, []).append(p)
         except Exception as e:
             errors.append(f"[dir2] {p.name}: {e}")
@@ -210,7 +210,7 @@ def pair_files(dir1: Path, dir2: Path) -> PairingResult:
     only_in_dir1: list[Path] = []
     only_in_dir2: list[Path] = []
 
-    def _sig_to_str(sig: tuple[int, int, int]) -> str:
+    def __sig_to_str(sig: tuple[int, int, int]) -> str:
         y, lo, hi = sig
 
         return f"{lo:02d}/{hi:02d}/{y} ~ {hi:02d}/{lo:02d}/{y}"
@@ -229,7 +229,7 @@ def pair_files(dir1: Path, dir2: Path) -> PairingResult:
             if len(files1) > 1 or len(files2) > 1:
                 errors.append(
                     f"Hay {len(files1)} archivo(s) en dir1 y "
-                    f"{len(files2)} en dir2 para la fecha {_sig_to_str(sig)}. "
+                    f"{len(files2)} en dir2 para la fecha {__sig_to_str(sig)}. "
                     "Se esperaba 1 y 1."
                 )
 

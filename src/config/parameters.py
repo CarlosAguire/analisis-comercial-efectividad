@@ -10,7 +10,7 @@ DATABASES_FOLDER = PROJECT_ROOT / "databases"
 DEBUG = True
 
 # Lista de columnas a CONSERVAR de cada tabla
-OFSC_DISPATCH_COLUMNS = ["Notas de Cierre", "Orden de trabajo", "Fecha"]
+OFSC_DISPATCH_COLUMNS = ["Notas de Cierre", "Orden de trabajo", "Fecha", "Compañia"]
 OFSC_DISPATCH_FILTERS = {
     "Estado": "No completado",
     "Tipo de Actividad": "Instalaciones",

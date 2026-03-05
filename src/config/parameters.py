@@ -35,12 +35,12 @@ RESIDENTIAL_PLANT_COLUMNS = [
 OFSC_DISPATCH_FILTERS = {
     "Estado": "No completado",
     "Tipo de Actividad": "Instalaciones",
-    "Tipo de Red": "Pymes",
+    "Tipo de Red": ["Pymes", "FTTX"],
 }
 OFSC_CAPACITY_FILTERS = {
     "Estado": "No completado",
     "Tipo de Actividad": "Instalaciones",
-    "Tipo de Red": "Pymes",
+    "Tipo de Red": ["Pymes", "FTTX"],
 }
 
 

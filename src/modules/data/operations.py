@@ -35,12 +35,12 @@ def join(
 ) -> pd.DataFrame:
     """
     Une DF1 y DF2 usando `foreign_key`. Si la llave se repite en alguno, se
-    desambigua con `date_col` (normalizada a dd/mm/yy). Esta versión detecta
-    automáticamente si las fechas de cada DF vienen en 'dd/mm/yy' o 'mm/dd/yy'
+    desambigua con `date_col` (normalizada a dd/mm/yyyy). Esta versión detecta
+    automáticamente si las fechas de cada DF vienen en 'dd/mm/yyyy' o 'mm/dd/yyyy'
     (siempre consistentes por DF) y arma una llave efectiva:
 
       - Sin duplicados:   __join_key__ = foreign_key
-      - Con duplicados:   __join_key__ = f"{foreign_key}||{fecha_dd/mm/yy}"
+      - Con duplicados:   __join_key__ = f"{foreign_key}||{fecha_dd/mm/yyyy}"
 
     Las validaciones siguen igual pero aplicadas sobre la llave efectiva:
       - Misma cantidad (opcional).
@@ -142,12 +142,12 @@ def join(
             "de fecha para desambiguar."
         )
 
-    # Helper: inferir si la serie usa dayfirst (dd/mm/yy) por la regla >12
+    # Helper: inferir si la serie usa dayfirst (dd/mm/yyyy) por la regla >12
     def __infer_dayfirst_by_12_rule(s: pd.Series) -> bool | None:
         if pd.api.types.is_datetime64_any_dtype(s):
             return True
 
-        # Esperamos "d{1,2}/d{1,2}/d{2}" (p.ej., '05/03/26')
+        # Esperamos "d{1,2}/d{1,2}/d{2,4}" (p.ej., '05/03/2026')
         # Extraemos números para evaluar >12
         parts = s.dropna().astype(str).str.split("/", n=2, expand=True)
 
@@ -166,9 +166,9 @@ def join(
         any_second = second_gt_12.any()
 
         if any_first and not any_second:
-            return True  # dd/mm/yy
+            return True  # dd/mm/yyyy
         if any_second and not any_first:
-            return False  # mm/dd/yy
+            return False  # mm/dd/yyyy
 
         return None  # ambiguo (todos <=12 o mezcla inconsistente)
 
@@ -177,8 +177,7 @@ def join(
         if pd.api.types.is_datetime64_any_dtype(s):
             return pd.to_datetime(s, errors="coerce")
 
-        format = "%d/%m/%y" if dayfirst else "%m/%d/%y"
-
+        format = "%d/%m/%Y" if dayfirst else "%m/%d/%Y"  # ← actualizado a %Y
         return pd.to_datetime(s, format=format, dayfirst=dayfirst, errors="coerce")
 
     # Armar llave base
@@ -205,14 +204,14 @@ def join(
             # Construir candidatos para df1
             df1_dt_d = __parse_with_flag(df1.loc[mask1, date_column], True)
             df1_dt_m = __parse_with_flag(df1.loc[mask1, date_column], False)
-            df1_s_d = df1_dt_d.dt.strftime("%d/%m/%y")
-            df1_s_m = df1_dt_m.dt.strftime("%d/%m/%y")
+            df1_s_d = df1_dt_d.dt.strftime("%d/%m/%Y")  # ← actualizado a %Y
+            df1_s_m = df1_dt_m.dt.strftime("%d/%m/%Y")  # ← actualizado a %Y
 
             # Construir candidatos para df2
             df2_dt_d = __parse_with_flag(df2.loc[mask2, date_column], True)
             df2_dt_m = __parse_with_flag(df2.loc[mask2, date_column], False)
-            df2_s_d = df2_dt_d.dt.strftime("%d/%m/%y")
-            df2_s_m = df2_dt_m.dt.strftime("%d/%m/%y")
+            df2_s_d = df2_dt_d.dt.strftime("%d/%m/%Y")  # ← actualizado a %Y
+            df2_s_m = df2_dt_m.dt.strftime("%d/%m/%Y")  # ← actualizado a %Y
 
             # Candidatos de llaves efectivas (solo en filas duplicadas)
             k1_d = (
@@ -272,9 +271,9 @@ def join(
                 "para llaves repetidas en DF2."
             )
 
-        # Normalizar a dd/mm/yy para construir la llave efectiva
-        df1["_date_str_tmp_"] = df1["_date_dt_tmp_"].dt.strftime("%d/%m/%y")
-        df2["_date_str_tmp_"] = df2["_date_dt_tmp_"].dt.strftime("%d/%m/%y")
+        # Normalizar a dd/mm/yyyy para construir la llave efectiva
+        df1["_date_str_tmp_"] = df1["_date_dt_tmp_"].dt.strftime("%d/%m/%Y")  # ← %Y
+        df2["_date_str_tmp_"] = df2["_date_dt_tmp_"].dt.strftime("%d/%m/%Y")  # ← %Y
 
         # En filas con fk duplicada, agregar fecha a la llave efectiva
         df1.loc[mask1, "__join_key__"] = (
@@ -446,3 +445,47 @@ def join_by_sales_advisor(
         how="left",
         suffixes=("", sufijo_conflicto),
     )
+
+
+def normalize_date(df: pd.DataFrame, column: str, input_format: str) -> pd.DataFrame:
+    """
+    Normaliza una columna de fechas según el formato de entrada y devuelve el
+    DataFrame con:
+    - La columna `column` en formato `dd/mm/yyyy`.
+    - Una nueva columna `Mes` con el nombre del mes.
+    """
+
+    df = df.copy()
+
+    # Limpieza ligera si es texto
+    if pd.api.types.is_string_dtype(df[column]):
+        df[column] = df[column].str.strip()
+
+    # Mapear a strptime
+    fmt_map = {
+        "dd/mm/yy": "%d/%m/%y",
+        "mm/dd/yy": "%m/%d/%y",
+        "dd/mm/yyyy": "%d/%m/%Y",
+        "mm/dd/yyyy": "%m/%d/%Y",
+    }
+    key = (input_format or "").strip().lower()
+
+    if key not in fmt_map:
+        allowed = ", ".join(fmt_map.keys())
+
+        raise ValueError(
+            f"input_format inválido: '{input_format}'. Use uno de: {allowed}"
+        )
+
+    in_fmt = fmt_map[key]
+
+    # Parseo a datetime
+    if pd.api.types.is_datetime64_any_dtype(df[column]):
+        dates = pd.to_datetime(df[column], errors="coerce")
+    else:
+        dates = pd.to_datetime(df[column], format=in_fmt, errors="coerce")
+
+    # Formateo estándar de salida dd/mm/yyyy (texto)
+    df[column] = dates.dt.strftime("%d/%m/%Y")
+
+    return df

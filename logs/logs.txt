@@ -1,5 +1,5 @@
-[ 04-03-2026 03:00 PM ] [ INFO ] Limpiando entorno...
-[ 04-03-2026 03:00 PM ] [ INFO ] Se van a limpiar los datos de los siguientes archivos:
+[ 05-03-2026 11:36 AM ] [ INFO ] Limpiando entorno...
+[ 05-03-2026 11:36 AM ] [ INFO ] Se van a limpiar los datos de los siguientes archivos:
 
 OFSC (CAPACIDADES):
 >> C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_01_02_26.xlsx
@@ -54,59 +54,59 @@ OFSC (DESPACHO):
 PLANTA RESIDENCIAL:
 >> C:\Proyectos\analisis-comercial-efectividad\databases\RM Planta Residencial.xlsx
 
-[ 04-03-2026 03:00 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\RM Planta Residencial.xlsx
-[ 04-03-2026 03:01 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_01_02_26.xlsx
-[ 04-03-2026 03:01 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_01_26.xlsx
-[ 04-03-2026 03:01 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_02_02_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_02_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_03_02_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_03_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_04_02_26 (2).xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_04_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_05_02_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_05_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_06_02_26 (1).xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_06_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_07_02_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_07_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_08_02_26 (1).xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_08_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_09_02_26 (1).xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_09_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_10_02_26.xlsx
-[ 04-03-2026 03:02 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_10_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_11_02_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_11_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_12_02_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_12_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_13_02_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_13_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_14_02_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_14_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_15_02_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_15_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_16_02_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_16_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_17_02_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_17_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_18_02_26.xlsx
-[ 04-03-2026 03:03 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_18_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_19_02_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_19_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_20_02_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_20_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_21_02_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_21_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_22_02_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_22_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_23_02_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_23_26.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Uniendo todos los OFSC de despacho y capacidades...
-[ 04-03-2026 03:04 PM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\databases\utils\limpio_ofsc_capacity.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\databases\utils\limpio_ofsc_dispatch.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\databases\utils\limpio_ofsc.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Uniendo OFSC y Planta Residencial...
-[ 04-03-2026 03:04 PM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\databases\utils\limpio_planta_residencial.xlsx
-[ 04-03-2026 03:04 PM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\datos.xlsx...
-[ 04-03-2026 03:04 PM ] [ INFO ] LIMPIEZA COMPLETADA.
-[ 04-03-2026 03:04 PM ] [ INFO ] Datos procesados correctamente.
+[ 05-03-2026 11:36 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\RM Planta Residencial.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_01_02_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_01_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_02_02_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_02_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_03_02_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_03_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_04_02_26 (2).xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_04_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_05_02_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_05_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_06_02_26 (1).xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_06_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_07_02_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_07_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_08_02_26 (1).xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_08_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_09_02_26 (1).xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_09_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_10_02_26.xlsx
+[ 05-03-2026 11:38 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_10_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_11_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_11_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_12_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_12_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_13_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_13_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_14_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_14_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_15_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_15_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_16_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_16_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_17_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_17_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_18_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_18_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_19_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_19_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_20_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_20_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_21_02_26.xlsx
+[ 05-03-2026 11:39 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_21_26.xlsx
+[ 05-03-2026 11:40 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_22_02_26.xlsx
+[ 05-03-2026 11:40 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_22_26.xlsx
+[ 05-03-2026 11:40 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (capacidades)\Actividades-R5 ORIENTE_23_02_26.xlsx
+[ 05-03-2026 11:40 AM ] [ INFO ] Iniciando limpieza: C:\Proyectos\analisis-comercial-efectividad\databases\OFSC (despacho)\Actividades-R5 ORIENTE_02_23_26.xlsx
+[ 05-03-2026 11:40 AM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\databases\utils\limpio_ofsc_capacity.xlsx
+[ 05-03-2026 11:40 AM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\databases\utils\limpio_ofsc_dispatch.xlsx
+[ 05-03-2026 11:40 AM ] [ INFO ] Uniendo todos los OFSC de despacho y capacidades...
+[ 05-03-2026 11:40 AM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\databases\utils\limpio_ofsc.xlsx
+[ 05-03-2026 11:40 AM ] [ INFO ] Uniendo OFSC y Planta Residencial...
+[ 05-03-2026 11:40 AM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\databases\utils\limpio_planta_residencial.xlsx
+[ 05-03-2026 11:40 AM ] [ INFO ] Creando archivo: C:\Proyectos\analisis-comercial-efectividad\datos.xlsx...
+[ 05-03-2026 11:40 AM ] [ INFO ] LIMPIEZA COMPLETADA.
+[ 05-03-2026 11:40 AM ] [ INFO ] Datos procesados correctamente.

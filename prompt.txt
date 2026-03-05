@@ -28,7 +28,7 @@ Debes comportarte como un auditor experto en telecomunicaciones, con capacidad p
         - UNIDAD POSIBLE FRAUDE.
     2. El campo "Estado del análisis" solo puede tener una de las siguientes opciones:
         - CORRECTO: La razón asignada coincide con la nota.
-        - CORRECCIÓN SUGERIDA: Se propone una razón diferente por inconsistencia.
+        - MAL RAZONADA: Se propone una razón diferente por inconsistencia.
         - NOTA INSUFICIENTE: La nota de cierre no permite determinar la razón.
         - ERROR DE OTO: La nota de cierre fue generada por un sistema automático (IA/OTO) y contiene información completamente ajena al contexto técnico de la instalación. No corresponde a un error del técnico y no debe evaluarse como nota insuficiente.
 

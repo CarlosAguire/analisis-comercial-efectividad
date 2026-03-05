@@ -14,7 +14,13 @@ from modules.data.clean import (
     clean_df_residential_plant,
 )
 from modules.data.match_files import pair_files
-from modules.data.operations import create_file, join, join_by_sales_advisor, read_excel
+from modules.data.operations import (
+    create_file,
+    join,
+    join_by_sales_advisor,
+    normalize_date,
+    read_excel,
+)
 
 RESIDENTIAL_PLANT_PATH = parameters.DATABASES_FOLDER / "RM Planta Residencial.xlsx"
 OFSC_CAPACITY_FOLDER = parameters.DATABASES_FOLDER / "OFSC (capacidades)"
@@ -95,11 +101,18 @@ def __run_data_cleanup() -> pd.DataFrame:
         dfs_ofsc_dispatch.append(df_ofsc_dispatch)
         dfs_residential_plant.append(df_residential_plant_copy)
 
-    # Unimos el OFSC de despacho y capacidades en uno solo
-    logging(message="Uniendo todos los OFSC de despacho y capacidades...", level="INFO")
-
     df_ofsc_capacity = pd.concat(objs=dfs_ofsc_capacity, ignore_index=True)
+    df_ofsc_capacity = normalize_date(
+        df=df_ofsc_capacity,
+        column="Fecha",
+        input_format="dd/mm/yy",
+    )
     df_ofsc_dispatch = pd.concat(objs=dfs_ofsc_dispatch, ignore_index=True)
+    df_ofsc_dispatch = normalize_date(
+        df=df_ofsc_dispatch,
+        column="Fecha",
+        input_format="mm/dd/yy",
+    )
 
     if parameters.DEBUG:
         logging(
@@ -113,6 +126,9 @@ def __run_data_cleanup() -> pd.DataFrame:
 
         create_file(df=df_ofsc_capacity, path=parameters.CLEAN_OFSC_CAPACITY_PATH)
         create_file(df=df_ofsc_dispatch, path=parameters.CLEAN_OFSC_DISPATCH_PATH)
+
+    # Unimos el OFSC de despacho y capacidades en uno solo
+    logging(message="Uniendo todos los OFSC de despacho y capacidades...", level="INFO")
 
     df_ofsc = join(
         df1=df_ofsc_dispatch,
@@ -154,6 +170,26 @@ def __run_data_cleanup() -> pd.DataFrame:
     )
     df_output["Razón sugerida"] = None
     df_output["Estado del análisis"] = None
+    df_output["Mes"] = pd.to_datetime(
+        df_output["Fecha"],
+        format="%d/%m/%Y",
+    ).dt.month.map(
+        {
+            1: "Enero",
+            2: "Febrero",
+            3: "Marzo",
+            4: "Abril",
+            5: "Mayo",
+            6: "Junio",
+            7: "Julio",
+            8: "Agosto",
+            9: "Septiembre",
+            10: "Octubre",
+            11: "Noviembre",
+            12: "Diciembre",
+        }
+    )
+
     df_output.rename(columns=parameters.FINAL_COLUMNS, inplace=True)
 
     # 9. Creamos la tabla final

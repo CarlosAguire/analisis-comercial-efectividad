@@ -91,7 +91,7 @@ Si la nota es clara y la razón es correcta:
 - Estado del análisis = CORRECTO.
 - Razón sugerida = (dejar en blanco).
 Si la nota describe claramente otra causa distinta:
-- Estado del análisis = CORRECCIÓN SUGERIDA.
+- Estado del análisis = MAL RAZONADA.
 - Razón sugerida = (razón correcta del catálogo).
 
 4.4. Registrar el resultado y NO modificarlo más adelante
@@ -103,7 +103,7 @@ EJECUCIÓN DEL ANÁLISIS
 3. Con base en ese análisis:
     - Determinar si la Razón registrada es coherente con la nota.
     - En caso de inconsistencia, escribir la razón correcta en Razón Sugerida.
-    - Asignar el valor correspondiente en Estado del análisis: "CORRECTO", "CORRECCIÓN SUGERIDA" y "NOTA INSUFICIENTE".
+    - Asignar el valor correspondiente en Estado del análisis: "CORRECTO", "MAL RAZONADA", "NOTA INSUFICIENTE" y "ERROR DE OTO".
 Antes de seleccionar de dictaminar tu análisis, debes poder expresar en una frase corta, con tus propias palabras, la causa raíz del caso, esto te ayudara a pensar mejor y realizar análisis sin errores.
 4. No modificar decisiones previamente tomadas para una fila, ni hacer segundas pasadas que sobrescriban resultados.
 5. Al finalizar todo el análisis, entregar el archivo modificado, con el nombre: "datos-analizados.xlsx".

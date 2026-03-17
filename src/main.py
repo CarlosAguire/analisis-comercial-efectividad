@@ -1,7 +1,6 @@
 import sys
 import traceback
 from copy import deepcopy
-from pathlib import Path
 
 import pandas as pd
 
@@ -23,8 +22,8 @@ from modules.data.operations import (
 )
 
 RESIDENTIAL_PLANT_PATH = parameters.DATABASES_FOLDER / "RM Planta Residencial.xlsx"
-OFSC_CAPACITY_FOLDER = parameters.DATABASES_FOLDER / "OFSC (capacidades)"
-OFSC_DISPATCH_FOLDER = parameters.DATABASES_FOLDER / "OFSC (despacho)"
+OFSC_CAPACITY_FOLDER = parameters.DATABASES_FOLDER / "OFSC" / "Area de Capacidades"
+OFSC_DISPATCH_FOLDER = parameters.DATABASES_FOLDER / "OFSC" / "Area de Despacho"
 
 
 def __run_data_cleanup() -> pd.DataFrame:
@@ -168,27 +167,8 @@ def __run_data_cleanup() -> pd.DataFrame:
         df=df_ofsc,
         df_dictionary=df_residential_plant,
     )
-    df_output["Razón sugerida"] = None
-    df_output["Estado del análisis"] = None
-    df_output["Mes"] = pd.to_datetime(
-        df_output["Fecha"],
-        format="%d/%m/%Y",
-    ).dt.month.map(
-        {
-            1: "Enero",
-            2: "Febrero",
-            3: "Marzo",
-            4: "Abril",
-            5: "Mayo",
-            6: "Junio",
-            7: "Julio",
-            8: "Agosto",
-            9: "Septiembre",
-            10: "Octubre",
-            11: "Noviembre",
-            12: "Diciembre",
-        }
-    )
+    df_output["Razón Sugerida"] = None
+    df_output["Estado de la Razón"] = None
 
     df_output.rename(columns=parameters.FINAL_COLUMNS, inplace=True)
 
@@ -206,21 +186,6 @@ def __prepare_date_for_rendering(df: pd.DataFrame) -> None:
     pass
 
 
-def __clean_environment() -> None:
-
-    files_utils = [
-        Path(parameters.CLEAN_RESIDENTIAL_PLANT_PATH),
-        Path(parameters.CLEAN_OFSC_CAPACITY_PATH),
-        Path(parameters.CLEAN_OFSC_DISPATCH_PATH),
-        Path(parameters.CLEAN_OFSC_PATH),
-    ]
-
-    # Borrar archivo si existe
-    for file in files_utils:
-        if file.exists():
-            file.unlink()
-
-
 def main() -> None:
     df_output = __run_data_cleanup()
     __prepare_date_for_rendering(df=df_output)
@@ -229,8 +194,6 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         logging(message="Limpiando entorno...", level="INFO")
-
-        __clean_environment()
 
         main()
 

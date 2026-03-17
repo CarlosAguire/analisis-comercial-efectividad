@@ -26,6 +26,7 @@ OFSC_CAPACITY_COLUMNS = [
 RESIDENTIAL_PLANT_COLUMNS = [
     "NOMBRE",
     "GV-Especialista",
+    "GV-Descripcion",
     "JEFE 1 CANAL REGIONAL",
     "CANAL2",
 ]
@@ -35,24 +36,25 @@ RESIDENTIAL_PLANT_COLUMNS = [
 OFSC_DISPATCH_FILTERS = {
     "Estado": "No completado",
     "Tipo de Actividad": "Instalaciones",
-    "Tipo de Red": ["Pymes", "FTTX"],
+    "Tipo de Red": "Pymes",
 }
 OFSC_CAPACITY_FILTERS = {
     "Estado": "No completado",
     "Tipo de Actividad": "Instalaciones",
-    "Tipo de Red": ["Pymes", "FTTX"],
+    "Tipo de Red": "Pymes",
 }
 
 
 # Diccionario para renombrar columnas en la tabla final
 FINAL_COLUMNS = {
     "Orden de trabajo": "Orden de Trabajo",
-    "Compañia": "Compañía",
+    "Compañia": "Aliado",
     "Asesor comercial": "Asesor Comercial",
     "Código Asesor comercial": "Código del Asesor Comercial",
     "GV-Especialista": "Especialista",
+    "GV-Descripcion": "Proveedor",
     "CANAL2": "Canal",
-    "JEFE 1 CANAL REGIONAL": "Jefe de Canal Regional",
+    "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
 }
 
 

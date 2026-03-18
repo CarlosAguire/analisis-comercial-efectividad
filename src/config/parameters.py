@@ -1,65 +1,133 @@
 from pathlib import Path
 
-# Configuración de ruta raíz del proyecto
-THIS_FILE = Path(__file__).resolve()
-PROJECT_ROOT = THIS_FILE.parent.parent.parent
-UTILS_FOLDER = PROJECT_ROOT / "databases" / "utils"
-DATABASES_FOLDER = PROJECT_ROOT / "databases"
-LOGS_FOLDER = PROJECT_ROOT / "logs"
-
 # Configuración del modo de ejecución
 DEBUG = True
 
+
+# Configuración de ruta raíz del proyecto
+THIS_FILE = Path(__file__).resolve()
+PROJECT_ROOT = THIS_FILE.parent.parent.parent
+
+
+# Configuración de rutas para archivos de entrada y salida
+UTILS_FOLDER = PROJECT_ROOT / "databases" / "utils"
+DATABASES_FOLDER = PROJECT_ROOT / "databases"
+LOGS_FOLDER = PROJECT_ROOT / "logs"
+RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsx"
+OFSC_CAPACITY_FOLDER = DATABASES_FOLDER / "OFSC" / "Area de Capacidades"
+OFSC_DISPATCH_FOLDER = DATABASES_FOLDER / "OFSC" / "Area de Despacho"
+
+
+# Tipos de análisis
+COMERCIAL_EFFICACY_ANALYSIS = "análisis de efectividad comercial"
+CONTACT_ANALYSIS = "análisis de contacto"
+
+
 # Lista de columnas a CONSERVAR de cada tabla
-OFSC_DISPATCH_COLUMNS = ["Notas de Cierre", "Orden de trabajo", "Fecha", "Compañia"]
-OFSC_CAPACITY_COLUMNS = [
-    "Estado",
-    "Razón",
-    "Tipo de Actividad",
-    "Ciudad",
-    "Orden de trabajo",
-    "Tipo de Red",
-    "Asesor comercial",
-    "Código Asesor comercial",
-    "Fecha",
-]
-RESIDENTIAL_PLANT_COLUMNS = [
-    "NOMBRE",
-    "GV-Especialista",
-    "GV-Descripcion",
-    "JEFE 1 CANAL REGIONAL",
-    "CANAL2",
-]
-
-
-# Filtros de cada taqbla
-OFSC_DISPATCH_FILTERS = {
-    "Estado": "No completado",
-    "Tipo de Actividad": "Instalaciones",
-    "Tipo de Red": "Pymes",
+COLUMNS_TO_RESERVE = {
+    COMERCIAL_EFFICACY_ANALYSIS: {
+        "ofsc_dispatch": [
+            "Notas de Cierre",
+            "Orden de trabajo",
+            "Fecha",
+            "Compañia",
+        ],
+        "ofsc_capacity": [
+            "Estado",
+            "Razón",
+            "Tipo de Actividad",
+            "Ciudad",
+            "Orden de trabajo",
+            "Tipo de Red",
+            "Asesor comercial",
+            "Código Asesor comercial",
+            "Fecha",
+        ],
+        "residential_plant": [
+            "NOMBRE",
+            "GV-Especialista",
+            "GV-Descripcion",
+            "JEFE 1 CANAL REGIONAL",
+            "CANAL2",
+        ],
+    },
+    CONTACT_ANALYSIS: {
+        "ofsc_capacity": [
+            "Tipo de Actividad",
+            "Ciudad",
+            "Orden de trabajo",
+            "Tipo de Red",
+            "Compañia",
+            "Asesor comercial",
+            "Código Asesor comercial",
+            "Teléfono",
+            "Telefono dos del cliente",
+            "Teléfono 3",
+            "Celuar del contacto",
+            "Fecha",
+        ],
+        "residential_plant": [
+            "NOMBRE",
+            "GV-Especialista",
+            "GV-Descripcion",
+            "JEFE 1 CANAL REGIONAL",
+            "CANAL2",
+        ],
+    },
 }
-OFSC_CAPACITY_FILTERS = {
-    "Estado": "No completado",
-    "Tipo de Actividad": "Instalaciones",
-    "Tipo de Red": "Pymes",
+
+
+# Filtros para cada tipo de análisis
+FILTERS = {
+    COMERCIAL_EFFICACY_ANALYSIS: {
+        "ofsc_dispatch": {
+            "Estado": "No completado",
+            "Tipo de Actividad": "Instalaciones",
+            "Tipo de Red": "Pymes",
+        },
+        "ofsc_capacity": {
+            "Estado": "No completado",
+            "Tipo de Actividad": "Instalaciones",
+            "Tipo de Red": "Pymes",
+        },
+    },
+    CONTACT_ANALYSIS: {
+        "ofsc_capacity": {
+            "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
+            "Tipo de Red": ["Pymes", "FTTX"],
+        },
+    },
 }
 
 
 # Diccionario para renombrar columnas en la tabla final
 FINAL_COLUMNS = {
-    "Orden de trabajo": "Orden de Trabajo",
-    "Compañia": "Aliado",
-    "Asesor comercial": "Asesor Comercial",
-    "Código Asesor comercial": "Código del Asesor Comercial",
-    "GV-Especialista": "Especialista",
-    "GV-Descripcion": "Proveedor",
-    "CANAL2": "Canal",
-    "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
+    COMERCIAL_EFFICACY_ANALYSIS: {
+        "Orden de trabajo": "Orden de Trabajo",
+        "Compañia": "Aliado",
+        "Asesor comercial": "Asesor Comercial",
+        "Código Asesor comercial": "Código del Asesor Comercial",
+        "GV-Especialista": "Especialista",
+        "GV-Descripcion": "Proveedor",
+        "CANAL2": "Canal",
+        "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
+    },
+    CONTACT_ANALYSIS: {
+        "Orden de trabajo": "Orden de Trabajo",
+        "Compañia": "Aliado",
+        "Asesor comercial": "Asesor Comercial",
+        "Código Asesor comercial": "Código del Asesor Comercial",
+        "GV-Especialista": "Especialista",
+        "GV-Descripcion": "Proveedor",
+        "CANAL2": "Canal",
+        "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
+    },
 }
 
 
 # Archivo de salida
-OUTPUT_FILE_PATH = PROJECT_ROOT / "datos.xlsx"
+EFFICACY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-efectividad-comercial.xlsx"
+CONTACT_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-contacto.xlsx"
 
 
 # Salidas individuales de archivos de apoyo

@@ -1,33 +1,27 @@
 import sys
 import traceback
-from copy import deepcopy
-
-import pandas as pd
 
 from config import parameters
 from logs_setup import logging
-from modules.data.clean import (
-    CleanDataFrame,
-    clean_df_ofsc_capacity,
-    clean_df_ofsc_dispatch,
-    clean_df_residential_plant,
-)
+from modules.controllers import contact_analysis, efficacy_analysis
 from modules.data.match_files import pair_files
-from modules.data.operations import (
-    create_file,
-    join,
-    join_by_sales_advisor,
-    normalize_date,
-    read_excel,
-)
+from modules.data.operations import read_excel
 
-RESIDENTIAL_PLANT_PATH = parameters.DATABASES_FOLDER / "RM Planta Residencial.xlsx"
-OFSC_CAPACITY_FOLDER = parameters.DATABASES_FOLDER / "OFSC" / "Area de Capacidades"
-OFSC_DISPATCH_FOLDER = parameters.DATABASES_FOLDER / "OFSC" / "Area de Despacho"
+COMERCIAL_EFFICACY_ANALYSIS = parameters.COMERCIAL_EFFICACY_ANALYSIS
+COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[COMERCIAL_EFFICACY_ANALYSIS]
 
 
-def __run_data_cleanup() -> pd.DataFrame:
-    files_path = pair_files(dir1=OFSC_CAPACITY_FOLDER, dir2=OFSC_DISPATCH_FOLDER)
+def main() -> None:
+    df_residential_plant = read_excel(path=parameters.RESIDENTIAL_PLANT_PATH, sheet=0)
+
+    message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
+    message += parameters.COMERCIAL_EFFICACY_ANALYSIS.upper()
+    logging(message=message, level="INFO")
+
+    files_path = pair_files(
+        dir1=parameters.OFSC_CAPACITY_FOLDER,
+        dir2=parameters.OFSC_DISPATCH_FOLDER,
+    )
 
     message = "Se van a limpiar los datos de los siguientes archivos:\n"
     message = message + "\nOFSC (CAPACIDADES):\n"
@@ -43,152 +37,23 @@ def __run_data_cleanup() -> pd.DataFrame:
         message = message + f">> {file_path}\n"
 
     message = message + "\nPLANTA RESIDENCIAL:\n"
-    message = message + f">> {RESIDENTIAL_PLANT_PATH}\n"
+    message = message + f">> {parameters.RESIDENTIAL_PLANT_PATH}\n"
 
     logging(message=message, level="INFO")
 
-    dfs_residential_plant: list[pd.DataFrame] = []
-    dfs_ofsc_capacity: list[pd.DataFrame] = []
-    dfs_ofsc_dispatch: list[pd.DataFrame] = []
-
-    logging(message=f"Iniciando limpieza: {RESIDENTIAL_PLANT_PATH}", level="INFO")
-
-    df_residential_plant = read_excel(path=RESIDENTIAL_PLANT_PATH, sheet=0)
-    NEW_RESIDENTIAL_PLANT_COLUMNS: list[str] = []
-
-    for path_ofsc_capacity_file, path_ofsc_dispatch_file in files_path.pairs:
-        RESIDENTIAL_PLANT_COLUMNS = deepcopy(parameters.RESIDENTIAL_PLANT_COLUMNS)
-
-        logging(message=f"Iniciando limpieza: {path_ofsc_capacity_file}", level="INFO")
-
-        df_ofsc_capacity = read_excel(path=path_ofsc_capacity_file, sheet=0)
-        df_ofsc_capacity = clean_df_ofsc_capacity(df=df_ofsc_capacity)
-
-        logging(message=f"Iniciando limpieza: {path_ofsc_dispatch_file}", level="INFO")
-
-        df_ofsc_dispatch = read_excel(path=path_ofsc_dispatch_file, sheet=0)
-        df_ofsc_dispatch = clean_df_ofsc_dispatch(df=df_ofsc_dispatch)
-
-        # Iniciamos a limpiar planta residencial
-        df_residential_plant_copy = df_residential_plant.copy()
-        df_residential_plant_copy = clean_df_residential_plant(
-            df=df_residential_plant_copy,
-            df_ofsc_capacity=df_ofsc_capacity,
-        )
-
-        # Renombramos columnas de planta residencial
-        df_residential_plant_copy.rename(
-            columns={"NOMBRE": "Asesor comercial"},
-            inplace=True,
-        )
-
-        index = 0
-
-        for campo in parameters.RESIDENTIAL_PLANT_COLUMNS:
-            if campo == "NOMBRE":
-                break
-
-            index = index + 1
-
-        RESIDENTIAL_PLANT_COLUMNS.pop(index)
-        RESIDENTIAL_PLANT_COLUMNS.append("Asesor comercial")
-
-        if not NEW_RESIDENTIAL_PLANT_COLUMNS:
-            NEW_RESIDENTIAL_PLANT_COLUMNS.extend(RESIDENTIAL_PLANT_COLUMNS)
-
-        dfs_ofsc_capacity.append(df_ofsc_capacity)
-        dfs_ofsc_dispatch.append(df_ofsc_dispatch)
-        dfs_residential_plant.append(df_residential_plant_copy)
-
-    df_ofsc_capacity = pd.concat(objs=dfs_ofsc_capacity, ignore_index=True)
-    df_ofsc_capacity = normalize_date(
-        df=df_ofsc_capacity,
-        column="Fecha",
-        input_format="dd/mm/yy",
-    )
-    df_ofsc_dispatch = pd.concat(objs=dfs_ofsc_dispatch, ignore_index=True)
-    df_ofsc_dispatch = normalize_date(
-        df=df_ofsc_dispatch,
-        column="Fecha",
-        input_format="mm/dd/yy",
+    efficacy_analysis.clean_data(
+        df_residential_plant=df_residential_plant,
+        files_path=files_path,
     )
 
-    if parameters.DEBUG:
-        logging(
-            message=f"Creando archivo: {parameters.CLEAN_OFSC_CAPACITY_PATH}",
-            level="INFO",
-        )
-        logging(
-            message=f"Creando archivo: {parameters.CLEAN_OFSC_DISPATCH_PATH}",
-            level="INFO",
-        )
+    message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
+    message += parameters.CONTACT_ANALYSIS.upper()
+    logging(message=message, level="INFO")
 
-        create_file(df=df_ofsc_capacity, path=parameters.CLEAN_OFSC_CAPACITY_PATH)
-        create_file(df=df_ofsc_dispatch, path=parameters.CLEAN_OFSC_DISPATCH_PATH)
-
-    # Unimos el OFSC de despacho y capacidades en uno solo
-    logging(message="Uniendo todos los OFSC de despacho y capacidades...", level="INFO")
-
-    df_ofsc = join(
-        df1=df_ofsc_dispatch,
-        df2=df_ofsc_capacity,
-        foreign_key="Orden de trabajo",
-        date_column="Fecha",
-        columns_df1=parameters.OFSC_DISPATCH_COLUMNS,
-        columns_df2=parameters.OFSC_CAPACITY_COLUMNS,
+    contact_analysis.clean_data(
+        df_residential_plant=df_residential_plant,
+        files_path=only_in_dir1,
     )
-
-    if parameters.DEBUG:
-        logging(message=f"Creando archivo: {parameters.CLEAN_OFSC_PATH}", level="INFO")
-
-        create_file(df=df_ofsc, path=parameters.CLEAN_OFSC_PATH)
-
-    # Unimos OFSC y Planta residencial en uno solo
-    logging(message="Uniendo OFSC y Planta Residencial...", level="INFO")
-
-    df_residential_plant = pd.concat(objs=dfs_residential_plant, ignore_index=True)
-    df_residential_plant = CleanDataFrame.drop_duplicate_rows_by_column(
-        df=df_residential_plant,
-        column="Asesor comercial",
-    )
-
-    if parameters.DEBUG:
-        logging(
-            message=f"Creando archivo: {parameters.CLEAN_RESIDENTIAL_PLANT_PATH}",
-            level="INFO",
-        )
-
-        create_file(
-            df=df_residential_plant,
-            path=parameters.CLEAN_RESIDENTIAL_PLANT_PATH,
-        )
-
-    df_output = join_by_sales_advisor(
-        df=df_ofsc,
-        df_dictionary=df_residential_plant,
-    )
-    df_output["Razón Sugerida"] = None
-    df_output["Estado de la Razón"] = None
-
-    df_output.rename(columns=parameters.FINAL_COLUMNS, inplace=True)
-
-    # 9. Creamos la tabla final
-    logging(message=f"Creando archivo: {parameters.OUTPUT_FILE_PATH}...", level="INFO")
-
-    create_file(df=df_output, path=parameters.OUTPUT_FILE_PATH)
-
-    logging(message="LIMPIEZA COMPLETADA.", level="INFO")
-
-    return df_output
-
-
-def __prepare_date_for_rendering(df: pd.DataFrame) -> None:
-    pass
-
-
-def main() -> None:
-    df_output = __run_data_cleanup()
-    __prepare_date_for_rendering(df=df_output)
 
 
 if __name__ == "__main__":

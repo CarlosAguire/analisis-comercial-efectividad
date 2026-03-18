@@ -140,8 +140,8 @@ def clean_data(
         )
 
         create_file(
-            df=df_residential_plant,
             path=parameters.CLEAN_RESIDENTIAL_PLANT_PATH,
+            df=df_residential_plant,
         )
 
     df_output = join_by_sales_advisor(

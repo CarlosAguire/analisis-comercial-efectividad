@@ -1,5 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -19,6 +20,13 @@ from modules.data.operations import (
 
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]
+
+
+def __clean_phone(value: Any) -> str:
+    if pd.isna(value) or str(value).strip() == "":
+        return "0"
+
+    return str(value)
 
 
 def clean_data(
@@ -101,6 +109,25 @@ def clean_data(
         columns=parameters.FINAL_COLUMNS[CONTACT_ANALYSIS],
         inplace=True,
     )
+
+    #
+    def calcular(row: pd.Series):
+        columns = [
+            "Teléfono",
+            "Telefono dos del cliente",
+            "Teléfono 3",
+            "Celuar del contacto",
+        ]
+
+        phones = [__clean_phone(row[col]) for col in columns]
+
+        # Cantidad de ceros
+        empty_phone_count = phones.count("0")
+
+        # Números distintos (sin contar "0")
+        valid_phone_count = len(set(p for p in phones if p != "0"))
+
+    df_output["resultado"] = df_output.apply(calcular, axis=1)
 
     logging(
         message=f"Creando archivo: {parameters.CONTACT_ANALYSIS_FILE_PATH}",

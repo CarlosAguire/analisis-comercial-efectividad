@@ -124,6 +124,51 @@ FINAL_COLUMNS = {
     },
 }
 
+# Configuración de jefaturas por ciudad
+HEADQUARTERS = {
+    "BORRERO MELO TATIANA ESPERANZA": [
+        "YOPAL",
+        "VILLAVICENCIO",
+        "VILLANUEVA",
+        "VILLA DE SAN DIEGO DE UBA",
+        "TUNJA",
+        "SOGAMOSO",
+        "RESTREPO",
+        "PAIPA",
+        "DUITAMA",
+        "CUMARAL",
+        "CHIQUINQUIRA",
+        "BUCARAMANGA",
+        "ARAUCA",
+        "AGUAZUL",
+        "ACACIAS",
+    ],
+    "CORREAL MEDINA CARLOS HUMBERTO": [
+        "VILLA DEL ROSARIO",
+        "VILLA CARO",
+        "SAN GIL",
+        "PIEDECUESTA",
+        "PAMPLONA",
+        "OCA#A",
+        "LOS PATIOS",
+        "GIRON",
+        "FLORIDABLANCA",
+        "CUCUTA",
+        "BARRANCABERMEJA",
+    ],
+    "CUNDINAMARCA": [
+        "VILLETA",
+        "SILVANIA",
+        "RICAURTE",
+        "PACHO",
+        "MONGUA",
+        "LA MESA",
+        "GUADUAS",
+        "GIRARDOT",
+        "FUSAGASUGA",
+    ],
+}
+
 
 # Archivo de salida
 EFFICACY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-efectividad-comercial.xlsx"

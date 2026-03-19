@@ -43,14 +43,18 @@ def clean_data(
         df_ofsc_capacity = read_excel(path=file_path, sheet=0)
         df_ofsc_capacity = clean_df_ofsc_capacity(df=df_ofsc_capacity)
 
+        if df_ofsc_capacity.empty:
+            continue
+
         # Iniciamos a limpiar planta residencial
-        df_residential_plant = clean_df_residential_plant(
+        df_residential_plant_copy = df_residential_plant.copy()
+        df_residential_plant_copy = clean_df_residential_plant(
             df_ofsc_capacity=df_ofsc_capacity,
-            df=df_residential_plant,
+            df=df_residential_plant_copy,
         )
 
         # Renombramos columnas de planta residencial
-        df_residential_plant.rename(
+        df_residential_plant_copy.rename(
             columns={"NOMBRE": "Asesor comercial"},
             inplace=True,
         )
@@ -70,7 +74,7 @@ def clean_data(
             NEW_RESIDENTIAL_PLANT_COLUMNS.extend(RESIDENTIAL_PLANT_COLUMNS)
 
         dfs_ofsc_capacity.append(df_ofsc_capacity)
-        dfs_residential_plant.append(df_residential_plant)
+        dfs_residential_plant.append(df_residential_plant_copy)
 
     df_ofsc = pd.concat(objs=dfs_ofsc_capacity, ignore_index=True)
     df_ofsc = normalize_date(
@@ -83,6 +87,7 @@ def clean_data(
     logging(message="Uniendo OFSC y Planta Residencial...", level="INFO")
 
     df_residential_plant = pd.concat(objs=dfs_residential_plant, ignore_index=True)
+
     df_residential_plant = CleanDataFrame.drop_duplicate_rows_by_column(
         df=df_residential_plant,
         column="Asesor comercial",
@@ -98,10 +103,10 @@ def clean_data(
     )
 
     logging(
-        message=f"Creando archivo: {parameters.CONTACT_ANALYSIS_FILE_PATH}...",
+        message=f"Creando archivo: {parameters.CONTACT_ANALYSIS_FILE_PATH}",
         level="INFO",
     )
 
-    create_file(df=df_output, path=parameters.EFFICACY_ANALYSIS_FILE_PATH)
+    create_file(df=df_output, path=parameters.CONTACT_ANALYSIS_FILE_PATH)
 
-    logging(message="LIMPIEZA COMPLETADA.", level="INFO")
+    logging(message="LIMPIEZA COMPLETADA.\n", level="INFO")

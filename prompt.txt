@@ -122,4 +122,4 @@ Cuando la columna "Razón" sea exactamente "FUERA ZONA/ SIN COBERTURA RED", ante
 ## 5. EJECUCIÓN
 1. Leer los datos del archivo de Excel "datos.xlsx" que te envíen fila por fila usando solo “Notas de Cierre” y “Razón”.  
 2. Realizar el análisis de la fila siguiendo en orden la cadena de pensamiento.
-4. Guardar el resultado del análisis de todas las filas en un archivo llamado **datos-analizados.xlsx** que se pueda descargar. Solamente respondeme con el archivo y un mensaje que diga "Análisis completado."
+4. Guardar el resultado del análisis de todas las filas en un archivo llamado "datos-efectividad-comercial (IA).xlsx" que se pueda descargar. Solamente respondeme con el archivo y un mensaje que diga "Análisis completado."

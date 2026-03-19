@@ -53,8 +53,8 @@ def clean_data(
         # Iniciamos a limpiar planta residencial
         df_residential_plant_copy = df_residential_plant.copy()
         df_residential_plant_copy = clean_df_residential_plant(
-            df=df_residential_plant_copy,
             df_ofsc_capacity=df_ofsc_capacity,
+            df=df_residential_plant_copy,
         )
 
         # Renombramos columnas de planta residencial
@@ -158,10 +158,10 @@ def clean_data(
 
     # 9. Creamos la tabla final
     logging(
-        message=f"Creando archivo: {parameters.EFFICACY_ANALYSIS_FILE_PATH}...",
+        message=f"Creando archivo: {parameters.EFFICACY_ANALYSIS_FILE_PATH}",
         level="INFO",
     )
 
     create_file(df=df_output, path=parameters.EFFICACY_ANALYSIS_FILE_PATH)
 
-    logging(message="LIMPIEZA COMPLETADA.", level="INFO")
+    logging(message="LIMPIEZA COMPLETADA.\n", level="INFO")

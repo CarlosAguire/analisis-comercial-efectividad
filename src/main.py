@@ -3,7 +3,7 @@ import traceback
 
 from config import parameters
 from logs_setup import logging
-from modules.controllers import contact_analysis, efficacy_analysis
+from modules.controllers import contact_analysis
 from modules.data.match_files import pair_files
 from modules.data.operations import read_excel
 
@@ -12,16 +12,15 @@ COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[COMERCIAL_EFFICACY_ANALYSIS]
 
 
 def main() -> None:
-    df_residential_plant = read_excel(path=parameters.RESIDENTIAL_PLANT_PATH, sheet=0)
-
-    message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
-    message += parameters.COMERCIAL_EFFICACY_ANALYSIS.upper()
-    logging(message=message, level="INFO")
 
     files_path = pair_files(
         dir1=parameters.OFSC_CAPACITY_FOLDER,
         dir2=parameters.OFSC_DISPATCH_FOLDER,
     )
+
+    """message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
+    message += parameters.COMERCIAL_EFFICACY_ANALYSIS.upper()
+    logging(message=message, level="INFO")
 
     message = "Se van a limpiar los datos de los siguientes archivos:\n"
     message = message + "\nOFSC (CAPACIDADES):\n"
@@ -39,15 +38,28 @@ def main() -> None:
     message = message + "\nPLANTA RESIDENCIAL:\n"
     message = message + f">> {parameters.RESIDENTIAL_PLANT_PATH}\n"
 
-    logging(message=message, level="INFO")
+    logging(message=message, level="INFO")"""
 
-    efficacy_analysis.clean_data(
+    df_residential_plant = read_excel(path=parameters.RESIDENTIAL_PLANT_PATH, sheet=0)
+    """efficacy_analysis.clean_data(
         df_residential_plant=df_residential_plant,
         files_path=files_path,
-    )
+    )"""
 
     message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
     message += parameters.CONTACT_ANALYSIS.upper()
+    logging(message=message, level="INFO")
+
+    message = "Se van a limpiar los datos de los siguientes archivos:\n"
+    message = message + "\nOFSC (CAPACIDADES):\n"
+    only_in_dir1 = [paths[0] for paths in files_path.pairs]
+
+    for file_path in only_in_dir1:
+        message = message + f">> {file_path}\n"
+
+    message = message + "\nPLANTA RESIDENCIAL:\n"
+    message = message + f">> {parameters.RESIDENTIAL_PLANT_PATH}\n"
+
     logging(message=message, level="INFO")
 
     contact_analysis.clean_data(
@@ -58,8 +70,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     try:
-        logging(message="Limpiando entorno...", level="INFO")
-
         main()
 
         logging(message="Datos procesados correctamente.", level="INFO")

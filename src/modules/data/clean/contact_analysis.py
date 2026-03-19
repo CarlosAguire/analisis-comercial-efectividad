@@ -9,6 +9,7 @@ COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]
 
 
 def clean_df_ofsc_capacity(df: pd.DataFrame) -> pd.DataFrame:
+
     # Filtramos para eliminar filas que no necesitamos
     df_ofsc_dispatch = CleanDataFrame.filter(
         filters=FILTERS["ofsc_capacity"],

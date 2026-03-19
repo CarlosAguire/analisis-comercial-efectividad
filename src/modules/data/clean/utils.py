@@ -90,6 +90,7 @@ class CleanDataFrame:
             # Si es lista o conjunto de filtros
             if isinstance(value, (list, set, tuple)):
                 mask &= df[field].isin(value)
+                continue
 
             # Si es un valor único
             else:

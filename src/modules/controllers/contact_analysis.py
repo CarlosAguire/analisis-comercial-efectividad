@@ -1,6 +1,7 @@
+import re
+from collections import Counter
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
@@ -22,11 +23,23 @@ CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]
 
 
-def __clean_phone(value: Any) -> str:
-    if pd.isna(value) or str(value).strip() == "":
+def __clean_phone(value: str) -> str:
+    if pd.isna(value):
+        return "0"
+    if isinstance(value, float):
+        value = str(value)
+        value = value.split(".")[0]
+    if value.lower() in {"", "nan", "none"}:
         return "0"
 
-    return str(value)
+    value = value.strip()
+
+    if value == "":
+        return "0"
+
+    value = re.sub(r"\D", "", value)
+
+    return value if value != "" else "0"
 
 
 def clean_data(
@@ -111,7 +124,7 @@ def clean_data(
     )
 
     #
-    def calcular(row: pd.Series):
+    def calcular(row: pd.Series) -> pd.Series:
         columns = [
             "Teléfono",
             "Telefono dos del cliente",
@@ -120,14 +133,31 @@ def clean_data(
         ]
 
         phones = [__clean_phone(row[col]) for col in columns]
-
-        # Cantidad de ceros
+        valid_phones = [p for p in phones if p != "0"]
+        counter = Counter(valid_phones)
+        unique_phone_count = len(counter)
+        repeated_phone_count = sum(count for count in counter.values() if count > 1)
         empty_phone_count = phones.count("0")
 
-        # Números distintos (sin contar "0")
-        valid_phone_count = len(set(p for p in phones if p != "0"))
+        row["Cantidad de Números Únicos"] = unique_phone_count
+        row["Cantidad de Números Faltantes"] = empty_phone_count
+        row["Cantida de Números Repetidos"] = repeated_phone_count
 
-    df_output["resultado"] = df_output.apply(calcular, axis=1)
+        for headquarter, cities in parameters.HEADQUARTERS.items():
+            city = row["Ciudad"]
+
+            if city in cities:
+                row["Jefatura"] = headquarter
+                break
+
+        return row
+
+    df_output["Cantidad de Números Únicos"] = "0"
+    df_output["Cantidad de Números Faltantes"] = "0"
+    df_output["Cantida de Números Repetidos"] = "0"
+    df_output["Jefatura"] = None
+
+    df_output = df_output.apply(calcular, axis=1)  # type: ignore
 
     logging(
         message=f"Creando archivo: {parameters.CONTACT_ANALYSIS_FILE_PATH}",

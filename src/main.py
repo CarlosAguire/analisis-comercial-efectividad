@@ -3,7 +3,7 @@ import traceback
 
 from config import parameters
 from logs_setup import logging
-from modules.controllers import contact_analysis
+from modules.controllers import contact_analysis, efficacy_analysis
 from modules.data.match_files import pair_files
 from modules.data.operations import read_excel
 
@@ -18,7 +18,7 @@ def main() -> None:
         dir2=parameters.OFSC_DISPATCH_FOLDER,
     )
 
-    """message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
+    message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
     message += parameters.COMERCIAL_EFFICACY_ANALYSIS.upper()
     logging(message=message, level="INFO")
 
@@ -38,13 +38,13 @@ def main() -> None:
     message = message + "\nPLANTA RESIDENCIAL:\n"
     message = message + f">> {parameters.RESIDENTIAL_PLANT_PATH}\n"
 
-    logging(message=message, level="INFO")"""
+    logging(message=message, level="INFO")
 
     df_residential_plant = read_excel(path=parameters.RESIDENTIAL_PLANT_PATH, sheet=0)
-    """efficacy_analysis.clean_data(
+    efficacy_analysis.clean_data(
         df_residential_plant=df_residential_plant,
         files_path=files_path,
-    )"""
+    )
 
     message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
     message += parameters.CONTACT_ANALYSIS.upper()

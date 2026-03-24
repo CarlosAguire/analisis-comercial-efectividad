@@ -60,7 +60,6 @@ COLUMNS_TO_RESERVE = {
             "Compañia",
             "Asesor comercial",
             "Código Asesor comercial",
-            "Teléfono",
             "Telefono dos del cliente",
             "Teléfono 3",
             "Celuar del contacto",
@@ -122,51 +121,6 @@ FINAL_COLUMNS = {
         "CANAL2": "Canal",
         "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
     },
-}
-
-# Configuración de jefaturas por ciudad
-HEADQUARTERS = {
-    "BORRERO MELO TATIANA ESPERANZA": [
-        "YOPAL",
-        "VILLAVICENCIO",
-        "VILLANUEVA",
-        "VILLA DE SAN DIEGO DE UBA",
-        "TUNJA",
-        "SOGAMOSO",
-        "RESTREPO",
-        "PAIPA",
-        "DUITAMA",
-        "CUMARAL",
-        "CHIQUINQUIRA",
-        "BUCARAMANGA",
-        "ARAUCA",
-        "AGUAZUL",
-        "ACACIAS",
-    ],
-    "CORREAL MEDINA CARLOS HUMBERTO": [
-        "VILLA DEL ROSARIO",
-        "VILLA CARO",
-        "SAN GIL",
-        "PIEDECUESTA",
-        "PAMPLONA",
-        "OCA#A",
-        "LOS PATIOS",
-        "GIRON",
-        "FLORIDABLANCA",
-        "CUCUTA",
-        "BARRANCABERMEJA",
-    ],
-    "CUNDINAMARCA": [
-        "VILLETA",
-        "SILVANIA",
-        "RICAURTE",
-        "PACHO",
-        "MONGUA",
-        "LA MESA",
-        "GUADUAS",
-        "GIRARDOT",
-        "FUSAGASUGA",
-    ],
 }
 
 

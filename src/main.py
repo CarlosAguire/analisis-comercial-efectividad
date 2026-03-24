@@ -1,23 +1,22 @@
 import sys
 import traceback
 
+import pandas as pd
+
 from config import parameters
 from logs_setup import logging
 from modules.controllers import contact_analysis, efficacy_analysis
-from modules.data.match_files import pair_files
-from modules.data.operations import read_excel
+from modules.data.match_files import PairingResult, pair_files
+from modules.data.operations import create_file, read_excel
 
 COMERCIAL_EFFICACY_ANALYSIS = parameters.COMERCIAL_EFFICACY_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[COMERCIAL_EFFICACY_ANALYSIS]
 
 
-def main() -> None:
-
-    files_path = pair_files(
-        dir1=parameters.OFSC_CAPACITY_FOLDER,
-        dir2=parameters.OFSC_DISPATCH_FOLDER,
-    )
-
+def __commercial_effectiveness_analysis(
+    df_residential_plant: pd.DataFrame,
+    files_path: PairingResult,
+) -> None:
     message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
     message += parameters.COMERCIAL_EFFICACY_ANALYSIS.upper()
     logging(message=message, level="INFO")
@@ -40,12 +39,16 @@ def main() -> None:
 
     logging(message=message, level="INFO")
 
-    df_residential_plant = read_excel(path=parameters.RESIDENTIAL_PLANT_PATH, sheet=0)
     efficacy_analysis.clean_data(
         df_residential_plant=df_residential_plant,
         files_path=files_path,
     )
 
+
+def __contact_analysis(
+    df_residential_plant: pd.DataFrame,
+    files_path: PairingResult,
+) -> None:
     message = "Se va a iniciar los procesos de limpieza de los datos del reporte: "
     message += parameters.CONTACT_ANALYSIS.upper()
     logging(message=message, level="INFO")
@@ -62,9 +65,36 @@ def main() -> None:
 
     logging(message=message, level="INFO")
 
-    contact_analysis.clean_data(
+    df_output = contact_analysis.clean_data(
         df_residential_plant=df_residential_plant,
         files_path=only_in_dir1,
+    )
+    df_output = contact_analysis.data_transformation(df=df_output)
+
+    logging(
+        message=f"Creando archivo final: {parameters.CONTACT_ANALYSIS_FILE_PATH}",
+        level="INFO",
+    )
+
+    create_file(df=df_output, path=parameters.CONTACT_ANALYSIS_FILE_PATH)
+
+
+def main() -> None:
+
+    files_path = pair_files(
+        dir1=parameters.OFSC_CAPACITY_FOLDER,
+        dir2=parameters.OFSC_DISPATCH_FOLDER,
+    )
+
+    df_residential_plant = read_excel(path=parameters.RESIDENTIAL_PLANT_PATH, sheet=0)
+
+    __commercial_effectiveness_analysis(
+        df_residential_plant=df_residential_plant,
+        files_path=files_path,
+    )
+    __contact_analysis(
+        df_residential_plant=df_residential_plant,
+        files_path=files_path,
     )
 
 

@@ -13,7 +13,6 @@ from modules.data.clean.contact_analysis import (
 )
 from modules.data.clean.utils import CleanDataFrame
 from modules.data.operations import (
-    create_file,
     join_by_sales_advisor,
     normalize_date,
     read_excel,
@@ -23,29 +22,10 @@ CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]
 
 
-def __clean_phone(value: str) -> str:
-    if pd.isna(value):
-        return "0"
-    if isinstance(value, float):
-        value = str(value)
-        value = value.split(".")[0]
-    if value.lower() in {"", "nan", "none"}:
-        return "0"
-
-    value = value.strip()
-
-    if value == "":
-        return "0"
-
-    value = re.sub(r"\D", "", value)
-
-    return value if value != "" else "0"
-
-
 def clean_data(
     df_residential_plant: pd.DataFrame,
     files_path: list[Path],
-) -> None:
+) -> pd.DataFrame:
     NEW_RESIDENTIAL_PLANT_COLUMNS: list[str] = []
     dfs_residential_plant: list[pd.DataFrame] = []
     dfs_ofsc_capacity: list[pd.DataFrame] = []
@@ -123,47 +103,63 @@ def clean_data(
         inplace=True,
     )
 
-    #
-    def calcular(row: pd.Series) -> pd.Series:
+    logging(message="Limpieza completada.\n", level="INFO")
+
+    return df_output
+
+
+def __clean_phone(value: str) -> str:
+    if pd.isna(value):
+        return "0"
+    if isinstance(value, float):
+        value = str(value)
+        value = value.split(".")[0]
+    if value.lower() in {"", "nan", "none"}:
+        return "0"
+
+    value = value.strip()
+
+    if value == "":
+        return "0"
+
+    value = re.sub(r"\D", "", value)
+
+    return value if value != "" else "0"
+
+
+def data_transformation(df: pd.DataFrame) -> pd.DataFrame:
+    def compute_phone_metrics(row: pd.Series) -> pd.Series:
         columns = [
-            "Teléfono",
             "Telefono dos del cliente",
             "Teléfono 3",
             "Celuar del contacto",
         ]
 
         phones = [__clean_phone(row[col]) for col in columns]
+
         valid_phones = [p for p in phones if p != "0"]
+
         counter = Counter(valid_phones)
+
+        # Cantidad de números únicos
         unique_phone_count = len(counter)
-        repeated_phone_count = sum(count for count in counter.values() if count > 1)
+
+        # Cantidad de números repetidos
+        repeated_phone_count = sum(1 for count in counter.values() if count > 1)
+
+        # Cantidad de faltantes
         empty_phone_count = phones.count("0")
 
         row["Cantidad de Números Únicos"] = unique_phone_count
         row["Cantidad de Números Faltantes"] = empty_phone_count
         row["Cantida de Números Repetidos"] = repeated_phone_count
 
-        for headquarter, cities in parameters.HEADQUARTERS.items():
-            city = row["Ciudad"]
-
-            if city in cities:
-                row["Jefatura"] = headquarter
-                break
-
         return row
 
-    df_output["Cantidad de Números Únicos"] = "0"
-    df_output["Cantidad de Números Faltantes"] = "0"
-    df_output["Cantida de Números Repetidos"] = "0"
-    df_output["Jefatura"] = None
+    df["Cantidad de Números Únicos"] = "0"
+    df["Cantidad de Números Faltantes"] = "0"
+    df["Cantida de Números Repetidos"] = "0"
 
-    df_output = df_output.apply(calcular, axis=1)  # type: ignore
+    df = df.apply(compute_phone_metrics, axis=1)  # type: ignore
 
-    logging(
-        message=f"Creando archivo: {parameters.CONTACT_ANALYSIS_FILE_PATH}",
-        level="INFO",
-    )
-
-    create_file(df=df_output, path=parameters.CONTACT_ANALYSIS_FILE_PATH)
-
-    logging(message="LIMPIEZA COMPLETADA.\n", level="INFO")
+    return df

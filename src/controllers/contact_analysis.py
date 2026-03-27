@@ -1,22 +1,20 @@
 import re
 from collections import Counter
 from copy import deepcopy
-from pathlib import Path
 
 import pandas as pd
 
 from config import parameters
-from logs_setup import logging
-from modules.data.clean.contact_analysis import (
+from data.clean.contact_analysis import (
     clean_df_ofsc_capacity,
     clean_df_residential_plant,
 )
-from modules.data.clean.utils import CleanDataFrame
-from modules.data.operations import (
+from data.clean.manager import CleanDataFrame
+from data.operations import (
     join_by_sales_advisor,
     normalize_date,
-    read_excel,
 )
+from logs_setup import logging
 
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]
@@ -24,25 +22,22 @@ COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]
 
 def clean_data(
     df_residential_plant: pd.DataFrame,
-    files_path: list[Path],
+    dfs_ofsc_capacity: list[pd.DataFrame],
 ) -> pd.DataFrame:
     NEW_RESIDENTIAL_PLANT_COLUMNS: list[str] = []
-    dfs_residential_plant: list[pd.DataFrame] = []
-    dfs_ofsc_capacity: list[pd.DataFrame] = []
+    cleaned_dfs_residential_plant: list[pd.DataFrame] = []
+    cleaned_dfs_ofsc_capacity: list[pd.DataFrame] = []
 
-    logging(
-        message=f"Iniciando limpieza: {parameters.RESIDENTIAL_PLANT_PATH}",
-        level="INFO",
-    )
-
-    for file_path in files_path:
+    for df_ofsc_capacity in dfs_ofsc_capacity:
         RESIDENTIAL_PLANT_COLUMNS = deepcopy(COLUMNS_TO_RESERVE["residential_plant"])
 
-        logging(message=f"Iniciando limpieza: {file_path}", level="INFO")
+        logging(
+            message=f"Iniciando limpieza: {df_ofsc_capacity.attrs['path']}",
+            level="INFO",
+        )
 
-        # Iniciamos a limpiar OFS capacidades
-        df_ofsc_capacity = read_excel(path=file_path, sheet=0)
-        df_ofsc_capacity = clean_df_ofsc_capacity(df=df_ofsc_capacity)
+        df_ofsc_capacity_copy = df_ofsc_capacity.copy()
+        df_ofsc_capacity_copy = clean_df_ofsc_capacity(df=df_ofsc_capacity_copy)
 
         if df_ofsc_capacity.empty:
             continue
@@ -50,7 +45,7 @@ def clean_data(
         # Iniciamos a limpiar planta residencial
         df_residential_plant_copy = df_residential_plant.copy()
         df_residential_plant_copy = clean_df_residential_plant(
-            df_ofsc_capacity=df_ofsc_capacity,
+            df_ofsc_capacity=df_ofsc_capacity_copy,
             df=df_residential_plant_copy,
         )
 
@@ -74,12 +69,15 @@ def clean_data(
         if not NEW_RESIDENTIAL_PLANT_COLUMNS:
             NEW_RESIDENTIAL_PLANT_COLUMNS.extend(RESIDENTIAL_PLANT_COLUMNS)
 
-        dfs_ofsc_capacity.append(df_ofsc_capacity)
-        dfs_residential_plant.append(df_residential_plant_copy)
+        cleaned_dfs_ofsc_capacity.append(df_ofsc_capacity_copy)
+        cleaned_dfs_residential_plant.append(df_residential_plant_copy)
 
-    df_ofsc = pd.concat(objs=dfs_ofsc_capacity, ignore_index=True)
-    df_ofsc = normalize_date(
-        df=df_ofsc,
+    cleaned_df_ofsc_capacity = pd.concat(
+        objs=cleaned_dfs_ofsc_capacity,
+        ignore_index=True,
+    )
+    cleaned_df_ofsc_capacity = normalize_date(
+        df=cleaned_df_ofsc_capacity,
         column="Fecha",
         input_format="dd/mm/yy",
     )
@@ -87,23 +85,24 @@ def clean_data(
     # Unimos OFSC y Planta residencial en uno solo
     logging(message="Uniendo OFSC y Planta Residencial...", level="INFO")
 
-    df_residential_plant = pd.concat(objs=dfs_residential_plant, ignore_index=True)
+    cleaned_df_residential_plant = pd.concat(
+        objs=cleaned_dfs_residential_plant,
+        ignore_index=True,
+    )
 
-    df_residential_plant = CleanDataFrame.drop_duplicate_rows_by_column(
-        df=df_residential_plant,
+    cleaned_df_residential_plant = CleanDataFrame.drop_duplicate_rows_by_column(
+        df=cleaned_df_residential_plant,
         column="Asesor comercial",
     )
 
     df_output = join_by_sales_advisor(
-        df_dictionary=df_residential_plant,
-        df=df_ofsc,
+        df_dictionary=cleaned_df_residential_plant,
+        df=cleaned_df_ofsc_capacity,
     )
     df_output.rename(
         columns=parameters.FINAL_COLUMNS[CONTACT_ANALYSIS],
         inplace=True,
     )
-
-    logging(message="Limpieza completada.\n", level="INFO")
 
     return df_output
 

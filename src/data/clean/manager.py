@@ -71,10 +71,16 @@ class CleanDataFrame:
         return df.drop_duplicates(subset=[column], keep="first").reset_index(drop=True)
 
     @staticmethod
-    def filter(df: pd.DataFrame, filters: dict[str, str | list[str]]) -> pd.DataFrame:
+    def filter(
+        df: pd.DataFrame, filters: dict[str, dict[str, str | list[str]]]
+    ) -> pd.DataFrame:
         """
-        Filtra un `DataFrame` usando filtros dinámicos, devuelve solo las filas que
-        cumplen todos los filtros.
+        Filtra un DataFrame usando filtros dinámicos de inclusión y exclusión.
+
+        filters = {
+            "include": {col: value | [values]},
+            "exclude": {col: value | [values]}
+        }
         """
 
         if not filters:
@@ -82,18 +88,24 @@ class CleanDataFrame:
 
         mask = pd.Series(True, index=df.index)
 
-        for field, value in filters.items():
-            # Si la columna no existe, simplemente la ignoramos
+        # Filtros de inclusión
+        for field, value in filters.get("include", {}).items():
             if field not in df.columns:
                 continue
 
-            # Si es lista o conjunto de filtros
             if isinstance(value, (list, set, tuple)):
                 mask &= df[field].isin(value)
-                continue
-
-            # Si es un valor único
             else:
                 mask &= df[field] == value
+
+        # Filtros de exclusión
+        for field, value in filters.get("exclude", {}).items():
+            if field not in df.columns:
+                continue
+
+            if isinstance(value, (list, set, tuple)):
+                mask &= ~df[field].isin(value)
+            else:
+                mask &= df[field] != value
 
         return df[mask]

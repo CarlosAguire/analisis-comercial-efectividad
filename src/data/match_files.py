@@ -130,14 +130,11 @@ def __date_signature(a: int, b: int, y: int) -> tuple[int, int, int]:
 
 def pair_files(dir1: Path, dir2: Path) -> PairingResult:
 
-    d1 = Path(dir1)
-    d2 = Path(dir2)
-
-    if not d1.is_dir() or not d2.is_dir():
+    if not dir1.is_dir() or not dir2.is_dir():
         raise NotADirectoryError("Alguna de las rutas no es carpeta.")
 
-    files_dir1 = [p for p in d1.iterdir() if p.is_file()]
-    files_dir2 = [p for p in d2.iterdir() if p.is_file()]
+    files_dir1 = [p for p in dir1.iterdir() if p.is_file()]
+    files_dir2 = [p for p in dir2.iterdir() if p.is_file()]
 
     # Índices por firma de fecha (y, min(a,b), max(a,b))
     idx1: dict[tuple[int, int, int], list[Path]] = {}
@@ -184,9 +181,9 @@ def pair_files(dir1: Path, dir2: Path) -> PairingResult:
 
     # Validación: mismos nombres "sin fecha" en ambas carpetas
     if not files_dir1:
-        errors.append(f"No se encontraron archivos dentro de dir1: {d1}")
+        errors.append(f"No se encontraron archivos dentro de dir1: {dir1}")
     if not files_dir2:
-        errors.append(f"No se encontraron archivos dentro de dir2: {d2}")
+        errors.append(f"No se encontraron archivos dentro de dir2: {dir2}")
 
     norm1 = {normalize_without_date(p.name) for p in files_dir1}
     norm2 = {normalize_without_date(p.name) for p in files_dir2}

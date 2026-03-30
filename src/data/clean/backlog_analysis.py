@@ -3,37 +3,36 @@ import pandas as pd
 from config import parameters
 from data.clean.manager import CleanDataFrame
 
-CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
-FILTERS = parameters.FILTERS[CONTACT_ANALYSIS]
-COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]
+BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
+COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[BACKLOG_ANALYSIS]
 
 
-def clean_df_ofsc_capacity(df: pd.DataFrame) -> pd.DataFrame:
+def clean_df_backlog(df: pd.DataFrame) -> pd.DataFrame:
 
-    # Filtramos para eliminar filas que no necesitamos
-    df_ofsc_dispatch = CleanDataFrame.filter(
-        filters=FILTERS["ofsc_capacity"],
+    # Removemos columnas que no necesitamos
+    df_backlog = CleanDataFrame.drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["backlog"],
         df=df,
     )
 
-    # Removemos columnas que no necesitamos
-    df_ofsc_dispatch = CleanDataFrame.drop_columns(
-        columns_preserve=COLUMNS_TO_RESERVE["ofsc_capacity"],
-        df=df_ofsc_dispatch,
+    # Renombramos columnas
+    df_backlog.rename(
+        columns={"NOMBRE": "Asesor comercial"},
+        inplace=True,
     )
 
-    return df_ofsc_dispatch
+    return df_backlog
 
 
 def clean_df_residential_plant(
     df: pd.DataFrame,
-    df_ofsc_capacity: pd.DataFrame,
+    df_backlog: pd.DataFrame,
 ) -> pd.DataFrame:
 
     # Filtramos para eliminar filas que no necesitamos
     df_residential_plant = CleanDataFrame.filter(
         filters={
-            "include": {"NOMBRE": df_ofsc_capacity["Asesor comercial"].tolist()},
+            "include": {"NOMBRE": df_backlog["Asesor comercial"].tolist()},
         },
         df=df,
     )
@@ -48,6 +47,12 @@ def clean_df_residential_plant(
     df_residential_plant = CleanDataFrame.drop_duplicate_rows_by_column(
         df=df_residential_plant,
         column="NOMBRE",
+    )
+
+    # Renombramos columnas
+    df_residential_plant.rename(
+        columns={"NOMBRE": "Asesor comercial"},
+        inplace=True,
     )
 
     return df_residential_plant

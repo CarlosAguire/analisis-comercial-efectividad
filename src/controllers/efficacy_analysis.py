@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import pandas as pd
 
 from config import parameters
@@ -26,14 +24,11 @@ def clean_data(
     dfs_ofsc_capacity: list[pd.DataFrame],
     dfs_ofsc_dispatch: list[pd.DataFrame],
 ) -> None:
-    NEW_RESIDENTIAL_PLANT_COLUMNS: list[str] = []
     cleaned_dfs_residential_plant: list[pd.DataFrame] = []
     cleaned_dfs_ofsc_capacity: list[pd.DataFrame] = []
     cleaned_dfs_ofsc_dispatch: list[pd.DataFrame] = []
 
     for df_ofsc_capacity in dfs_ofsc_capacity:
-        RESIDENTIAL_PLANT_COLUMNS = deepcopy(COLUMNS_TO_RESERVE["residential_plant"])
-
         logging(
             message=f"Iniciando limpieza: {df_ofsc_capacity.attrs['path']}",
             level="INFO",
@@ -54,20 +49,6 @@ def clean_data(
             columns={"NOMBRE": "Asesor comercial"},
             inplace=True,
         )
-
-        index = 0
-
-        for campo in COLUMNS_TO_RESERVE["residential_plant"]:
-            if campo == "NOMBRE":
-                break
-
-            index = index + 1
-
-        RESIDENTIAL_PLANT_COLUMNS.pop(index)
-        RESIDENTIAL_PLANT_COLUMNS.append("Asesor comercial")
-
-        if not NEW_RESIDENTIAL_PLANT_COLUMNS:
-            NEW_RESIDENTIAL_PLANT_COLUMNS.extend(RESIDENTIAL_PLANT_COLUMNS)
 
         cleaned_dfs_ofsc_capacity.append(df_ofsc_capacity_copy)
         cleaned_dfs_residential_plant.append(df_residential_plant_copy)

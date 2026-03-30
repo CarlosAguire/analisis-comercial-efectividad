@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 
 
-def read_excel(path: Path, sheet: int | str) -> pd.DataFrame:
+def read_xlsx_file(path: Path, sheet: int | str) -> pd.DataFrame:
     """
     Lee una hoja de Excel.
     - No se recortan espacios.
@@ -12,11 +12,18 @@ def read_excel(path: Path, sheet: int | str) -> pd.DataFrame:
     - No se normalizan caracteres.
     """
 
-    return pd.read_excel(
-        io=path,
-        sheet_name=sheet,
-        engine="openpyxl",
-    )
+    return pd.read_excel(path, sheet_name=sheet, engine="openpyxl")
+
+
+def read_csv_file(path: Path) -> pd.DataFrame:
+    """
+    Lee una hoja de Excel.
+    - No se recortan espacios.
+    - No se cambian mayúsculas/minúsculas.
+    - No se normalizan caracteres.
+    """
+
+    return pd.read_csv(path, encoding="latin1", low_memory=False)
 
 
 def join(

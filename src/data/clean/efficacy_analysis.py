@@ -53,7 +53,9 @@ def clean_df_residential_plant(
 
     # Filtramos para eliminar filas que no necesitamos
     df_residential_plant = CleanDataFrame.filter(
-        filters={"NOMBRE": df_ofsc_capacity["Asesor comercial"].tolist()},
+        filters={
+            "include": {"NOMBRE": df_ofsc_capacity["Asesor comercial"].tolist()},
+        },
         df=df,
     )
 

@@ -1,7 +1,7 @@
 import pandas as pd
 
 from config import parameters
-from data.clean.efficacy_analysis import (
+from data.clean.commercial_analysis import (
     clean_df_ofsc_capacity,
     clean_df_ofsc_dispatch,
     clean_df_residential_plant,
@@ -19,7 +19,7 @@ COMERCIAL_EFFICACY_ANALYSIS = parameters.COMERCIAL_EFFICACY_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[COMERCIAL_EFFICACY_ANALYSIS]
 
 
-def clean_data(
+def __clean_data(
     df_residential_plant: pd.DataFrame,
     dfs_ofsc_capacity: list[pd.DataFrame],
     dfs_ofsc_dispatch: list[pd.DataFrame],
@@ -110,6 +110,7 @@ def clean_data(
         df2=cleaned_df_ofsc_capacity,
         foreign_key="Orden de trabajo",
         date_column="Fecha",
+        time_column="Inicio",
         columns_df1=COLUMNS_TO_RESERVE["ofsc_dispatch"],
         columns_df2=COLUMNS_TO_RESERVE["ofsc_capacity"],
     )
@@ -161,3 +162,20 @@ def clean_data(
     )
 
     create_file(df=df_output, path=parameters.EFFICACY_ANALYSIS_FILE_PATH)
+
+
+def run(
+    df_residential_plant: pd.DataFrame,
+    dfs_ofsc_capacity: list[pd.DataFrame],
+    dfs_ofsc_dispatch: list[pd.DataFrame],
+) -> None:
+    message = f"Iniciando limpieza de los datos para el {COMERCIAL_EFFICACY_ANALYSIS}"
+    logging(message=message, level="INFO")
+
+    __clean_data(
+        df_residential_plant=df_residential_plant,
+        dfs_ofsc_capacity=dfs_ofsc_capacity,
+        dfs_ofsc_dispatch=dfs_ofsc_dispatch,
+    )
+
+    logging(message="Limpieza completada", level="INFO")

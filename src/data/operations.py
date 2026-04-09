@@ -31,6 +31,7 @@ def join(
     df2: pd.DataFrame,
     foreign_key: str,
     date_column: str | None = None,
+    time_column: str | None = None,
     columns_df1: Iterable[str] | None = None,
     columns_df2: Iterable[str] | None = None,
     normalize_spaces: bool = True,
@@ -41,78 +42,71 @@ def join(
     coercer_type: bool = True,
 ) -> pd.DataFrame:
     """
-    Une DF1 y DF2 usando `foreign_key`. Si la llave se repite en alguno, se
-    desambigua con `date_col` (normalizada a dd/mm/yyyy). Esta versión detecta
-    automáticamente si las fechas de cada DF vienen en 'dd/mm/yyyy' o 'mm/dd/yyyy'
-    (siempre consistentes por DF) y arma una llave efectiva:
+    Une DF1 y DF2 garantizando una relación 1:1 mediante una LLAVE EFECTIVA
+    construida progresivamente:
 
-      - Sin duplicados:   __join_key__ = foreign_key
-      - Con duplicados:   __join_key__ = f"{foreign_key}||{fecha_dd/mm/yyyy}"
+      1. foreign_key
+      2. foreign_key + fecha (dd/mm/yyyy)
+      3. foreign_key + fecha + hora (hh:mm AM/PM)
 
-    Las validaciones siguen igual pero aplicadas sobre la llave efectiva:
-      - Misma cantidad (opcional).
-      - Mismo conjunto de llaves (opcional).
-      - Unicidad 1:1 (opcional).
+    La hora SOLO se usa si FK+Fecha sigue duplicada.
     """
 
-    # --- Subset de columnas (incluir date_col si fue provista) ---
-    cols1 = set([foreign_key])
-    cols2 = set([foreign_key])
+    # ------------------------------------------------------------
+    # Subset de columnas
+    # ------------------------------------------------------------
+    cols1 = {foreign_key}
+    cols2 = {foreign_key}
+
     if columns_df1 is not None:
         cols1 |= set(columns_df1)
     if columns_df2 is not None:
         cols2 |= set(columns_df2)
+
     if date_column is not None:
         cols1.add(date_column)
         cols2.add(date_column)
 
+    if time_column is not None:
+        cols1.add(time_column)
+        cols2.add(time_column)
+
     df1 = (
         df1
-        if (columns_df1 is None and date_column is None)
+        if (columns_df1 is None and date_column is None and time_column is None)
         else df1.loc[:, list(cols1)]
     )
     df2 = (
         df2
-        if (columns_df2 is None and date_column is None)
+        if (columns_df2 is None and date_column is None and time_column is None)
         else df2.loc[:, list(cols2)]
     )
 
-    # Validar existencia de columnas clave
-    missing = [
-        n for n, df in (("DF1", df1), ("DF2", df2)) if foreign_key not in df.columns
-    ]
-    if missing:
-        raise KeyError(
-            f"La columna llave '{foreign_key}' no existe en: {', '.join(missing)}"
-        )
-
-    if date_column is not None:
-        missing_date = [
-            n for n, df in (("DF1", df1), ("DF2", df2)) if date_column not in df.columns
-        ]
-
-        if missing_date:
-            raise KeyError(
-                f"La columna de fecha '{date_column}' no existe en: "
-                f"{', '.join(missing_date)}"
-            )
+    # ------------------------------------------------------------
+    # Validaciones de existencia
+    # ------------------------------------------------------------
+    for name, df in (("DF1", df1), ("DF2", df2)):
+        if foreign_key not in df.columns:
+            raise KeyError(f"La columna llave '{foreign_key}' no existe en {name}")
+        if date_column is not None and date_column not in df.columns:
+            raise KeyError(f"La columna de fecha '{date_column}' no existe en {name}")
 
     df1 = df1.copy()
     df2 = df2.copy()
 
+    # ------------------------------------------------------------
     # Normalizar espacios
+    # ------------------------------------------------------------
     if normalize_spaces:
-        if pd.api.types.is_string_dtype(df1[foreign_key]):
-            df1[foreign_key] = df1[foreign_key].str.strip()
-        if pd.api.types.is_string_dtype(df2[foreign_key]):
-            df2[foreign_key] = df2[foreign_key].str.strip()
-        if date_column is not None:
-            if pd.api.types.is_string_dtype(df1[date_column]):
-                df1[date_column] = df1[date_column].str.strip()
-            if pd.api.types.is_string_dtype(df2[date_column]):
-                df2[date_column] = df2[date_column].str.strip()
+        for col in filter(None, [foreign_key, date_column, time_column]):
+            if col in df1.columns and pd.api.types.is_string_dtype(df1[col]):
+                df1[col] = df1[col].str.strip()
+            if col in df2.columns and pd.api.types.is_string_dtype(df2[col]):
+                df2[col] = df2[col].str.strip()
 
-    # Alinear tipos de la llave foránea
+    # ------------------------------------------------------------
+    # Alinear tipos de la FK
+    # ------------------------------------------------------------
     if coercer_type and df1[foreign_key].dtype != df2[foreign_key].dtype:
         try:
             df2[foreign_key] = df2[foreign_key].astype(df1[foreign_key].dtype)
@@ -120,267 +114,186 @@ def join(
             df1[foreign_key] = df1[foreign_key].astype("string")
             df2[foreign_key] = df2[foreign_key].astype("string")
 
-    # Manejo de nulos en la llave foránea
+    # ------------------------------------------------------------
+    # Manejo de nulos en FK
+    # ------------------------------------------------------------
     if ignore_nulls_key:
         df1 = df1[df1[foreign_key].notna()]
         df2 = df2[df2[foreign_key].notna()]
     else:
-        nulls = []
-
-        if df1[foreign_key].isna().any():
-            nulls.append("DF1")
-        if df2[foreign_key].isna().any():
-            nulls.append("DF2")
-        if nulls:
+        if df1[foreign_key].isna().any() or df2[foreign_key].isna().any():
             raise ValueError(
-                f"Existen valores nulos en la llave foranea '{foreign_key}' en: "
-                f"{', '.join(nulls)}"
+                f"Existen valores nulos en la llave foránea '{foreign_key}'"
             )
 
-    # Construcción de LLAVE EFECTIVA con normalización de fecha por DF
-    dup1_fk = df1[foreign_key].duplicated(keep=False)
-    dup2_fk = df2[foreign_key].duplicated(keep=False)
-    any_dups_fk = dup1_fk.any() or dup2_fk.any()
-
-    if any_dups_fk and date_column is None:
-        raise ValueError(
-            f"Se detectaron llaves foráneas repetidas en '{foreign_key}', "
-            "pero no se proporcionó 'date_column'. Especifique la columna "
-            "de fecha para desambiguar."
-        )
-
-    # Helper: inferir si la serie usa dayfirst (dd/mm/yyyy) por la regla >12
+    # ------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------
     def __infer_dayfirst_by_12_rule(s: pd.Series) -> bool | None:
         if pd.api.types.is_datetime64_any_dtype(s):
             return True
 
-        # Esperamos "d{1,2}/d{1,2}/d{2,4}" (p.ej., '05/03/2026')
-        # Extraemos números para evaluar >12
-        parts = s.dropna().astype(str).str.split("/", n=2, expand=True)
-
+        parts = s.dropna().astype(str).str.split("/", expand=True)
         if parts.shape[1] != 3 or parts.empty:
             return None
 
-        try:
-            a = pd.to_numeric(parts[0], errors="coerce")
-            b = pd.to_numeric(parts[1], errors="coerce")
-        except Exception:
-            return None
+        a = pd.to_numeric(parts[0], errors="coerce")
+        b = pd.to_numeric(parts[1], errors="coerce")
 
-        first_gt_12 = a > 12
-        second_gt_12 = b > 12
-        any_first = first_gt_12.any()
-        any_second = second_gt_12.any()
+        if (a > 12).any() and not (b > 12).any():
+            return True
+        if (b > 12).any() and not (a > 12).any():
+            return False
+        return None
 
-        if any_first and not any_second:
-            return True  # dd/mm/yyyy
-        if any_second and not any_first:
-            return False  # mm/dd/yyyy
+    def __parse_date(s: pd.Series, dayfirst: bool) -> pd.Series:
+        fmt = "%d/%m/%Y" if dayfirst else "%m/%d/%Y"
+        return pd.to_datetime(s, format=fmt, errors="coerce")
 
-        return None  # ambiguo (todos <=12 o mezcla inconsistente)
+    def __parse_time_12h(s: pd.Series) -> pd.Series:
+        dt = pd.to_datetime(
+            s.astype(str).str.strip(),
+            format="%I:%M %p",
+            errors="coerce",
+        )
+        return dt.dt.strftime("%I:%M %p")
 
-    # Helper: parsear según 'dayfirst' (si ya es datetime, lo respeta)
-    def __parse_with_flag(s: pd.Series, dayfirst: bool) -> pd.Series:
-        if pd.api.types.is_datetime64_any_dtype(s):
-            return pd.to_datetime(s, errors="coerce")
-
-        format = "%d/%m/%Y" if dayfirst else "%m/%d/%Y"  # ← actualizado a %Y
-        return pd.to_datetime(s, format=format, dayfirst=dayfirst, errors="coerce")
-
-    # Armar llave base
+    # ------------------------------------------------------------
+    # Construcción de llave efectiva
+    # ------------------------------------------------------------
     df1["__join_key__"] = df1[foreign_key].astype("string")
     df2["__join_key__"] = df2[foreign_key].astype("string")
 
-    # Si no hay duplicados, seguimos como antes
-    if not any_dups_fk:
-        pass
-    else:
-        # Conjunto de claves duplicadas (en cualquiera)
-        dup_keys_union = pd.Index(df1.loc[dup1_fk, foreign_key].unique()).union(
-            pd.Index(df2.loc[dup2_fk, foreign_key].unique())
-        )
-        mask1 = df1[foreign_key].isin(dup_keys_union)
-        mask2 = df2[foreign_key].isin(dup_keys_union)
+    dup1 = df1[foreign_key].duplicated(keep=False)
+    dup2 = df2[foreign_key].duplicated(keep=False)
+    any_dups_fk = dup1.any() or dup2.any()
 
-        # Inferir orientación por DF
+    if any_dups_fk:
+        if date_column is None:
+            raise ValueError(
+                "Se detectaron llaves foráneas duplicadas y no se proporcionó"
+                " 'date_column'."
+            )
+
+        mask1 = dup1
+        mask2 = dup2
+
         df1_dayfirst = __infer_dayfirst_by_12_rule(df1.loc[mask1, date_column])
         df2_dayfirst = __infer_dayfirst_by_12_rule(df2.loc[mask2, date_column])
 
-        # Si alguna es ambigua, probamos combinaciones y elegimos la que hace coincidir
-        if df1_dayfirst is None or df2_dayfirst is None:
-            # Construir candidatos para df1
-            df1_dt_d = __parse_with_flag(df1.loc[mask1, date_column], True)
-            df1_dt_m = __parse_with_flag(df1.loc[mask1, date_column], False)
-            df1_s_d = df1_dt_d.dt.strftime("%d/%m/%Y")  # ← actualizado a %Y
-            df1_s_m = df1_dt_m.dt.strftime("%d/%m/%Y")  # ← actualizado a %Y
+        if df1_dayfirst is None:
+            df1_dayfirst = True
+        if df2_dayfirst is None:
+            df2_dayfirst = False
 
-            # Construir candidatos para df2
-            df2_dt_d = __parse_with_flag(df2.loc[mask2, date_column], True)
-            df2_dt_m = __parse_with_flag(df2.loc[mask2, date_column], False)
-            df2_s_d = df2_dt_d.dt.strftime("%d/%m/%Y")  # ← actualizado a %Y
-            df2_s_m = df2_dt_m.dt.strftime("%d/%m/%Y")  # ← actualizado a %Y
+        df1["_date_tmp_"] = __parse_date(df1[date_column], df1_dayfirst)
+        df2["_date_tmp_"] = __parse_date(df2[date_column], df2_dayfirst)
 
-            # Candidatos de llaves efectivas (solo en filas duplicadas)
-            k1_d = (
-                df1.loc[mask1, foreign_key].astype("string") + "||" + df1_s_d
-            ).dropna()
-            k1_m = (
-                df1.loc[mask1, foreign_key].astype("string") + "||" + df1_s_m
-            ).dropna()
-            k2_d = (
-                df2.loc[mask2, foreign_key].astype("string") + "||" + df2_s_d
-            ).dropna()
-            k2_m = (
-                df2.loc[mask2, foreign_key].astype("string") + "||" + df2_s_m
-            ).dropna()
+        if df1.loc[mask1, "_date_tmp_"].isna().any():
+            raise ValueError("Fechas inválidas en DF1 para llaves duplicadas")
+        if df2.loc[mask2, "_date_tmp_"].isna().any():
+            raise ValueError("Fechas inválidas en DF2 para llaves duplicadas")
 
-            combos = {
-                ("d", "d"): (set(k1_d.unique()), set(k2_d.unique())),
-                ("d", "m"): (set(k1_d.unique()), set(k2_m.unique())),
-                ("m", "d"): (set(k1_m.unique()), set(k2_d.unique())),
-                ("m", "m"): (set(k1_m.unique()), set(k2_m.unique())),
-            }
-            valid = [
-                cmb for cmb, (s1, s2) in combos.items() if s1 == s2 and len(s1) > 0
-            ]
+        df1["_date_str_"] = df1["_date_tmp_"].dt.strftime("%d/%m/%Y")
+        df2["_date_str_"] = df2["_date_tmp_"].dt.strftime("%d/%m/%Y")
 
-            if len(valid) == 1:
-                df1_dayfirst = valid[0][0] == "d"
-                df2_dayfirst = valid[0][1] == "d"
-            elif len(valid) > 1:
-                # Empate raro: preferimos (d, m) asumiendo DF opuestos
-                if ("d", "m") in valid:
-                    df1_dayfirst, df2_dayfirst = True, False
-                elif ("m", "d") in valid:
-                    df1_dayfirst, df2_dayfirst = False, True
-                else:
-                    # Último recurso: asumir df1=d, df2=m
-                    df1_dayfirst, df2_dayfirst = True, False
-            else:
-                if df1_dayfirst is None:
-                    df1_dayfirst = True
-                if df2_dayfirst is None:
-                    df2_dayfirst = False
-
-        # Parsear definitivamente con las flags elegidas
-        df1["_date_dt_tmp_"] = __parse_with_flag(df1[date_column], df1_dayfirst)
-        df2["_date_dt_tmp_"] = __parse_with_flag(df2[date_column], df2_dayfirst)
-
-        # Validar nulos en filas duplicadas
-        if df1.loc[mask1, "_date_dt_tmp_"].isna().any():
-            raise ValueError(
-                f"Hay valores de fecha nulos/invalidos en '{date_column}' "
-                "para llaves repetidas en DF1."
-            )
-        if df2.loc[mask2, "_date_dt_tmp_"].isna().any():
-            raise ValueError(
-                f"Hay valores de fecha nulos/invalidos en '{date_column}' "
-                "para llaves repetidas en DF2."
-            )
-
-        # Normalizar a dd/mm/yyyy para construir la llave efectiva
-        df1["_date_str_tmp_"] = df1["_date_dt_tmp_"].dt.strftime("%d/%m/%Y")  # ← %Y
-        df2["_date_str_tmp_"] = df2["_date_dt_tmp_"].dt.strftime("%d/%m/%Y")  # ← %Y
-
-        # En filas con fk duplicada, agregar fecha a la llave efectiva
         df1.loc[mask1, "__join_key__"] = (
             df1.loc[mask1, foreign_key].astype("string")
             + "||"
-            + df1.loc[mask1, "_date_str_tmp_"]
+            + df1.loc[mask1, "_date_str_"]
         )
         df2.loc[mask2, "__join_key__"] = (
             df2.loc[mask2, foreign_key].astype("string")
             + "||"
-            + df2.loc[mask2, "_date_str_tmp_"]
+            + df2.loc[mask2, "_date_str_"]
         )
 
-        # Limpiar columnas temporales de fecha
-        df1 = df1.drop(columns=["_date_dt_tmp_", "_date_str_tmp_"])
-        df2 = df2.drop(columns=["_date_dt_tmp_", "_date_str_tmp_"])
+        # 🔴 SEGUNDA CAPA: Hora si sigue duplicado
+        dup1_after = df1["__join_key__"].duplicated(keep=False)
+        dup2_after = df2["__join_key__"].duplicated(keep=False)
 
-    # Validación de cantidad (igual que antes)
+        if dup1_after.any() or dup2_after.any():
+            if time_column is None:
+                raise ValueError(
+                    "Existen órdenes duplicadas incluso usando fecha. "
+                    "Se requiere 'time_column' para garantizar unicidad."
+                )
+
+            df1["_time_str_"] = __parse_time_12h(df1[time_column])
+            df2["_time_str_"] = __parse_time_12h(df2[time_column])
+
+            if df1.loc[dup1_after, "_time_str_"].isna().any():
+                raise ValueError("Horas inválidas en DF1 para órdenes duplicadas")
+            if df2.loc[dup2_after, "_time_str_"].isna().any():
+                raise ValueError("Horas inválidas en DF2 para órdenes duplicadas")
+
+            df1.loc[dup1_after, "__join_key__"] = (
+                df1.loc[dup1_after, "__join_key__"]
+                + "||"
+                + df1.loc[dup1_after, "_time_str_"]
+            )
+            df2.loc[dup2_after, "__join_key__"] = (
+                df2.loc[dup2_after, "__join_key__"]
+                + "||"
+                + df2.loc[dup2_after, "_time_str_"]
+            )
+
+        df1.drop(
+            columns=[
+                c
+                for c in df1.columns
+                if c.startswith("_date_") or c.startswith("_time_")
+            ],
+            inplace=True,
+        )
+        df2.drop(
+            columns=[
+                c
+                for c in df2.columns
+                if c.startswith("_date_") or c.startswith("_time_")
+            ],
+            inplace=True,
+        )
+
+    # ------------------------------------------------------------
+    # Validaciones finales
+    # ------------------------------------------------------------
     if verify_quantity and len(df1) != len(df2):
         raise ValueError(
-            "Los DataFrames tienen diferente número de filas: "
-            f"DF1={len(df1):,}, DF2={len(df2):,}"
+            f"DF1 y DF2 tienen diferente número de filas ({len(df1)} vs {len(df2)})"
         )
 
-    # Verificación de conjuntos (ahora sobre la llave efectiva)
     if verify_keys:
-        keys1 = pd.Index(df1["__join_key__"].unique())
-        keys2 = pd.Index(df2["__join_key__"].unique())
-        missing_in_df2 = keys1.difference(keys2)
-        missing_in_df1 = keys2.difference(keys1)
-
-        if len(missing_in_df1) or len(missing_in_df2):
-            detalles = []
-
-            if len(missing_in_df2):
-                detalles.append(
-                    f"En DF1 y NO en DF2 (#{len(missing_in_df2)}). Ejemplos: "
-                    f"{missing_in_df2[:10].tolist()}"
-                )
-            if len(missing_in_df1):
-                detalles.append(
-                    f"En DF2 y NO en DF1 (#{len(missing_in_df1)}). Ejemplos: "
-                    f"{missing_in_df1[:10].tolist()}"
-                )
-
+        k1 = set(df1["__join_key__"])
+        k2 = set(df2["__join_key__"])
+        if k1 != k2:
             raise KeyError(
-                "Los conjuntos de llaves efectivas no coinciden. "
-                + " | ".join(detalles)
+                "Los conjuntos de llaves efectivas no coinciden entre DF1 y DF2"
             )
 
-    # Unicidad 1:1 sobre la llave efectiva (igual que antes)
-    validate_arg = None
+    validate_arg = "one_to_one" if verify_uniqueness else None
 
-    if verify_uniqueness:
-        dup1 = df1["__join_key__"].duplicated(keep=False)
-        dup2 = df2["__join_key__"].duplicated(keep=False)
-
-        if dup1.any() or dup2.any():
-            examples1 = (
-                df1.loc[dup1, "__join_key__"].value_counts().head(5).to_dict()
-                if dup1.any()
-                else {}
-            )
-            examples2 = (
-                df2.loc[dup2, "__join_key__"].value_counts().head(5).to_dict()
-                if dup2.any()
-                else {}
-            )
-
-            raise ValueError(
-                "Se esperaba cardinalidad 1:1 en la llave efectiva. "
-                f"Duplicados DF1 (top 5): {examples1} | Duplicados DF2 (top 5): "
-                f"{examples2}"
-            )
-
-        validate_arg = "one_to_one"
-
-    # Unión usando la llave efectiva
+    # ------------------------------------------------------------
+    # Merge final
+    # ------------------------------------------------------------
     drop_cols = [foreign_key]
-
-    if date_column is not None and date_column in df2.columns:
+    if date_column is not None:
         drop_cols.append(date_column)
+    if time_column is not None:
+        drop_cols.append(time_column)
 
-    df2_no_fk = df2.drop(columns=drop_cols)
     df = pd.merge(
         df1,
-        df2_no_fk,
+        df2.drop(columns=[c for c in drop_cols if c in df2.columns]),
         on="__join_key__",
         how="inner",
-        sort=False,
         validate=validate_arg,
     )
 
-    # Limpiar temporal y reordenar
-    if "__join_key__" in df.columns:
-        df = df.drop(columns=["__join_key__"])
+    df.drop(columns="__join_key__", inplace=True)
+    cols = [foreign_key] + [c for c in df.columns if c != foreign_key]
 
-    columns = [foreign_key] + [c for c in df.columns if c != foreign_key]
-
-    return df[columns]
+    return df[cols]
 
 
 def create_file(df: pd.DataFrame, path: Path) -> None:

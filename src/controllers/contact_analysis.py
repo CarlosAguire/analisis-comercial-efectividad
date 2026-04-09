@@ -9,17 +9,14 @@ from data.clean.contact_analysis import (
     clean_df_residential_plant,
 )
 from data.clean.manager import CleanDataFrame
-from data.operations import (
-    join_by_sales_advisor,
-    normalize_date,
-)
+from data.operations import create_file, join_by_sales_advisor, normalize_date
 from logs_setup import logging
 
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]
 
 
-def clean_data(
+def __clean_data(
     df_residential_plant: pd.DataFrame,
     dfs_ofsc_capacity: list[pd.DataFrame],
 ) -> pd.DataFrame:
@@ -108,7 +105,7 @@ def __clean_phone(value: str) -> str:
     return value if value != "" else "0"
 
 
-def data_transformation(df: pd.DataFrame) -> pd.DataFrame:
+def __data_transformation(df: pd.DataFrame) -> pd.DataFrame:
     def compute_phone_metrics(row: pd.Series) -> pd.Series:
         columns = [
             "Telefono dos del cliente",
@@ -144,3 +141,27 @@ def data_transformation(df: pd.DataFrame) -> pd.DataFrame:
     df = df.apply(compute_phone_metrics, axis=1)  # type: ignore
 
     return df
+
+
+def run(
+    df_residential_plant: pd.DataFrame,
+    dfs_ofsc_capacity: list[pd.DataFrame],
+) -> None:
+    message = f"Iniciando limpieza de los datos para el {CONTACT_ANALYSIS}"
+    logging(message=message, level="INFO")
+
+    df_output = __clean_data(
+        df_residential_plant=df_residential_plant,
+        dfs_ofsc_capacity=dfs_ofsc_capacity,
+    )
+
+    logging(message="Limpieza completada", level="INFO")
+
+    df_output = __data_transformation(df=df_output)
+
+    logging(
+        message=f"Creando archivo final: {parameters.CONTACT_ANALYSIS_FILE_PATH}",
+        level="INFO",
+    )
+
+    create_file(df=df_output, path=parameters.CONTACT_ANALYSIS_FILE_PATH)

@@ -1,3 +1,4 @@
+import argparse
 import sys
 import traceback
 from pathlib import Path
@@ -7,13 +8,12 @@ import pandas as pd
 from config import parameters
 from controllers import (
     backlog_analysis,
+    commercial_analysis,
     contact_analysis,
-    efficacy_analysis,
     productivity_analysis,
     read_files,
 )
 from data.match_files import pair_files
-from data.operations import create_file
 from logs_setup import logging
 
 COMERCIAL_EFFICACY_ANALYSIS = parameters.COMERCIAL_EFFICACY_ANALYSIS
@@ -25,7 +25,7 @@ BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
 def __read_files(
     ofsc_capacity_files: list[Path],
     ofsc_dispatch_files: list[Path],
-    residential_plant_file: Path,
+    residential_plant_file: Path | None,
     backlog_dir: Path,
 ) -> dict[str, list[pd.DataFrame] | pd.DataFrame]:
     message = "Se van a preparar los siguientes archivos, para los "
@@ -41,8 +41,9 @@ def __read_files(
     for path in ofsc_dispatch_files:
         message += f"   >> {path}\n"
 
-    message += "\nPlanta Residencial:\n"
-    message += f"   >> {parameters.RESIDENTIAL_PLANT_PATH}\n"
+    if residential_plant_file:
+        message += "\nPlanta Residencial:\n"
+        message += f"   >> {residential_plant_file}\n"
 
     logging(message=message, level="INFO")
 
@@ -56,94 +57,32 @@ def __read_files(
     )
 
 
-def __commercial_effectiveness_analysis(
-    df_residential_plant: pd.DataFrame,
-    dfs_ofsc_capacity: list[pd.DataFrame],
-    dfs_ofsc_dispatch: list[pd.DataFrame],
+def run_analysis(
+    productivity_analysis_parameter: bool,
+    commercial_analysis_parameter: bool,
+    contact_analysis_parameter: bool,
+    backlog_analysis_parameter: bool,
 ) -> None:
-    message = f"Iniciando limpieza de los datos para el {COMERCIAL_EFFICACY_ANALYSIS}"
-    logging(message=message, level="INFO")
-
-    efficacy_analysis.clean_data(
-        df_residential_plant=df_residential_plant,
-        dfs_ofsc_capacity=dfs_ofsc_capacity,
-        dfs_ofsc_dispatch=dfs_ofsc_dispatch,
-    )
-
-    logging(message="Limpieza completada", level="INFO")
-
-
-def __contact_analysis(
-    df_residential_plant: pd.DataFrame,
-    dfs_ofsc_capacity: list[pd.DataFrame],
-) -> None:
-    message = f"Iniciando limpieza de los datos para el {CONTACT_ANALYSIS}"
-    logging(message=message, level="INFO")
-
-    df_output = contact_analysis.clean_data(
-        df_residential_plant=df_residential_plant,
-        dfs_ofsc_capacity=dfs_ofsc_capacity,
-    )
-
-    logging(message="Limpieza completada", level="INFO")
-
-    df_output = contact_analysis.data_transformation(df=df_output)
-
-    logging(
-        message=f"Creando archivo final: {parameters.CONTACT_ANALYSIS_FILE_PATH}",
-        level="INFO",
-    )
-
-    create_file(df=df_output, path=parameters.CONTACT_ANALYSIS_FILE_PATH)
-
-
-def __backlog_analysis(
-    df_residential_plant: pd.DataFrame,
-    df_backlog: pd.DataFrame,
-) -> None:
-    message = f"Iniciando limpieza de los datos para el {BACKLOG_ANALYSIS}"
-    logging(message=message, level="INFO")
-
-    df_output = backlog_analysis.clean_data(
-        df_residential_plant=df_residential_plant,
-        df_backlog=df_backlog,
-    )
-
-    logging(message="Limpieza completada", level="INFO")
-    logging(
-        message=f"Creando archivo final: {parameters.BACKLOG_ANALYSIS_FILE_PATH}",
-        level="INFO",
-    )
-
-    create_file(df=df_output, path=parameters.BACKLOG_ANALYSIS_FILE_PATH)
-
-
-def __productivity_analysis(dfs_ofsc_capacity: list[pd.DataFrame]) -> None:
-    message = f"Iniciando limpieza de los datos para el {PRODUCTIVITY_ANALYSIS}"
-    logging(message=message, level="INFO")
-
-    df_output = productivity_analysis.clean_data(dfs_ofsc_capacity=dfs_ofsc_capacity)
-
-    logging(message="Limpieza completada", level="INFO")
-    logging(
-        message=f"Creando archivo final: {parameters.CONTACT_ANALYSIS_FILE_PATH}",
-        level="INFO",
-    )
-
-    create_file(df=df_output, path=parameters.PRODUCTIVITY_ANALYSIS_FILE_PATH)
-
-
-def main() -> None:
+    FTTH_HFC_TREE_FOLDER = parameters.FTTH_HFC_TREE_FOLDER
+    OFSC_CAPACITY_FOLDER = FTTH_HFC_TREE_FOLDER / "OFSC" / "Area de Capacidades"
+    OFSC_DISPATCH_FOLDER = FTTH_HFC_TREE_FOLDER / "OFSC" / "Area de Despacho"
 
     files_path = pair_files(
-        dir1=parameters.OFSC_CAPACITY_FOLDER,
-        dir2=parameters.OFSC_DISPATCH_FOLDER,
+        dir1=OFSC_CAPACITY_FOLDER,
+        dir2=OFSC_DISPATCH_FOLDER,
+    )
+
+    conditon = (
+        productivity_analysis_parameter
+        and not commercial_analysis_parameter
+        and not contact_analysis_parameter
+        and not backlog_analysis_parameter
     )
 
     dfs = __read_files(
         ofsc_capacity_files=[paths[0] for paths in files_path.pairs],
         ofsc_dispatch_files=[paths[-1] for paths in files_path.pairs],
-        residential_plant_file=parameters.RESIDENTIAL_PLANT_PATH,
+        residential_plant_file=None if conditon else parameters.RESIDENTIAL_PLANT_PATH,
         backlog_dir=parameters.BACKLOG_FOLDER,
     )
 
@@ -152,25 +91,63 @@ def main() -> None:
     dfs_ofsc_capacity: list[pd.DataFrame] = dfs["ofsc_capacity"]  # type: ignore
     dfs_ofsc_dispatch: list[pd.DataFrame] = dfs["ofsc_dispatch"]  # type: ignore
 
-    """__commercial_effectiveness_analysis(
-        df_residential_plant=df_residential_plant,
-        dfs_ofsc_capacity=dfs_ofsc_capacity,
-        dfs_ofsc_dispatch=dfs_ofsc_dispatch,
+    if commercial_analysis_parameter:
+        commercial_analysis.run(
+            df_residential_plant=df_residential_plant,
+            dfs_ofsc_capacity=dfs_ofsc_capacity,
+            dfs_ofsc_dispatch=dfs_ofsc_dispatch,
+        )
+    if contact_analysis_parameter:
+        contact_analysis.run(
+            df_residential_plant=df_residential_plant,
+            dfs_ofsc_capacity=dfs_ofsc_capacity,
+        )
+    if backlog_analysis_parameter:
+        backlog_analysis.run(
+            df_residential_plant=df_residential_plant,
+            df_backlog=df_backlog,
+        )
+
+    OFSC_FOLDER = parameters.FO_TREE_FOLDER / "OFSC"
+
+    data = {"ftth_hfc_tree": dfs}
+    dfs = read_files.read_files(
+        ofsc_capacity_files=[p for p in OFSC_FOLDER.iterdir() if p.is_file()],
+        ofsc_dispatch_files=None,
+        residential_plant_file=None,
+        backlog_file=None,
     )
-    __contact_analysis(
-        df_residential_plant=df_residential_plant,
-        dfs_ofsc_capacity=dfs_ofsc_capacity,
-    )
-    __backlog_analysis(
-        df_residential_plant=df_residential_plant,
-        df_backlog=df_backlog,
-    )"""
-    __productivity_analysis(dfs_ofsc_capacity=dfs_ofsc_capacity)
+    data["fo_tree"] = dfs
+
+    dfs_ftth_hfc_tree: list[pd.DataFrame]
+    dfs_ftth_hfc_tree = data["ftth_hfc_tree"]["ofsc_capacity"]  # type: ignore
+    dfs_fo_tree: list[pd.DataFrame]
+    dfs_fo_tree = data["fo_tree"]["ofsc_capacity"]  # type: ignore
+
+    if productivity_analysis_parameter:
+        productivity_analysis.run(ftth_hfc_tree=dfs_ftth_hfc_tree, fo_tree=dfs_fo_tree)
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--commercial_analysis", action="store_true")
+    parser.add_argument("--contact_analysis", action="store_true")
+    parser.add_argument("--backlog_analysis", action="store_true")
+    parser.add_argument("--productivity_analysis", action="store_true")
+    args = parser.parse_args()
+
     try:
-        main()
+        commercial_analysis_parameter = args.commercial_analysis
+        contact_analysis_parameter = args.contact_analysis
+        backlog_analysis_parameter = args.backlog_analysis
+        productivity_analysis_parameter = args.productivity_analysis
+
+        run_analysis(
+            productivity_analysis_parameter=productivity_analysis_parameter,
+            commercial_analysis_parameter=commercial_analysis_parameter,
+            contact_analysis_parameter=contact_analysis_parameter,
+            backlog_analysis_parameter=backlog_analysis_parameter,
+        )
 
         logging(message="Datos procesados correctamente.", level="INFO")
 

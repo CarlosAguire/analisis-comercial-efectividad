@@ -14,8 +14,8 @@ UTILS_FOLDER = PROJECT_ROOT / "databases" / "utils"
 DATABASES_FOLDER = PROJECT_ROOT / "databases"
 LOGS_FOLDER = PROJECT_ROOT / "logs"
 RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsx"
-OFSC_CAPACITY_FOLDER = DATABASES_FOLDER / "OFSC" / "Area de Capacidades"
-OFSC_DISPATCH_FOLDER = DATABASES_FOLDER / "OFSC" / "Area de Despacho"
+FTTH_HFC_TREE_FOLDER = DATABASES_FOLDER / "FTTH y HFC"
+FO_TREE_FOLDER = DATABASES_FOLDER / "FO"
 BACKLOG_FOLDER = DATABASES_FOLDER / "Back Transversal"
 
 
@@ -33,6 +33,7 @@ COLUMNS_TO_RESERVE = {
             "Notas de Cierre",
             "Orden de trabajo",
             "Fecha",
+            "Inicio",
             "Compañia",
         ],
         "ofsc_capacity": [
@@ -45,6 +46,7 @@ COLUMNS_TO_RESERVE = {
             "Asesor comercial",
             "Código Asesor comercial",
             "Fecha",
+            "Inicio",
         ],
         "residential_plant": [
             "NOMBRE",
@@ -104,63 +106,6 @@ COLUMNS_TO_RESERVE = {
             "CANAL2",
         ],
     },
-    PRODUCTIVITY_ANALYSIS: {
-        "ofsc_capacity": [
-            "Técnico",
-            "Intervalos de tiempo",
-            "Actividad ID",
-            "ID Aliado",
-            "Fecha",
-            "Nombre",
-            "Dirección campo 1",
-            "Nombre Completo",
-            "Tipo de Actividad",
-            "Subtipo de la Orden de Trabajo",
-            "Orden de trabajo",
-            "Estado",
-            "Zonas de trabajo",
-            "Duración",
-            "Ciudad",
-            "Departamento",
-            "Nodo",
-            "Número de cuenta",
-            "Estado interno de la OT",
-            "Numero de Reincidencias Serivicios",
-            "Numero de Reincidencias Calidad",
-            "Numero de Reprogramaciones",
-            "SLA Suscriptor",
-            "SLA Cumplimiento",
-            "Estado SLA",
-            "Asesor comercial",
-            "Código Asesor comercial",
-            "Tipo de Red",
-            "Materials Validation Result",
-            "Resultados SoftClose",
-            "Agent Confirmation",
-            "Regional",
-            "Unidad de Gestión",
-            "Razón",
-            "Número de Ticket Fallas Masivas",
-            "Código de causa 1 del IIMS",
-            "Código de causa 2 del IIMS",
-            "Código de causa 3 del IIMS",
-            "Fecha de agendamiento",
-            "Compañia",
-            "External ID",
-            "Persona que Confirma",
-            "Nombre Completo",
-            "Lista de Razon",
-            "Prioridad",
-            "Teléfono",
-            "Telefono dos del cliente",
-            "Teléfono 3",
-            "Celuar del contacto",
-            "Coordenada X",
-            "Coordenada Y",
-            "Agenda Inmediata",
-            "Fecha de creación de la OT YYYY-MM-DD",
-        ],
-    },
 }
 
 
@@ -170,15 +115,15 @@ FILTERS = {
         "ofsc_dispatch": {
             "include": {
                 "Estado": "No completado",
-                "Tipo de Actividad": "Instalaciones",
-                "Tipo de Red": "Pymes",
+                "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
+                "Tipo de Red": ["Pymes", "FTTX"],
             },
         },
         "ofsc_capacity": {
             "include": {
                 "Estado": "No completado",
-                "Tipo de Actividad": "Instalaciones",
-                "Tipo de Red": "Pymes",
+                "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
+                "Tipo de Red": ["Pymes", "FTTX"],
             }
         },
     },

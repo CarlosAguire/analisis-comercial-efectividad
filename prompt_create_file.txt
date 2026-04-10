@@ -1,0 +1,12 @@
+DATOS DE ENTRADA:
+- JSON que es una lista de objetos, donde cada objeto son los datos de una fila de la tabla (esta delimitado entre tres comillas):  """ JSON_TABLE  """
+
+PERFIL PROFESIONAL:
+Debes actuar como un programador Python Senior con amplia experiencia en el uso de Pandas moderno y análisis de datos.
+
+PREPARACIÓN DE LOS DATOS DE ENTRADA:
+El JSON es una cadena de texto plano, su contenido tiene formato JSON, antes de trabajar con esta información primero debes realizar los siguientes pasos:
+1. Utiliza Python para convertir la cadena de texto en un JSON y luego lo conviertes a un objeto de Python (deberías tener como resultados una lista de diccionarios).
+
+TAREA A REALIZAR:
+Cuando hayas preparado los datos de entrada usa Pandas moderno (No uses writer.save() para gestionar el búfer de forma más segura). El contenido de esta tabla  lo encontraras en los datos de entrada preparados, recuerda, es una lista de diccionarios donde cada diccionario es una fila. El nombre que debe tener el archivo debe ser "datos-efectividad-comercial-IA.xlsx".

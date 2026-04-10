@@ -155,6 +155,12 @@ def __clean_data(
         inplace=True,
     )
 
+    df_output["Notas de Cierre"] = (
+        df_output["Notas de Cierre"]
+        .astype(str)
+        .str.translate(str.maketrans("", "", "'\""))
+    )
+
     # 9. Creamos la tabla final
     logging(
         message=f"Creando archivo: {parameters.EFFICACY_ANALYSIS_FILE_PATH}",

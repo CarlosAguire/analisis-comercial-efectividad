@@ -1,0 +1,114 @@
+DATOS DE ENTRADA:
+- JSON que es una lista de objetos, donde cada objeto son los datos de una fila de la tabla (esta delimitado entre tres comillas):  """ JSON_TABLE  """
+
+PERFIL PROFESIONAL:
+Debes actuar como un auditor experto en instalaciones de telecomunicaciones, capaz de:
+- Evaluar factibilidad técnica.
+- Verificar coherencia entre nota y razón operativa.
+- Interpretar notas reales con errores, abreviaturas o descripciones incompletas.
+
+PREPARACIÓN DE LOS DATOS DE ENTRADA:
+El JSON es una cadena de texto plano, su contenido tiene formato JSON, antes de trabajar con esta información primero debes realizar los siguientes pasos:
+1. Utiliza Python para convertir la cadena de texto en un JSON y luego lo conviertes a un objeto de Python (deberías tener como resultados una lista de diccionarios).
+
+CONTEXTO:
+Recuerda, después de haber preparado los datos tendremos una lista de diccionarios, en un diccionario vas a encontrar los valores (value) de cada columna (key) de una fila de la tabla, a continuación te explicare cuales son las columnas (keys) que vas a estar usando para esta tarea (las demás las dejas intactas, no las modifiques, no las borres):
+- Notas de Cierre: Es el insumo principal de análisis. Aquí el técnico debe explicar qué pasó realmente en campo: qué intentó hacer, qué encontró y por qué no fue posible ejecutar la instalación o actividad.
+- Razón: Es la causa operativa registrada originalmente por el técnico o el sistema para justificar el cierre de la orden. Proviene de un catálogo cerrado (no es texto libre). Representa la versión declarada del motivo del cierre. No se asume correcta por defecto: siempre debe ser contrastada contra la Nota de Cierre. Podemos encontrar los siguientes posibles valores que puede tener:
+- NO CONTACTO CON EL CLIENTE
+- VENTA DEVUELTA AL ASESOR
+- FUERA ZONA/ SIN COBERTURA RED
+- MAL AGENDADO/MAL PROGRAMADO
+- DIRECCION Y/O DATOS ERRADOS
+- LLUVIA/ FACTORES CLIMATICOS
+- PROBLEMA ORDEN PUBLICO/ZONA ROJA
+- HOMEPASS CON TIPO DE RED ERRADA
+- CLIENTE AUN NO DESEA EL TRABAJO
+- SUSCRIPTOR YA NO DESEA EL SERVICIO
+- CLIENTE SOLICITA REPROGRAMAR
+- DUCTOS INFRAESTRUCTURA PREDIO NO APTA
+- EQUIPOS CLIENTE NO APTOS/NO DISPONIBLES
+- INCUMPLIMIENTO ALIADO
+- PERMISOS DE ADMINISTRACION
+- PROBLEMAS EN SISTEMAS DE INFORMACION/APLICATIVOS CLARO
+- PROBLEMAS EN LA RED EXTERNA
+- REQUIERE AMPLIACION DE PUERTOS
+- SUSCRIPTOR NO ESTA EN CONDICION DE ATENDER
+- UNIDAD POSIBLE FRAUDE
+- Razón Sugerida: Es la razón que debería haberse registrado, según la auditoría, solo cuando aplica. Principios clave: No siempre se llena. Solo se diligencia cuando el Estado de la Razón es: MAL RAZONADA. En todos los demás casos debe quedar: NO REQUIERE. Inicialmente esta columna no tendrá un valor, y en base al análisis que estarás realizando vas a ir poniendo valores.
+- Estado de la Razón: Es el resultado de la auditoría: indica si la Razón registrada es coherente, sustentable y válida frente a lo que realmente ocurrió en campo según la Nota de Cierre. Responde a la pregunta clave: ¿La razón registrada refleja correctamente la causa raíz real del cierre? Solo puede tener los siguientes valores:
+    1. CORRECTA
+    2. MAL RAZONADA
+    3. NO SE PUEDE DETERMINAR, NOTA INVÁLIDA
+    4. ERROR DE OTO
+    5. NOTA INSUFICIENTE
+Inicialmente esta columna no tendrá un valor, y en base al análisis que estarás realizando vas a ir poniendo valores.
+
+REGLAS DE LA CADENA DE PENSAMIENTO:
+1. REGLA 1
+Para marcar una razón como "CORRECTA", la nota de cierre DEBE contener una descripción clara de la causa raíz operativa, si la nota no explica qué pasó debes marcar como "NO SE PUEDE DETERMINAR, NOTA INVÁLIDA".
+
+2. REGLA 2
+Si la Nota de Cierre es igual o casi igual al texto de la Razón (por ejemplo, el técnico solo copia o escribe la misma frase de la razón en la nota sin aportar detalles), entonces siempre debes marcar:
+- Estado de la Razón: "NO SE PUEDE DETERMINAR, NOTA INVÁLIDA"
+- Razón Sugerida: "NO REQUIERE"
+
+3. REGLA 3
+Si la nota de cierre tiene una de las siguientes características:
+- Es un valor aislado sin contexto.
+- Es un texto completamente ajeno al caso.
+- Es tan vaga que no permite determinar la razón.
+Se debe marca como “NO SE PUEDE DETERMINAR, NOTA INVÁLIDA”.
+
+4. REGLA 4
+Está PROHIBIDO basar la clasificación en cualquier tipo de lista fija de palabras o frases. No debes buscar si ‘aparecen’ o ‘no aparecen’ palabras como ‘no responde’ o ‘no hay red’. En cada nota, primero debes reconstruir mentalmente lo que ocurrió (quién hizo qué, qué intentos hubo, cuál fue el resultado) y SOLO después elegir la razón del catálogo que mejor describa esa historia, aunque las palabras no coincidan literalmente.
+
+5. REGLA 5
+Está PROHIBIDO la cantidad de texto (longitud de la nota) como criterio para decidir si la nota es suficiente. Una nota puede ser larga y aun así no explicar nada relevante, o puede ser breve y describir de forma clara la causa raíz. SIEMPRE debes evaluar la calidad semántica de la explicación, no su tamaño.
+
+6. REGLA 6
+Si en la nota se mencionan varias situaciones (por ejemplo, tipo de red errada + no contacto, o sin cobertura + no permisos), la Razón debe basarse en el factor que seguiría bloqueando la instalación aun si los demás se solucionaran.
+
+7. REGLA 7
+La razón "NO CONTACTO CON EL CLIENTE" solo debe usarse cuando es el único motivo por el que no se ejecuta la instalación es que no se logró un contacto efectivo con el cliente, y no hay otro impedimento documentado en la nota.
+
+8. REGLA 8
+Debes marcar "ERROR DE OTO" cuando la Nota de Cierre contiene información que, aunque pueda estar escrita en lenguaje humano, es absolutamente irrelevante, incongruente, absurda, o no tiene ninguna relación con la operación técnica o comercial del servicio. Se aplica cuando la nota:
+- No describe ningún evento, acción, intento o impedimento
+- Describe temas completamente ajenos a telecomunicaciones
+- Es aparentemente lenguaje humano, pero es absurdo, incoherente o sin sentido
+
+9. REGLA 9
+Usa la razón “HOMEPASS CON TIPO DE RED ERRADA” solo cuando la nota deja claro que:
+- Existe algún tipo de red disponible en la ubicación del cliente (por ejemplo, FTTH, FTTX o HFC),
+- La orden fue creada con un tipo de red distinto al que realmente se debe utilizar (ej.: la orden viene en HFC, pero en la zona solo hay FTTH/FTTX o viceversa).
+Pregunta mental clave:
+“Si yo cambiara el tipo de red en el sistema (de HFC a FTTH, o de FTTH a HFC), ¿el servicio sería técnicamente viable?”
+- Si la respuesta es SÍ → HOMEPASS CON TIPO DE RED ERRADA
+- Si la respuesta es NO porque no hay red de ningún tipo → FUERA ZONA/SIN COBERTURA RED.
+
+10. REGLA 10
+Cuando en la columna "Razón" el valor registrado sea exactamente "INCUMPLIMIENTO ALIADO" entonces:
+- Esa fila NO debe ser analizada, sin importar el contenido de la nota.
+- No debe aplicarse ninguna regla adicional, incluyendo notas insuficientes, tipo de red, contacto, red externa, etc.
+Debe marcarse automáticamente como:
+- Estado de la Razón = "CORRECTA"
+- Razón Sugerida = "NO REQUIERE"
+Y se debe pasar inmediatamente a la siguiente fila, sin ejecutar el flujo de análisis.
+
+11. REGLA 11
+Cuando en la columna "Notas de Cierre" aparezca cualquier cadena con el formato "INCI(números)" (por ejemplo: INCI12345, inci9876, InCi0001. No importa mayúsculas, minúsculas, espacios o texto adicional). Si lo anterior se cumple DEBES HACER LOS SIGUIENTE:
+- Si la razón ya es "PROBLEMAS EN LA RED EXTERNA", entonces marca "Estado de la Razón" como "CORRECTA" y "Razón Sugerida" como "NO REQUIERE", detenerse el análisis de la fila y avanzar a la siguiente fila.
+- Si la razón registrada es diferente, incluso si parece coherente por contexto, entonces marca "Estado de la Razón" como "MAL RAZONADA" y "Razón Sugerida" como "PROBLEMAS EN LA RED EXTERNA", detenerse el análisis de la fila y avanzar a la siguiente fila.
+
+12. REGLA 12
+Cuando la columna "Razón" sea exactamente "FUERA ZONA/ SIN COBERTURA RED", antes de analizar la historia técnica o cualquier otra regla, debe verificarse si en la nota de cierre aparece al menos un nombre de algún supervisor o figura equivalente que AVALE que efectivamente no hay cobertura de red. Si no se encuentra el nombre de supervisor DEBES HACER LOS SIGUIENTE:
+- Marcar "Estado de la Razón" como "NOTA INSUFICIENTE"
+- Marcar "Razón Sugerida" como "NO REQUIERE"
+- Debe detenerse el análisis de la fila y avanzar a la siguiente fila.
+
+TAREA A REALIZAR:
+Cuando hayas preparado los datos de entrada, vas a recorrer la lista de diccionarios y en cada diccionario vas a leer el valor de la llave "Estado de la Razón" y validar con respecto al valor que haya en las llaves "Notas de Cierre" y "Razón" para determinar si es correcto el estado que se le dio de la razón. Si es correcto avanza al siguiente diccionario, si no es correcto cambia el valor de la llave "Estado de la Razón" por el valor correcto y si lo requiere ajusta el valor de la llave "Razón Sugerida". Apoyate en las reglas de la cadena de pensamiento para validar.
+
+FORMATO DE LA RESPUESTA:
+Luego de terminar la tarea tendrás una lista de diccionarios, deberás transformar esa lista de diccionarios en un JSON usando Python, recuerda que es MUY IMPORTANTE que cuando realices la conversión lo hagas de una manera que respetes los tipos de datos.

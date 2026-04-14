@@ -9,14 +9,26 @@ THIS_FILE = Path(__file__).resolve()
 PROJECT_ROOT = THIS_FILE.parent.parent.parent
 
 
-# Configuración de rutas para archivos de entrada y salida
-UTILS_FOLDER = PROJECT_ROOT / "databases" / "utils"
+# Configuración de rutas de carpetas
 DATABASES_FOLDER = PROJECT_ROOT / "databases"
-LOGS_FOLDER = PROJECT_ROOT / "logs"
-RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsx"
 FTTH_HFC_TREE_FOLDER = DATABASES_FOLDER / "FTTH y HFC"
-FO_TREE_FOLDER = DATABASES_FOLDER / "FO"
 BACKLOG_FOLDER = DATABASES_FOLDER / "Back Transversal"
+UTILS_FOLDER = PROJECT_ROOT / "databases" / "utils"
+COMERCIAL_UTILS_FOLDER = UTILS_FOLDER / "comercial"
+CONTACT_UTILS_FOLDER = UTILS_FOLDER / "contacto"
+BACKLOG_UTILS_FOLDER = UTILS_FOLDER / "backlog"
+PRODUCTIVITY_UTILS_FOLDER = UTILS_FOLDER / "productividad"
+MIGRATIONS_UTILS_FOLDER = UTILS_FOLDER / "migraciones"
+FO_TREE_FOLDER = DATABASES_FOLDER / "FO"
+LOGS_FOLDER = PROJECT_ROOT / "logs"
+
+
+# Configuración de rutas de archivos
+RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsx"
+GPON_BASES_PATH = DATABASES_FOLDER / "BASES CENTROS COMERCIALES GPON.xlsx"
+BROWNFIELD_BASES_PATH = DATABASES_FOLDER / "BASE BROWNFIELD 2025 Oriente.xlsb"
+PY_OUT_LOGS_PATH = LOGS_FOLDER / "py_out_logs.txt"
+LOGS_PATH = LOGS_FOLDER / "logs.txt"
 
 
 # Tipos de análisis
@@ -24,9 +36,10 @@ COMERCIAL_EFFICACY_ANALYSIS = "análisis de efectividad comercial"
 CONTACT_ANALYSIS = "análisis de contacto"
 BACKLOG_ANALYSIS = "análisis de backlog"
 PRODUCTIVITY_ANALYSIS = "análisis de productividad"
+MIGRATIONS_ANALYSIS = "análisis de migraciones"
 
 
-# Lista de columnas a CONSERVAR de cada tabla
+# Lista de columnas a conservar
 COLUMNS_TO_RESERVE = {
     COMERCIAL_EFFICACY_ANALYSIS: {
         "ofsc_dispatch": [
@@ -106,6 +119,30 @@ COLUMNS_TO_RESERVE = {
             "CANAL2",
         ],
     },
+    MIGRATIONS_ANALYSIS: {
+        "brownfield_bases": [
+            "ESTADO REGIONAL",
+            "DESMONTE DE NODOS 1",
+            "TIPIFICACION",
+            "CUENTA MATRIZ",
+            "CUENTA",
+            "TIPO DE RED",
+            "ALIADO",
+            "Mes",
+            "CIUDAD",
+        ],
+        "gpon_bases": [
+            "CODIGO",
+            "CUENTA",
+            "ESTADO GENERAL DE  LA MIGRACION",
+            "TIPIFICACION REGIONAL",
+            "CUENTA MATRIZ",
+            "Tipo Red (GPON-Unifilar)",
+            "ALIADO",
+            "MES",
+            "Ciudad",
+        ],
+    },
 }
 
 
@@ -161,7 +198,7 @@ FILTERS = {
 }
 
 
-# Diccionario para renombrar columnas en la tabla final
+# Diccionario para renombrar columnas
 FINAL_COLUMNS = {
     COMERCIAL_EFFICACY_ANALYSIS: {
         "Orden de trabajo": "Orden de Trabajo",
@@ -204,17 +241,21 @@ FINAL_COLUMNS = {
 
 
 # Archivo de salida
-EFFICACY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-efectividad-comercial.xlsx"
+EFFICACY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-efectividad-comercial.xlsx"
+PRODUCTIVITY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-productividad.xlsx"
+MIGRATIONS_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-migraciones.xlsx"
 CONTACT_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-contacto.xlsx"
-BACKLOG_ANALYSIS_FILE_PATH = PROJECT_ROOT / "backlog.xlsx"
-PRODUCTIVITY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "AVANCE DIARIO.xlsx"
+BACKLOG_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-backlog.xlsx"
 
 
 # Salidas individuales de archivos de apoyo
-UTILS_FOLDER.mkdir(parents=True, exist_ok=True)
-CLEAN_OFSC_PATH = UTILS_FOLDER / "limpio_ofsc.xlsx"
-CLEAN_OFSC_CAPACITY_PATH = UTILS_FOLDER / "limpio_ofsc_capacity.xlsx"
-CLEAN_OFSC_DISPATCH_PATH = UTILS_FOLDER / "limpio_ofsc_dispatch.xlsx"
-CLEAN_RESIDENTIAL_PLANT_PATH = UTILS_FOLDER / "limpio_planta_residencial.xlsx"
-LOGS_PATH = LOGS_FOLDER / "logs.txt"
-PY_OUT_LOGS_PATH = LOGS_FOLDER / "py_out_logs.txt"
+COMERCIAL_OFSC_PATH = COMERCIAL_UTILS_FOLDER / "ofsc_capacity_dispatch.xlsx"
+COMERCIAL_OFSC_CAPACITY_PATH = COMERCIAL_UTILS_FOLDER / "ofsc_capacity.xlsx"
+COMERCIAL_OFSC_DISPATCH_PATH = COMERCIAL_UTILS_FOLDER / "ofsc_dispatch.xlsx"
+COMERCIAL_RESIDENTIAL_PLANT_PATH = COMERCIAL_UTILS_FOLDER / "planta_residencial.xlsx"
+CONTACT_RESIDENTIAL_PLANT_PATH = CONTACT_UTILS_FOLDER / "planta_residencial.xlsx"
+CONTACT_OFSC_CAPACITY_PATH = CONTACT_UTILS_FOLDER / "ofsc_capacity.xlsx"
+PRODUCTIVITY_OFSC_FTTH_HFC_PATH = PRODUCTIVITY_UTILS_FOLDER / "ofsc_ftth_hfc.xlsx"
+PRODUCTIVITY_OFSC_FO_PATH = PRODUCTIVITY_UTILS_FOLDER / "ofsc_fo.xlsx"
+BACKLOG_OFSC_FO_PATH = BACKLOG_UTILS_FOLDER / "backlog.xlsx"
+BACKLOG_RESIDENTIAL_PLANT = BACKLOG_UTILS_FOLDER / "planta_residencial.xlsx"

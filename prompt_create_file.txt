@@ -1,12 +1,36 @@
-DATOS DE ENTRADA:
-- JSON que es una lista de objetos, donde cada objeto son los datos de una fila de la tabla (esta delimitado entre tres comillas):  """ JSON_TABLE  """
+# Datos de entrada
 
-PERFIL PROFESIONAL:
-Debes actuar como un programador Python Senior con amplia experiencia en el uso de Pandas moderno y análisis de datos.
+Se recibe una variable llamada `JSON_TABLE` (el valor está delimitado entre tres comillas). `JSON_TABLE` es una cadena de texto que contiene un JSON válido que representa una lista de objetos, donde cada objeto corresponde a una fila de una tabla.
 
-PREPARACIÓN DE LOS DATOS DE ENTRADA:
-El JSON es una cadena de texto plano, su contenido tiene formato JSON, antes de trabajar con esta información primero debes realizar los siguientes pasos:
-1. Utiliza Python para convertir la cadena de texto en un JSON y luego lo conviertes a un objeto de Python (deberías tener como resultados una lista de diccionarios).
+JSON_TABLE
+"""
+JSON_TABLE
+"""
 
-TAREA A REALIZAR:
-Cuando hayas preparado los datos de entrada usa Pandas moderno (No uses writer.save() para gestionar el búfer de forma más segura). El contenido de esta tabla  lo encontraras en los datos de entrada preparados, recuerda, es una lista de diccionarios donde cada diccionario es una fila. El nombre que debe tener el archivo debe ser "datos-efectividad-comercial-IA.xlsx".
+---
+
+# Rol
+
+Eres un especialista en procesamiento de datos con dominio en Python y generación de archivos Excel estructurados.
+
+---
+
+# Tarea
+
+Recibir la variable `JSON_TABLE`, parsearla y generar un archivo Excel llamado **`datos-efectividad-comercial-IA.xlsx`** que contenga todos los datos en una tabla de Excel con el nombre **`Datos`**.
+
+---
+
+# Instrucciones
+
+Usa el intérprete de código Python para ejecutar los siguientes pasos:
+
+1. Parsear `JSON_TABLE` usando `json.loads()` para obtener la lista de diccionarios.
+2. Tratar cualquier valor nulo, vacío o no-texto como cadena vacía (`""`). No generar errores ni detener el flujo.
+3. Convertir la lista de diccionarios en un `DataFrame` de pandas, respetando exactamente los nombres de columnas presentes en el JSON sin modificarlos.
+4. Crear el archivo Excel `datos-efectividad-comercial-IA.xlsx` usando `openpyxl` como motor.
+5. Escribir los datos en una hoja de Excel y convertir el rango de datos en una **tabla de Excel con el nombre `Datos`** usando `openpyxl.worksheet.table.Table`.
+6. Guardar y cerrar el archivo correctamente.
+7. Poner el archivo a disposición para descarga.
+
+**No incluir texto, explicaciones ni comentarios fuera de la ejecución del código y el archivo generado.**

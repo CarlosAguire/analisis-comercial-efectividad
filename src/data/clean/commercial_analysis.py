@@ -17,7 +17,7 @@ def clean_df_ofsc_dispatch(df: pd.DataFrame) -> pd.DataFrame:
 
     # Filtramos para eliminar filas que no necesitamos
     df_ofsc_dispatch = CleanDataFrame.filter(
-        filters=FILTERS["ofsc_dispatch"],
+        include=FILTERS["ofsc_dispatch"]["include"],
         df=df_ofsc_dispatch,
     )
 
@@ -33,7 +33,7 @@ def clean_df_ofsc_dispatch(df: pd.DataFrame) -> pd.DataFrame:
 def clean_df_ofsc_capacity(df: pd.DataFrame) -> pd.DataFrame:
     # Filtramos para eliminar filas que no necesitamos
     df_ofsc_capacity = CleanDataFrame.filter(
-        filters=FILTERS["ofsc_capacity"],
+        include=FILTERS["ofsc_capacity"]["include"],
         df=df,
     )
 
@@ -53,9 +53,7 @@ def clean_df_residential_plant(
 
     # Filtramos para eliminar filas que no necesitamos
     df_residential_plant = CleanDataFrame.filter(
-        filters={
-            "include": {"NOMBRE": df_ofsc_capacity["Asesor comercial"].tolist()},
-        },
+        include={"NOMBRE": df_ofsc_capacity["Asesor comercial"].tolist()},
         df=df,
     )
 

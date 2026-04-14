@@ -72,40 +72,45 @@ class CleanDataFrame:
 
     @staticmethod
     def filter(
-        df: pd.DataFrame, filters: dict[str, dict[str, str | list[str]]]
+        df: pd.DataFrame,
+        include: dict[str, None | str | list[str]] | None = None,
+        exclude: dict[str, None | str | list[str]] | None = None,
     ) -> pd.DataFrame:
         """
-        Filtra un DataFrame usando filtros dinámicos de inclusión y exclusión.
-
-        filters = {
-            "include": {col: value | [values]},
-            "exclude": {col: value | [values]}
-        }
+        Motor de filtrado avanzado que soporta tanto inclusión como exclusión dinámica.
         """
 
-        if not filters:
+        # Inicializamos diccionarios vacíos si no se envían
+        inclusion_filters = include or {}
+        exclusion_filters = exclude or {}
+
+        conditions = []
+
+        # 1. Procesar Inclusiones (Lo que queremos ver)
+        for column, value in inclusion_filters.items():
+            if value is not None and column in df.columns:
+                if isinstance(value, list):
+                    conditions.append(f"`{column}` in @inclusion_filters['{column}']")
+                else:
+                    conditions.append(f"`{column}` == @inclusion_filters['{column}']")
+
+        # 2. Procesar Exclusiones (Lo que queremos ocultar)
+        for column, value in exclusion_filters.items():
+            if value is not None and column in df.columns:
+                if isinstance(value, list):
+                    # La magia aquí es el 'not in'
+                    conditions.append(
+                        f"`{column}` not in @exclusion_filters['{column}']"
+                    )
+                else:
+                    # Y aquí el '!='
+                    conditions.append(f"`{column}` != @exclusion_filters['{column}']")
+
+        # 3. Si no hubo condiciones válidas, retornamos el DF original
+        if not conditions:
             return df
 
-        mask = pd.Series(True, index=df.index)
+        # 4. Ensamblaje y ejecución
+        query = " and ".join(conditions)
 
-        # Filtros de inclusión
-        for field, value in filters.get("include", {}).items():
-            if field not in df.columns:
-                continue
-
-            if isinstance(value, (list, set, tuple)):
-                mask &= df[field].isin(value)
-            else:
-                mask &= df[field] == value
-
-        # Filtros de exclusión
-        for field, value in filters.get("exclude", {}).items():
-            if field not in df.columns:
-                continue
-
-            if isinstance(value, (list, set, tuple)):
-                mask &= ~df[field].isin(value)
-            else:
-                mask &= df[field] != value
-
-        return df[mask]
+        return df.query(expr=query)

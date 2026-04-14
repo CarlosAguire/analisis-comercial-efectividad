@@ -106,7 +106,20 @@ def __clean_phone(value: str) -> str:
 
 
 def __data_transformation(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.assign(
+        **{
+            "Teléfono 3": df["Teléfono 3"].astype(dtype="string[pyarrow]"),
+            "Telefono dos del cliente": df["Telefono dos del cliente"].astype(
+                dtype="string[pyarrow]"
+            ),
+            "Celuar del contacto": df["Celuar del contacto"].astype(
+                dtype="string[pyarrow]"
+            ),
+        },
+    )
+
     def compute_phone_metrics(row: pd.Series) -> pd.Series:
+
         columns = [
             "Telefono dos del cliente",
             "Teléfono 3",
@@ -137,6 +150,9 @@ def __data_transformation(df: pd.DataFrame) -> pd.DataFrame:
     df["Cantidad de Números Únicos"] = "0"
     df["Cantidad de Números Faltantes"] = "0"
     df["Cantida de Números Repetidos"] = "0"
+    print(type(df["Telefono dos del cliente"].values[0]))
+    print(type(df["Teléfono 3"].values[0]))
+    print(type(df["Celuar del contacto"].values[0]))
 
     df = df.apply(compute_phone_metrics, axis=1)  # type: ignore
 

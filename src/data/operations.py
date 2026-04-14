@@ -2,6 +2,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import pandas as pd
+from python_calamine import CalamineError
 
 
 def read_xlsx_file(path: Path, sheet: int | str) -> pd.DataFrame:
@@ -12,7 +13,37 @@ def read_xlsx_file(path: Path, sheet: int | str) -> pd.DataFrame:
     - No se normalizan caracteres.
     """
 
-    return pd.read_excel(path, sheet_name=sheet, engine="openpyxl")
+    try:
+        return pd.read_excel(
+            io=path,
+            sheet_name=sheet,
+            engine="calamine",
+            dtype_backend="pyarrow",
+        )
+    except CalamineError:
+        return pd.read_excel(
+            io=path,
+            sheet_name=sheet,
+            engine="openpyxl",
+            dtype_backend="pyarrow",
+        )
+
+
+def read_xlsb_file(path: Path, sheet: int | str) -> pd.DataFrame:
+    """
+    Lee una hoja de Excel.
+    - No se recortan espacios.
+    - No se cambian mayúsculas/minúsculas.
+    - No se normalizan caracteres.
+    """
+
+    # Aquí puedes iniciar tu Method Chaining
+    return pd.read_excel(
+        io=path,
+        sheet_name=sheet,
+        engine="pyxlsb",
+        dtype_backend="pyarrow",
+    )
 
 
 def read_csv_file(path: Path) -> pd.DataFrame:
@@ -23,7 +54,12 @@ def read_csv_file(path: Path) -> pd.DataFrame:
     - No se normalizan caracteres.
     """
 
-    return pd.read_csv(path, encoding="latin1", low_memory=False)
+    return pd.read_csv(
+        filepath_or_buffer=path,
+        engine="pyarrow",
+        dtype_backend="pyarrow",
+        encoding="latin1",
+    )
 
 
 def join(
@@ -297,25 +333,38 @@ def join(
 
 
 def create_file(df: pd.DataFrame, path: Path) -> None:
-    with pd.ExcelWriter(path=path, engine="xlsxwriter", mode="w") as w:
+    # 1. Dimensiones del DataFrame
+    num_rows, num_columns = df.shape
+
+    # Lista de nombres de columnas para los encabezados de la tabla
+    columns = [{"header": col} for col in df.columns]
+
+    with pd.ExcelWriter(path=path, engine="xlsxwriter") as writer:
         sheet_name = "DATOS"
-        df.to_excel(excel_writer=w, index=False, sheet_name=sheet_name)
 
-        worksheet = w.sheets[sheet_name]
+        # 2. Volcamos los datos empezando en la fila 1 (dejamos la 0 para el encabezado)
+        df.to_excel(
+            excel_writer=writer,
+            sheet_name=sheet_name,
+            index=False,
+            header=False,
+            startrow=1,
+        )
 
-        # Dimensiones del rango
-        (n_rows, n_columns) = df.shape
+        # 3. Accedemos a los objetos internos de XlsxWriter
+        worksheet = writer.sheets[sheet_name]
 
-        # Encabezados para la tabla
-        columns = [{"header": col} for col in df.columns]
-
-        # La creamos como tabla de Excel
+        # 4. Creamos la tabla sobre el rango de datos
         worksheet.add_table(
             0,
             0,
-            n_rows,
-            n_columns - 1,
-            {"name": "TablaDatos", "columns": columns, "style": None},
+            num_rows,
+            num_columns - 1,
+            {
+                "name": "Datos",
+                "columns": columns,
+                "style": None,
+            },
         )
 
 

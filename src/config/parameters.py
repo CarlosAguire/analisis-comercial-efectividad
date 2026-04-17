@@ -25,6 +25,7 @@ LOGS_FOLDER = PROJECT_ROOT / "logs"
 
 # Configuración de rutas de archivos
 RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsx"
+BACKLOG_PATH = DATABASES_FOLDER / "Backlog_Nacional_Por_Produccion.csv"
 GPON_BASES_PATH = DATABASES_FOLDER / "BASES CENTROS COMERCIALES GPON.xlsx"
 BROWNFIELD_BASES_PATH = DATABASES_FOLDER / "BASE BROWNFIELD 2025 Oriente.xlsb"
 PY_OUT_LOGS_PATH = LOGS_FOLDER / "py_out_logs.txt"
@@ -126,21 +127,19 @@ COLUMNS_TO_RESERVE = {
             "TIPIFICACION",
             "CUENTA MATRIZ",
             "CUENTA",
-            "TIPO DE RED",
             "ALIADO",
-            "Mes",
             "CIUDAD",
+            "FECHA AGENDA",
+            "NOTA",
         ],
         "gpon_bases": [
             "CODIGO",
             "CUENTA",
-            "ESTADO GENERAL DE  LA MIGRACION",
             "TIPIFICACION REGIONAL",
             "CUENTA MATRIZ",
-            "Tipo Red (GPON-Unifilar)",
             "ALIADO",
-            "MES",
             "Ciudad",
+            "FECHA DE MIGRACION",
         ],
     },
 }
@@ -198,11 +197,13 @@ FILTERS = {
 }
 
 
-# Diccionario para renombrar columnas
+# Nombre de columnas finales para cada análisis
 FINAL_COLUMNS = {
     COMERCIAL_EFFICACY_ANALYSIS: {
         "Orden de trabajo": "Orden de Trabajo",
+        "Notas de Cierre": "Nota de Cierre",
         "Compañia": "Aliado",
+        "Inicio": "Hora",
         "Asesor comercial": "Asesor Comercial",
         "Código Asesor comercial": "Código del Asesor Comercial",
         "GV-Especialista": "Especialista",
@@ -237,15 +238,75 @@ FINAL_COLUMNS = {
         "CANAL2": "Canal",
         "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
     },
+    MIGRATIONS_ANALYSIS: {
+        "brownfield_bases": {
+            "ESTADO REGIONAL": "Estado",
+            "CUENTA MATRIZ": "Cuenta Matriz",
+            "CUENTA": "Cuenta",
+            "ALIADO": "Aliado",
+            "CIUDAD": "Ciudad",
+            "FECHA AGENDA": "Fecha",
+            "TIPIFICACION": "Tipificación",
+            "DESMONTE DE NODOS 1": "Desmonte de Nodos",
+            "NOTA": "Nota",
+        },
+        "gpon_bases": {
+            "TIPIFICACION REGIONAL": "Estado",
+            "CUENTA MATRIZ": "Cuenta Matriz",
+            "CUENTA": "Cuenta",
+            "ALIADO": "Aliado",
+            "Ciudad": "Ciudad",
+            "FECHA DE MIGRACION": "Fecha",
+            "CODIGO": "Código",
+        },
+    },
+}
+
+
+# Orden de columnas para el archivo final de cada análisis
+COLUMN_ORDER = {
+    COMERCIAL_EFFICACY_ANALYSIS: [
+        "Orden de Trabajo",
+        "Tipo de Actividad",
+        "Estado",
+        "Razón",
+        "Nota de Cierre",
+        "Tipo de Red",
+        "Aliado",
+        "Ciudad",
+        "Código del Asesor Comercial",
+        "Asesor Comercial",
+        "Especialista",
+        "Proveedor",
+        "Canal",
+        "Jefe de Canal",
+        "Razón Sugerida",
+        "Estado de la Razón",
+        "Fecha",
+        "Hora",
+    ],
+    MIGRATIONS_ANALYSIS: [
+        "Estado",
+        "Cuenta Matriz",
+        "Tipo de Red",
+        "Cuenta",
+        "Aliado",
+        "Ciudad",
+        "Tipificación",
+        "Desmonte de Nodos",
+        "Nota",
+        "Código",
+        "Fecha",
+    ],
 }
 
 
 # Archivo de salida
-EFFICACY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-efectividad-comercial.xlsx"
-PRODUCTIVITY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-productividad.xlsx"
-MIGRATIONS_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-migraciones.xlsx"
-CONTACT_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-contacto.xlsx"
-BACKLOG_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-analisis-backlog.xlsx"
+EFFICACY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-efectividad-comercial.xlsx"
+PRODUCTIVITY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-productividad.xlsx"
+MIGRATIONS_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-migraciones.xlsx"
+CONTACT_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-contacto.xlsx"
+BACKLOG_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-backlog.xlsx"
 
 
 # Salidas individuales de archivos de apoyo

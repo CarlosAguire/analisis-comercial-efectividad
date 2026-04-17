@@ -2,10 +2,14 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import pandas as pd
+from pyarrow.lib import ArrowInvalid
 from python_calamine import CalamineError
 
 
-def read_xlsx_file(path: Path, sheet: int | str) -> pd.DataFrame:
+def read_xlsx_file(
+    path: Path,
+    sheet: int | str,
+) -> pd.DataFrame:
     """
     Lee una hoja de Excel.
     - No se recortan espacios.
@@ -27,6 +31,12 @@ def read_xlsx_file(path: Path, sheet: int | str) -> pd.DataFrame:
             engine="openpyxl",
             dtype_backend="pyarrow",
         )
+    except ArrowInvalid:
+        return pd.read_excel(
+            io=path,
+            sheet_name=sheet,
+            engine="openpyxl",
+        )
 
 
 def read_xlsb_file(path: Path, sheet: int | str) -> pd.DataFrame:
@@ -37,13 +47,19 @@ def read_xlsb_file(path: Path, sheet: int | str) -> pd.DataFrame:
     - No se normalizan caracteres.
     """
 
-    # Aquí puedes iniciar tu Method Chaining
-    return pd.read_excel(
-        io=path,
-        sheet_name=sheet,
-        engine="pyxlsb",
-        dtype_backend="pyarrow",
-    )
+    try:
+        return pd.read_excel(
+            io=path,
+            sheet_name=sheet,
+            engine="pyxlsb",
+            dtype_backend="pyarrow",
+        )
+    except ArrowInvalid:
+        return pd.read_excel(
+            io=path,
+            sheet_name=sheet,
+            engine="pyxlsb",
+        )
 
 
 def read_csv_file(path: Path) -> pd.DataFrame:
@@ -59,6 +75,28 @@ def read_csv_file(path: Path) -> pd.DataFrame:
         engine="pyarrow",
         dtype_backend="pyarrow",
         encoding="latin1",
+    )
+
+
+def reorder_columns(df: pd.DataFrame, order: list[str]) -> pd.DataFrame:
+
+    return df.loc[:, order]
+
+
+def correct_dates(df: pd.DataFrame, column: str) -> pd.DataFrame:
+    """
+    Convierte números de serie de Excel a datetime, gestionando
+    correctamente celdas vacías y errores de formato.
+    """
+
+    return df.assign(
+        **{
+            column: pd.to_datetime(
+                pd.to_numeric(df[column], errors="coerce"),
+                unit="D",
+                origin="1899-12-30",
+            ).astype("timestamp[ns][pyarrow]")
+        }
     )
 
 
@@ -332,14 +370,22 @@ def join(
     return df[cols]
 
 
-def create_file(df: pd.DataFrame, path: Path) -> None:
+def create_file(
+    df: pd.DataFrame,
+    path: Path,
+    datetime_format: str | None = None,
+) -> None:
     # 1. Dimensiones del DataFrame
     num_rows, num_columns = df.shape
 
     # Lista de nombres de columnas para los encabezados de la tabla
     columns = [{"header": col} for col in df.columns]
 
-    with pd.ExcelWriter(path=path, engine="xlsxwriter") as writer:
+    with pd.ExcelWriter(
+        path=path,
+        engine="xlsxwriter",
+        datetime_format=datetime_format,
+    ) as writer:
         sheet_name = "DATOS"
 
         # 2. Volcamos los datos empezando en la fila 1 (dejamos la 0 para el encabezado)

@@ -91,7 +91,7 @@ def __clean_data(df_gpon: pd.DataFrame, df_brownfield: pd.DataFrame) -> pd.DataF
 
 def run(df_gpon: pd.DataFrame, df_brownfield: pd.DataFrame) -> None:
     # Iniciamos proceso de limpieza
-    message = f"Iniciando limpieza de los datos para el {MIGRATIONS_ANALYSIS}"
+    message = f"Preparando limpieza de los datos para el {MIGRATIONS_ANALYSIS}"
     logging(message=message, level="INFO")
 
     df_output = __clean_data(df_gpon=df_gpon, df_brownfield=df_brownfield)

@@ -12,7 +12,7 @@ def clean_df_ofsc_capacity(df: pd.DataFrame) -> pd.DataFrame:
 
     # Filtramos para eliminar filas que no necesitamos
     df_ofsc_dispatch = CleanDataFrame.filter(
-        include=FILTERS["ofsc_capacity"]["include"],
+        filters=FILTERS["ofsc_capacity"],
         df=df,
     )
 
@@ -32,7 +32,7 @@ def clean_df_residential_plant(
 
     # Filtramos para eliminar filas que no necesitamos
     df_residential_plant = CleanDataFrame.filter(
-        include={"NOMBRE": df_ofsc_capacity["Asesor comercial"].tolist()},
+        filters={"include": {"NOMBRE": df_ofsc_capacity["Asesor comercial"].tolist()}},
         df=df,
     )
 

@@ -1,15 +1,11 @@
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
-from pyarrow.lib import ArrowInvalid
-from python_calamine import CalamineError
 
 
-def read_xlsx_file(
-    path: Path,
-    sheet: int | str,
-) -> pd.DataFrame:
+def read_xlsx_file(path: Path, sheet: int | str) -> pd.DataFrame:
     """
     Lee una hoja de Excel.
     - No se recortan espacios.
@@ -17,26 +13,11 @@ def read_xlsx_file(
     - No se normalizan caracteres.
     """
 
-    try:
-        return pd.read_excel(
-            io=path,
-            sheet_name=sheet,
-            engine="calamine",
-            dtype_backend="pyarrow",
-        )
-    except CalamineError:
-        return pd.read_excel(
-            io=path,
-            sheet_name=sheet,
-            engine="openpyxl",
-            dtype_backend="pyarrow",
-        )
-    except ArrowInvalid:
-        return pd.read_excel(
-            io=path,
-            sheet_name=sheet,
-            engine="openpyxl",
-        )
+    return pd.read_excel(
+        io=path,
+        sheet_name=sheet,
+        engine="openpyxl",
+    )
 
 
 def read_xlsb_file(path: Path, sheet: int | str) -> pd.DataFrame:
@@ -47,19 +28,11 @@ def read_xlsb_file(path: Path, sheet: int | str) -> pd.DataFrame:
     - No se normalizan caracteres.
     """
 
-    try:
-        return pd.read_excel(
-            io=path,
-            sheet_name=sheet,
-            engine="pyxlsb",
-            dtype_backend="pyarrow",
-        )
-    except ArrowInvalid:
-        return pd.read_excel(
-            io=path,
-            sheet_name=sheet,
-            engine="pyxlsb",
-        )
+    return pd.read_excel(
+        io=path,
+        sheet_name=sheet,
+        engine="pyxlsb",
+    )
 
 
 def read_csv_file(path: Path) -> pd.DataFrame:
@@ -72,9 +45,8 @@ def read_csv_file(path: Path) -> pd.DataFrame:
 
     return pd.read_csv(
         filepath_or_buffer=path,
-        engine="pyarrow",
-        dtype_backend="pyarrow",
         encoding="latin1",
+        low_memory=False,
     )
 
 
@@ -414,52 +386,73 @@ def create_file(
         )
 
 
-def join_by_sales_advisor(
+def complete_data(
     df: pd.DataFrame,
     df_dictionary: pd.DataFrame,
-    *,
-    sufijo_conflicto: str = "_dicc",
+    column: str,
+    key_match: Literal["exact", "contains"] = "exact",
 ) -> pd.DataFrame:
     """
-    Completa la información de `df_destino` tomando datos desde `df_diccionario`
-    usando una columna en común (nombre).
+    Completa valores nulos del DataFrame original usando un DataFrame diccionario.
 
-    Parámetros
-    ----------
-    df_destino : DataFrame
-        DataFrame que contiene la columna de nombres y necesita ser enriquecido.
-    df_diccionario : DataFrame
-        DataFrame maestro que contiene la información completa por persona.
-        Se garantiza que `col_nombre` no tiene duplicados.
-    col_nombre : str
-        Nombre de la columna utilizada para emparejar en ambos DataFrames.
-    columnas_a_traer : Iterable[str] | None
-        Columnas que se traerán desde el diccionario (excepto la columna clave).
-        Si None, se traen todas las columnas excepto la clave.
-    sufijo_conflicto : str
-        Sufijo que se agregará si existen nombres de columnas en conflicto.
-
-    Retorna
-    -------
-    DataFrame enriquecido con las columnas traídas desde el diccionario.
+    Parámetros:
+    - column: columna llave
+    - key_match:
+        * "exact"    → coincidencia exacta (merge)
+        * "contains" → la llave del diccionario debe estar contenida en la del DF base
     """
 
-    # Copias para no alterar los originales
     df_copy = df.copy()
     df_dictionary_copy = df_dictionary.copy()
 
-    # Determinar columnas a traer
-    columns = [c for c in df_dictionary_copy.columns if c != "Asesor comercial"]
+    columns_to_complete = [
+        c for c in df_dictionary_copy.columns if c != column and c in df_copy.columns
+    ]
 
-    # Generar DF reducido del diccionario
-    df_dictionary_copy = df_dictionary_copy[["Asesor comercial"] + columns]
+    if not columns_to_complete:
+        return df_copy
 
-    return df_copy.merge(
-        df_dictionary_copy,
-        on="Asesor comercial",
-        how="left",
-        suffixes=("", sufijo_conflicto),
-    )
+    # -----------------------------
+    # CASO 1: MATCH EXACTO (merge)
+    # -----------------------------
+    if key_match == "exact":
+        merged = df_copy.merge(
+            df_dictionary_copy[[column] + columns_to_complete],
+            on=column,
+            how="left",
+            suffixes=("", "_dicc"),
+        )
+
+        for col in columns_to_complete:
+            merged[col] = merged[col].fillna(merged[f"{col}_dicc"])
+
+        return merged.drop(
+            columns=[f"{c}_dicc" for c in columns_to_complete],
+            errors="ignore",
+        )
+
+    # --------------------------------
+    # CASO 2: MATCH POR CONTAINS
+    # --------------------------------
+    df_copy[column] = df_copy[column].astype("string")
+    df_dictionary_copy[column] = df_dictionary_copy[column].astype("string")
+
+    for _, dicc_row in df_dictionary_copy.iterrows():
+        key_value = dicc_row[column]
+
+        if pd.isna(key_value):
+            continue
+
+        mask = df_copy[column].str.contains(
+            key_value,
+            regex=False,
+            na=False,
+        )
+
+        for col in columns_to_complete:
+            df_copy.loc[mask & df_copy[col].isna(), col] = dicc_row[col]
+
+    return df_copy
 
 
 def normalize_date(df: pd.DataFrame, column: str, input_format: str) -> pd.DataFrame:

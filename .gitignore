@@ -217,4 +217,7 @@ __marimo__/
 
 databases/
 reportes/
+debugging/
 *.xlsx
+*.csv
+*.xlsb

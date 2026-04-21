@@ -13,18 +13,18 @@ PROJECT_ROOT = THIS_FILE.parent.parent.parent
 DATABASES_FOLDER = PROJECT_ROOT / "databases"
 FTTH_HFC_TREE_FOLDER = DATABASES_FOLDER / "FTTH y HFC"
 BACKLOG_FOLDER = DATABASES_FOLDER / "Back Transversal"
-UTILS_FOLDER = PROJECT_ROOT / "databases" / "utils"
-COMERCIAL_UTILS_FOLDER = UTILS_FOLDER / "comercial"
-CONTACT_UTILS_FOLDER = UTILS_FOLDER / "contacto"
-BACKLOG_UTILS_FOLDER = UTILS_FOLDER / "backlog"
-PRODUCTIVITY_UTILS_FOLDER = UTILS_FOLDER / "productividad"
-MIGRATIONS_UTILS_FOLDER = UTILS_FOLDER / "migraciones"
+DEBUGGING_FOLDER = PROJECT_ROOT / "debugging"
+COMERCIAL_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "comercial"
+CONTACT_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "contacto"
+BACKLOG_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "backlog"
+PRODUCTIVITY_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "productividad"
+MIGRATIONS_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "migraciones"
 FO_TREE_FOLDER = DATABASES_FOLDER / "FO"
 LOGS_FOLDER = PROJECT_ROOT / "logs"
 
 
 # Configuración de rutas de archivos
-RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsx"
+RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsb"
 BACKLOG_PATH = DATABASES_FOLDER / "Backlog_Nacional_Por_Produccion.csv"
 GPON_BASES_PATH = DATABASES_FOLDER / "BASES CENTROS COMERCIALES GPON.xlsx"
 BROWNFIELD_BASES_PATH = DATABASES_FOLDER / "BASE BROWNFIELD 2025 Oriente.xlsb"
@@ -99,21 +99,27 @@ COLUMNS_TO_RESERVE = {
             "CUENTA",
             "OT/LL",
             "FECHA_CREADO",
+            "Region",
             "CONVENIENCIA",
             "Comunidad",
             "Opera",
+            "Red",
             "FECHA_AGENDA_FUTURO",
+            "ESTADO_ORDEN",
             "ESTADO_VISITA",
             "ANTIGUEDAD_ULTIMA_VISITA",
             "CUENTA_MATRIZ",
-            "NOMBRE",
-            "GV-Especialista",
-            "GV-Descripcion",
-            "CANAL2",
-            "Alerta",
+            "CEDULA_VENDEDOR",
+            "ANTIGUEDAD_DIGITACION",
+            "HORA_CREADO",
+            "HORA_CREADO",
+            "CLASE",
+            "SEGMENTO",
+            "Aliado Zonificado",
         ],
         "residential_plant": [
-            "NOMBRE",
+            "TCARGU",
+            "CC_COMPLETA",
             "GV-Especialista",
             "GV-Descripcion",
             "JEFE 1 CANAL REGIONAL",
@@ -310,13 +316,15 @@ BACKLOG_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-backlog.xlsx"
 
 
 # Salidas individuales de archivos de apoyo
-COMERCIAL_OFSC_PATH = COMERCIAL_UTILS_FOLDER / "ofsc_capacity_dispatch.xlsx"
-COMERCIAL_OFSC_CAPACITY_PATH = COMERCIAL_UTILS_FOLDER / "ofsc_capacity.xlsx"
-COMERCIAL_OFSC_DISPATCH_PATH = COMERCIAL_UTILS_FOLDER / "ofsc_dispatch.xlsx"
-COMERCIAL_RESIDENTIAL_PLANT_PATH = COMERCIAL_UTILS_FOLDER / "planta_residencial.xlsx"
-CONTACT_RESIDENTIAL_PLANT_PATH = CONTACT_UTILS_FOLDER / "planta_residencial.xlsx"
-CONTACT_OFSC_CAPACITY_PATH = CONTACT_UTILS_FOLDER / "ofsc_capacity.xlsx"
-PRODUCTIVITY_OFSC_FTTH_HFC_PATH = PRODUCTIVITY_UTILS_FOLDER / "ofsc_ftth_hfc.xlsx"
-PRODUCTIVITY_OFSC_FO_PATH = PRODUCTIVITY_UTILS_FOLDER / "ofsc_fo.xlsx"
-BACKLOG_OFSC_FO_PATH = BACKLOG_UTILS_FOLDER / "backlog.xlsx"
-BACKLOG_RESIDENTIAL_PLANT = BACKLOG_UTILS_FOLDER / "planta_residencial.xlsx"
+COMERCIAL_OFSC_PATH = COMERCIAL_DEBUGGING_FOLDER / "ofsc_capacity_dispatch.xlsx"
+COMERCIAL_OFSC_CAPACITY_PATH = COMERCIAL_DEBUGGING_FOLDER / "ofsc_capacity.xlsx"
+COMERCIAL_OFSC_DISPATCH_PATH = COMERCIAL_DEBUGGING_FOLDER / "ofsc_dispatch.xlsx"
+CONTACT_RESIDENTIAL_PLANT_PATH = CONTACT_DEBUGGING_FOLDER / "planta_residencial.xlsx"
+CONTACT_OFSC_CAPACITY_PATH = CONTACT_DEBUGGING_FOLDER / "ofsc_capacity.xlsx"
+PRODUCTIVITY_OFSC_FTTH_HFC_PATH = PRODUCTIVITY_DEBUGGING_FOLDER / "ofsc_ftth_hfc.xlsx"
+PRODUCTIVITY_OFSC_FO_PATH = PRODUCTIVITY_DEBUGGING_FOLDER / "ofsc_fo.xlsx"
+BACKLOG_OFSC_FO_PATH = BACKLOG_DEBUGGING_FOLDER / "backlog.xlsx"
+BACKLOG_RESIDENTIAL_PLANT = BACKLOG_DEBUGGING_FOLDER / "planta_residencial.xlsx"
+COMERCIAL_RESIDENTIAL_PLANT_PATH = (
+    COMERCIAL_DEBUGGING_FOLDER / "planta_residencial.xlsx"
+)

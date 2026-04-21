@@ -1,4 +1,6 @@
 import re
+from collections.abc import Iterable
+from typing import Any, Literal
 
 import pandas as pd
 
@@ -73,44 +75,71 @@ class CleanDataFrame:
     @staticmethod
     def filter(
         df: pd.DataFrame,
-        include: dict[str, None | str | list[str]] | None = None,
-        exclude: dict[str, None | str | list[str]] | None = None,
+        filters: dict[str, dict[str, str | list[str]]],
+        combine: Literal["and", "or"] = "and",
     ) -> pd.DataFrame:
         """
-        Motor de filtrado avanzado que soporta tanto inclusión como exclusión dinámica.
+        Filtra un DataFrame con soporte para combinación AND / OR.
+
+        combine:
+            - "and": todas las condiciones deben cumplirse
+            - "or": al menos una condición debe cumplirse
         """
 
-        # Inicializamos diccionarios vacíos si no se envían
-        inclusion_filters = include or {}
-        exclusion_filters = exclude or {}
-
-        conditions = []
-
-        # 1. Procesar Inclusiones (Lo que queremos ver)
-        for column, value in inclusion_filters.items():
-            if value is not None and column in df.columns:
-                if isinstance(value, list):
-                    conditions.append(f"`{column}` in @inclusion_filters['{column}']")
-                else:
-                    conditions.append(f"`{column}` == @inclusion_filters['{column}']")
-
-        # 2. Procesar Exclusiones (Lo que queremos ocultar)
-        for column, value in exclusion_filters.items():
-            if value is not None and column in df.columns:
-                if isinstance(value, list):
-                    # La magia aquí es el 'not in'
-                    conditions.append(
-                        f"`{column}` not in @exclusion_filters['{column}']"
-                    )
-                else:
-                    # Y aquí el '!='
-                    conditions.append(f"`{column}` != @exclusion_filters['{column}']")
-
-        # 3. Si no hubo condiciones válidas, retornamos el DF original
-        if not conditions:
+        if not filters:
             return df
 
-        # 4. Ensamblaje y ejecución
-        query = " and ".join(conditions)
+        final_mask = None
 
-        return df.query(expr=query)
+        def __is_iterable(value: Any) -> bool:
+
+            return isinstance(value, Iterable) and not isinstance(value, str)
+
+        def __combine_masks(mask1: Any, mask2: Any) -> Any:
+
+            if mask1 is None:
+                return mask2
+
+            return mask1 & mask2 if combine == "and" else mask1 | mask2
+
+        # ---------- INCLUDE ----------
+        for field, value in filters.get("include", {}).items():
+            if field not in df.columns:
+                continue
+
+            if __is_iterable(value=value):
+                mask = df[field].isin(value)
+            else:
+                mask = df[field] == value
+
+            final_mask = __combine_masks(mask1=final_mask, mask2=mask)
+
+        # ---------- EXCLUDE ----------
+        for field, value in filters.get("exclude", {}).items():
+            if field not in df.columns:
+                continue
+
+            if __is_iterable(value=value):
+                mask = ~df[field].isin(value)
+            else:
+                mask = df[field] != value
+
+            final_mask = __combine_masks(mask1=final_mask, mask2=mask)
+
+        # ---------- CONTAINS ----------
+        for field, value in filters.get("contains", {}).items():
+            if field not in df.columns:
+                continue
+
+            series = df[field].astype("string")
+
+            if __is_iterable(value=value):
+                mask = False
+                for v in value:
+                    mask |= series.str.contains(str(v), regex=False, na=False)
+            else:
+                mask = series.str.contains(str(value), regex=False, na=False)
+
+            final_mask = __combine_masks(mask1=final_mask, mask2=mask)
+
+        return df[final_mask] if final_mask is not None else df

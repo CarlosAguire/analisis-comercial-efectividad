@@ -28,7 +28,8 @@ def __clean_data(dfs: list[pd.DataFrame]) -> pd.DataFrame:
 
 
 def run(ftth_hfc_tree: list[pd.DataFrame], fo_tree: list[pd.DataFrame]) -> None:
-    message = f"Iniciando limpieza de los datos para el {PRODUCTIVITY_ANALYSIS}"
+    # Iniciamos proceso de limpieza
+    message = f"Preparando limpieza de los datos para el {PRODUCTIVITY_ANALYSIS}"
     logging(message=message, level="INFO")
 
     df_ftth_hfc_tree = __clean_data(dfs=ftth_hfc_tree)

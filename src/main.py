@@ -18,6 +18,7 @@ COMERCIAL_EFFICACY_ANALYSIS = parameters.COMERCIAL_EFFICACY_ANALYSIS
 PRODUCTIVITY_ANALYSIS = parameters.PRODUCTIVITY_ANALYSIS
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
+MIGRATIONS_ANALYSIS = parameters.MIGRATIONS_ANALYSIS
 
 FTTH_HFC_TREE_FOLDER = parameters.FTTH_HFC_TREE_FOLDER
 FTTH_HFC_CAPACITY_FOLDER = FTTH_HFC_TREE_FOLDER / "OFSC" / "Area de Capacidades"
@@ -41,7 +42,7 @@ def run_analysis(
         or contact_analysis_parameter
         or backlog_analysis_parameter
     ):
-        df_residential_plant = read_xlsx_file(
+        df_residential_plant = read_xlsb_file(
             path=parameters.RESIDENTIAL_PLANT_PATH,
             sheet=1,
         )
@@ -57,11 +58,12 @@ def run_analysis(
             )
 
             # Si no se requieren los otros análisis, se termina la función aquí
-            if not (
-                commercial_analysis_parameter
-                and contact_analysis_parameter
-                and productivity_analysis_parameter
-                and migrations_analysis_parameter
+            if (
+                backlog_analysis_parameter
+                and not contact_analysis_parameter
+                and not productivity_analysis_parameter
+                and not migrations_analysis_parameter
+                and not commercial_analysis_parameter
             ):
                 return None
 
@@ -95,11 +97,12 @@ def run_analysis(
             )
 
             # Si no se requieren los otros análisis, se termina la función aquí
-            if not (
-                backlog_analysis_parameter
-                and contact_analysis_parameter
-                and productivity_analysis_parameter
-                and migrations_analysis_parameter
+            if (
+                commercial_analysis_parameter
+                and not contact_analysis_parameter
+                and not productivity_analysis_parameter
+                and not migrations_analysis_parameter
+                and not backlog_analysis_parameter
             ):
                 return None
         if contact_analysis_parameter:
@@ -109,11 +112,12 @@ def run_analysis(
             )
 
             # Si no se requieren los otros análisis, se termina la función aquí
-            if not (
-                backlog_analysis_parameter
-                and commercial_analysis_parameter
-                and productivity_analysis_parameter
-                and migrations_analysis_parameter
+            if (
+                contact_analysis_parameter
+                and not commercial_analysis_parameter
+                and not productivity_analysis_parameter
+                and not migrations_analysis_parameter
+                and not backlog_analysis_parameter
             ):
                 return None
     if productivity_analysis_parameter:
@@ -129,11 +133,12 @@ def run_analysis(
         productivity_analysis.run(ftth_hfc_tree=dfs_ftth_hfc_tree, fo_tree=dfs_fo_tree)
 
         # Si no se requieren los otros análisis, se termina la función aquí
-        if not (
-            backlog_analysis_parameter
-            and commercial_analysis_parameter
-            and contact_analysis_parameter
-            and migrations_analysis_parameter
+        if (
+            productivity_analysis_parameter
+            and not commercial_analysis_parameter
+            and not contact_analysis_parameter
+            and not migrations_analysis_parameter
+            and not backlog_analysis_parameter
         ):
             return None
     if migrations_analysis_parameter:
@@ -149,11 +154,12 @@ def run_analysis(
         migrations_analysis.run(df_gpon=df_gpon, df_brownfield=df_brownfield)
 
         # Si no se requieren los otros análisis, se termina la función aquí
-        if not (
-            backlog_analysis_parameter
-            and commercial_analysis_parameter
-            and contact_analysis_parameter
-            and productivity_analysis_parameter
+        if (
+            migrations_analysis_parameter
+            and not commercial_analysis_parameter
+            and not contact_analysis_parameter
+            and not productivity_analysis_parameter
+            and not backlog_analysis_parameter
         ):
             return None
 
@@ -175,6 +181,23 @@ if __name__ == "__main__":
         backlog_analysis_parameter = args.backlog_analysis
         productivity_analysis_parameter = args.productivity_analysis
         migrations_analysis_parameter = args.migrations_analysis
+
+        analysis_to_run = []
+
+        if commercial_analysis_parameter:
+            analysis_to_run.append(f"    >> {COMERCIAL_EFFICACY_ANALYSIS}\n")
+        if contact_analysis_parameter:
+            analysis_to_run.append(f"    >> {CONTACT_ANALYSIS}\n")
+        if backlog_analysis_parameter:
+            analysis_to_run.append(f"    >> {BACKLOG_ANALYSIS}\n")
+        if productivity_analysis_parameter:
+            analysis_to_run.append(f"    >> {PRODUCTIVITY_ANALYSIS}\n")
+        if migrations_analysis_parameter:
+            analysis_to_run.append(f"    >> {MIGRATIONS_ANALYSIS}")
+
+        message = "Preparando archivos para ejecutar los siguientes análisis:\n"
+        message += "".join(analysis_to_run)
+        logging(message=message, level="INFO")
 
         run_analysis(
             productivity_analysis_parameter=productivity_analysis_parameter,

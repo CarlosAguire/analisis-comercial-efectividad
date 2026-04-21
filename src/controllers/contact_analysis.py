@@ -9,7 +9,7 @@ from data.clean.contact_analysis import (
     clean_df_residential_plant,
 )
 from data.clean.manager import CleanDataFrame
-from data.operations import create_file, join_by_sales_advisor, normalize_date
+from data.operations import complete_data, create_file, normalize_date
 from logs_setup import logging
 
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
@@ -74,9 +74,14 @@ def __clean_data(
         column="Asesor comercial",
     )
 
-    df_output = join_by_sales_advisor(
+    cleaned_df_ofsc_capacity["GV-Especialista"] = None
+    cleaned_df_ofsc_capacity["GV-Descripcion"] = None
+    cleaned_df_ofsc_capacity["JEFE 1 CANAL REGIONAL"] = None
+    cleaned_df_ofsc_capacity["CANAL2"] = None
+    df_output = complete_data(
         df_dictionary=cleaned_df_residential_plant,
         df=cleaned_df_ofsc_capacity,
+        column="Asesor comercial",
     )
     df_output.rename(
         columns=parameters.FINAL_COLUMNS[CONTACT_ANALYSIS],
@@ -106,20 +111,7 @@ def __clean_phone(value: str) -> str:
 
 
 def __data_transformation(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.assign(
-        **{
-            "Teléfono 3": df["Teléfono 3"].astype(dtype="string[pyarrow]"),
-            "Telefono dos del cliente": df["Telefono dos del cliente"].astype(
-                dtype="string[pyarrow]"
-            ),
-            "Celuar del contacto": df["Celuar del contacto"].astype(
-                dtype="string[pyarrow]"
-            ),
-        },
-    )
-
     def compute_phone_metrics(row: pd.Series) -> pd.Series:
-
         columns = [
             "Telefono dos del cliente",
             "Teléfono 3",

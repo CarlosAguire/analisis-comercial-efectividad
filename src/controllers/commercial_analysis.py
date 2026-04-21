@@ -10,9 +10,9 @@ from data.clean.commercial_analysis import (
 )
 from data.clean.manager import CleanDataFrame
 from data.operations import (
+    complete_data,
     create_file,
     join,
-    join_by_sales_advisor,
     normalize_date,
     reorder_columns,
 )
@@ -174,9 +174,14 @@ def __clean_data(
     # Unimos el archivo de OFSC con el de planta residencial en uno solo
     logging(message="Uniendo OFSC y Planta Residencial...", level="INFO")
 
-    df_output = join_by_sales_advisor(
+    df_ofsc["GV-Especialista"] = None
+    df_ofsc["GV-Descripcion"] = None
+    df_ofsc["JEFE 1 CANAL REGIONAL"] = None
+    df_ofsc["CANAL2"] = None
+    df_output = complete_data(
         df_dictionary=df_residential_plant,
         df=df_ofsc,
+        column="Asesor comercial",
     )
 
     # Eliminamos dataframes que ya no se usaran más para liberar memoria
@@ -212,7 +217,7 @@ def run(
     dfs_ofsc_dispatch: list[pd.DataFrame],
 ) -> None:
     # Iniciamos proceso de limpieza
-    message = f"Iniciando limpieza de los datos para el {COMERCIAL_EFFICACY_ANALYSIS}"
+    message = f"Preparando limpieza de los datos para el {COMERCIAL_EFFICACY_ANALYSIS}"
     logging(message=message, level="INFO")
 
     df_output = __clean_data(

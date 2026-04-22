@@ -185,17 +185,17 @@ if __name__ == "__main__":
         analysis_to_run = []
 
         if commercial_analysis_parameter:
-            analysis_to_run.append(f"    >> {COMERCIAL_EFFICACY_ANALYSIS}\n")
+            analysis_to_run.append(f"\n    >> {COMERCIAL_EFFICACY_ANALYSIS}")
         if contact_analysis_parameter:
-            analysis_to_run.append(f"    >> {CONTACT_ANALYSIS}\n")
+            analysis_to_run.append(f"\n    >> {CONTACT_ANALYSIS}")
         if backlog_analysis_parameter:
-            analysis_to_run.append(f"    >> {BACKLOG_ANALYSIS}\n")
+            analysis_to_run.append(f"\n    >> {BACKLOG_ANALYSIS}")
         if productivity_analysis_parameter:
-            analysis_to_run.append(f"    >> {PRODUCTIVITY_ANALYSIS}\n")
+            analysis_to_run.append(f"\n    >> {PRODUCTIVITY_ANALYSIS}")
         if migrations_analysis_parameter:
-            analysis_to_run.append(f"    >> {MIGRATIONS_ANALYSIS}")
+            analysis_to_run.append(f"\n    >> {MIGRATIONS_ANALYSIS}")
 
-        message = "Preparando archivos para ejecutar los siguientes análisis:\n"
+        message = "Preparando archivos para ejecutar los siguientes análisis:"
         message += "".join(analysis_to_run)
         logging(message=message, level="INFO")
 

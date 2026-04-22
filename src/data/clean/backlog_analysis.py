@@ -71,8 +71,9 @@ def clean_df_backlog(
     df_residential_plant_copy = df_residential_plant_copy.rename(
         columns={"TCARGU": "CEDULA_VENDEDOR"},
     )
+
     df_output = complete_data(
-        df=df_backlog_copy,
+        df=df_output,
         df_dictionary=df_residential_plant_copy,
         column="CEDULA_VENDEDOR",
         key_match="contains",

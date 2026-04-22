@@ -7,7 +7,7 @@ from data.clean.migrations_analysis import (
     clean_df_brownfield,
     clean_df_gpon,
 )
-from data.operations import correct_dates, create_file, reorder_columns
+from data.operations import create_file, normalize_dates, reorder_columns
 from logs_setup import logging
 
 MIGRATIONS_ANALYSIS = parameters.MIGRATIONS_ANALYSIS
@@ -21,30 +21,10 @@ def __clean_data(df_gpon: pd.DataFrame, df_brownfield: pd.DataFrame) -> pd.DataF
     df_gpon_copy = clean_df_gpon(df=df_gpon_copy)
 
     # Creamos columnas faltantes
-    df_gpon_copy = df_gpon_copy.assign(
-        **{
-            "Tipificación": pd.Series(
-                data=pd.NA,
-                index=df_gpon_copy.index,
-                dtype="string[pyarrow]",
-            ),
-            "Tipo de Red": pd.Series(
-                data="GPON",
-                index=df_gpon_copy.index,
-                dtype="string[pyarrow]",
-            ),
-            "Desmonte de Nodos": pd.Series(
-                data="NO APLICA",
-                index=df_gpon_copy.index,
-                dtype="string[pyarrow]",
-            ),
-            "Nota": pd.Series(
-                data="NO REQUIERE",
-                index=df_gpon_copy.index,
-                dtype="string[pyarrow]",
-            ),
-        },
-    )
+    df_gpon_copy["Tipificación"] = None
+    df_gpon_copy["Nota"] = "NO REQUIERE"
+    df_gpon_copy["Desmonte de Nodos"] = "NO APLICA"
+    df_gpon_copy["Tipo de Red"] = "GPON"
 
     # Reordenamos columnas
     df_gpon_copy = reorder_columns(df=df_gpon_copy, order=COLUMN_ORDER)
@@ -54,20 +34,8 @@ def __clean_data(df_gpon: pd.DataFrame, df_brownfield: pd.DataFrame) -> pd.DataF
     df_brownfield_copy = clean_df_brownfield(df=df_brownfield_copy)
 
     # Creamos columnas faltantes
-    df_brownfield_copy = df_brownfield_copy.assign(
-        **{
-            "Tipo de Red": pd.Series(
-                data="HFC",
-                index=df_gpon_copy.index,
-                dtype="string[pyarrow]",
-            ),
-            "Código": pd.Series(
-                data="NO REQUIERE",
-                index=df_brownfield_copy.index,
-                dtype="string[pyarrow]",
-            ),
-        },
-    )
+    df_brownfield_copy["Tipo de Red"] = "HFC"
+    df_brownfield_copy["Código"] = "NO REQUIERE"
 
     # Reordenamos columnas
     df_brownfield_copy = reorder_columns(df=df_brownfield_copy, order=COLUMN_ORDER)
@@ -84,7 +52,7 @@ def __clean_data(df_gpon: pd.DataFrame, df_brownfield: pd.DataFrame) -> pd.DataF
     gc.collect()
 
     # Corregimos formato de fechas
-    df_output = correct_dates(df=df_output, column="Fecha")
+    df_output["Fecha"] = normalize_dates(df_output["Fecha"])
 
     return df_output
 

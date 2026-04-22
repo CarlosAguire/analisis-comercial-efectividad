@@ -182,6 +182,7 @@ def __clean_data(
         df_dictionary=df_residential_plant,
         df=df_ofsc,
         column="Asesor comercial",
+        key_match="contains",
     )
 
     # Eliminamos dataframes que ya no se usaran más para liberar memoria

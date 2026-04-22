@@ -1,3 +1,4 @@
+import warnings
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Literal
@@ -12,6 +13,12 @@ def read_xlsx_file(path: Path, sheet: int | str) -> pd.DataFrame:
     - No se cambian mayúsculas/minúsculas.
     - No se normalizan caracteres.
     """
+
+    warnings.filterwarnings(
+        "ignore",
+        category=UserWarning,
+        message="Data Validation extension is not supported",
+    )
 
     return pd.read_excel(
         io=path,
@@ -55,21 +62,22 @@ def reorder_columns(df: pd.DataFrame, order: list[str]) -> pd.DataFrame:
     return df.loc[:, order]
 
 
-def correct_dates(df: pd.DataFrame, column: str) -> pd.DataFrame:
-    """
-    Convierte números de serie de Excel a datetime, gestionando
-    correctamente celdas vacías y errores de formato.
-    """
+def normalize_dates(serie_fechas: pd.Series) -> pd.Series:
 
-    return df.assign(
-        **{
-            column: pd.to_datetime(
-                pd.to_numeric(df[column], errors="coerce"),
-                unit="D",
-                origin="1899-12-30",
-            ).astype("timestamp[ns][pyarrow]")
-        }
+    # 1. Rescatar los números (ej: 45840 o 45840.0)
+    fechas_numericas = pd.to_datetime(
+        pd.to_numeric(serie_fechas, errors="coerce"), origin="1899-12-30", unit="D"
     )
+
+    # 2. Rescatar los textos (ej: "02/07/2025") y fechas correctas
+    fechas_texto = pd.to_datetime(
+        serie_fechas,
+        errors="coerce",
+        dayfirst=True,  # Fundamental para fechas en formato DD/MM/YYYY
+    )
+
+    # 3. Combinar ambos mundos
+    return fechas_numericas.fillna(fechas_texto)
 
 
 def join(
@@ -392,15 +400,6 @@ def complete_data(
     column: str,
     key_match: Literal["exact", "contains"] = "exact",
 ) -> pd.DataFrame:
-    """
-    Completa valores nulos del DataFrame original usando un DataFrame diccionario.
-
-    Parámetros:
-    - column: columna llave
-    - key_match:
-        * "exact"    → coincidencia exacta (merge)
-        * "contains" → la llave del diccionario debe estar contenida en la del DF base
-    """
 
     df_copy = df.copy()
     df_dictionary_copy = df_dictionary.copy()
@@ -434,23 +433,28 @@ def complete_data(
     # --------------------------------
     # CASO 2: MATCH POR CONTAINS
     # --------------------------------
-    df_copy[column] = df_copy[column].astype("string")
-    df_dictionary_copy[column] = df_dictionary_copy[column].astype("string")
+    base_keys = df_copy[column].astype(str).str.lower().str.strip()
 
     for _, dicc_row in df_dictionary_copy.iterrows():
-        key_value = dicc_row[column]
+        dicc_val = dicc_row[column]
 
-        if pd.isna(key_value):
+        if pd.isna(dicc_val):
             continue
 
-        mask = df_copy[column].str.contains(
-            key_value,
-            regex=False,
-            na=False,
+        dicc_str = str(dicc_val).lower().strip()
+
+        if not dicc_str or dicc_str in ("nan", "<na>"):
+            continue
+
+        mask = base_keys.apply(
+            lambda x: (  # type: ignore
+                isinstance(x, str) and x not in ("nan", "<na>", "") and (x in dicc_str)  # noqa
+            )
         )
 
-        for col in columns_to_complete:
-            df_copy.loc[mask & df_copy[col].isna(), col] = dicc_row[col]
+        if mask.any():
+            for col in columns_to_complete:
+                df_copy.loc[mask, col] = dicc_row[col]
 
     return df_copy
 

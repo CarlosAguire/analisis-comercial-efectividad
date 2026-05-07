@@ -27,7 +27,7 @@ LOGS_FOLDER = PROJECT_ROOT / "logs"
 RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsb"
 BACKLOG_PATH = DATABASES_FOLDER / "Backlog_Nacional_Por_Produccion.csv"
 GPON_BASES_PATH = DATABASES_FOLDER / "BASES CENTROS COMERCIALES GPON.xlsx"
-BROWNFIELD_BASES_PATH = DATABASES_FOLDER / "BASE BROWNFIELD 2025 Oriente.xlsb"
+BROWNFIELD_BASES_PATH = DATABASES_FOLDER / "BASE BROWNFIELD 2026 Oriente.xlsx"
 PY_OUT_LOGS_PATH = LOGS_FOLDER / "py_out_logs.txt"
 LOGS_PATH = LOGS_FOLDER / "logs.txt"
 
@@ -112,7 +112,6 @@ COLUMNS_TO_RESERVE = {
             "CEDULA_VENDEDOR",
             "ANTIGUEDAD_DIGITACION",
             "HORA_CREADO",
-            "HORA_CREADO",
             "CLASE",
             "SEGMENTO",
             "Aliado Zonificado",
@@ -129,9 +128,11 @@ COLUMNS_TO_RESERVE = {
     MIGRATIONS_ANALYSIS: {
         "brownfield_bases": [
             "ESTADO REGIONAL",
-            "DESMONTE DE NODOS 1",
+            "CRONOGRAMA DESMONTE REGIONAL",
+            "CRONOGRAMA DESMONTE TRANSVERSAL",
             "TIPIFICACION",
             "CUENTA MATRIZ",
+            "CRUCE POTENCIAL",
             "CUENTA",
             "ALIADO",
             "CIUDAD",
@@ -143,6 +144,7 @@ COLUMNS_TO_RESERVE = {
             "CUENTA",
             "TIPIFICACION REGIONAL",
             "CUENTA MATRIZ",
+            "BASE TV",
             "ALIADO",
             "Ciudad",
             "FECHA DE MIGRACION",
@@ -233,11 +235,18 @@ FINAL_COLUMNS = {
         "CUENTA": "Cuenta",
         "OT/LL": "OT",
         "FECHA_CREADO": "Fecha de Creación",
+        "HORA_CREADO": "Hora de Creación",
         "CONVENIENCIA": "Convivencia",
+        "ESTADO_ORDEN": "Estado de la Orden",
+        "Aliado Zonificado": "Aliado",
+        "ANTIGUEDAD_DIGITACION": "Antiguedad desde la Digitación",
+        "CLASE": "Clase",
+        "CEDULA_VENDEDOR": "Cédula del Vendedor",
+        "SEGMENTO": "Segmento",
         "Comunidad": "Ciudad",
         "FECHA_AGENDA_FUTURO": "Fecha Agenda Futuro",
         "ESTADO_VISITA": "Estado de la Visita",
-        "ANTIGUEDAD_ULTIMA_VISITA": "Antiguedad",
+        "ANTIGUEDAD_ULTIMA_VISITA": "Antiguedad desde la Última Visita",
         "CUENTA_MATRIZ": "Cuenta Matriz",
         "GV-Especialista": "Especialista",
         "GV-Descripcion": "Proveedor",
@@ -249,11 +258,13 @@ FINAL_COLUMNS = {
             "ESTADO REGIONAL": "Estado",
             "CUENTA MATRIZ": "Cuenta Matriz",
             "CUENTA": "Cuenta",
+            "CRUCE POTENCIAL": "Cruce Potencial",
             "ALIADO": "Aliado",
             "CIUDAD": "Ciudad",
             "FECHA AGENDA": "Fecha",
             "TIPIFICACION": "Tipificación",
-            "DESMONTE DE NODOS 1": "Desmonte de Nodos",
+            "CRONOGRAMA DESMONTE REGIONAL": "Cronograma Desmonte Regional",
+            "CRONOGRAMA DESMONTE TRANSVERSAL": "Cronograma Desmonte Transversal",
             "NOTA": "Nota",
         },
         "gpon_bases": {
@@ -261,6 +272,7 @@ FINAL_COLUMNS = {
             "CUENTA MATRIZ": "Cuenta Matriz",
             "CUENTA": "Cuenta",
             "ALIADO": "Aliado",
+            "BASE TV": "Cruce Potencial",
             "Ciudad": "Ciudad",
             "FECHA DE MIGRACION": "Fecha",
             "CODIGO": "Código",
@@ -299,7 +311,9 @@ COLUMN_ORDER = {
         "Aliado",
         "Ciudad",
         "Tipificación",
-        "Desmonte de Nodos",
+        "Cruce Potencial",
+        "Cronograma Desmonte Regional",
+        "Cronograma Desmonte Transversal",
         "Nota",
         "Código",
         "Fecha",

@@ -146,7 +146,7 @@ def run_analysis(
             path=parameters.GPON_BASES_PATH,
             sheet="TOTAL",
         )
-        df_brownfield = read_xlsb_file(
+        df_brownfield = read_xlsx_file(
             path=parameters.BROWNFIELD_BASES_PATH,
             sheet="BASE BROWNFIELD 2025(BASE)",
         )

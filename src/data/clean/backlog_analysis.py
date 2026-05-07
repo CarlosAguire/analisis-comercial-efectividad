@@ -1,5 +1,3 @@
-import gc
-
 import pandas as pd
 
 from config import parameters
@@ -16,75 +14,88 @@ def clean_df_backlog(
     df_backlog: pd.DataFrame,
     df_residential_plant: pd.DataFrame,
 ) -> pd.DataFrame:
+
+    # Normalizamos los nombres de las columnas
+    df_backlog.columns = df_backlog.columns.str.replace(
+        pat="ï»¿",
+        repl="",
+        regex=False,
+    ).str.strip()
+
     # Ajustamos tipos de datos
     # fmt: off
-    df_backlog_copy = df_backlog.copy()
-    df_backlog_copy["CEDULA_VENDEDOR"] = (
-        df_backlog_copy["CEDULA_VENDEDOR"].astype("Int64").astype("string")
+    df_backlog["HORA_CREADO"] = df_backlog["HORA_CREADO"].astype("string")
+    df_backlog["Hora_AMPM"] = (
+        pd.to_datetime(
+            df_backlog["HORA_CREADO"].astype("string").str.zfill(6),
+            format="%H%M%S",
+            errors="coerce",
+        )
+        .dt.strftime("%I:%M %p")
     )
-
-    df_residential_plant_copy = df_residential_plant.copy()
-    df_residential_plant_copy["CC_COMPLETA"] = (
-        df_residential_plant_copy["CC_COMPLETA"].astype(dtype="string")
+    df_backlog = df_backlog.drop(columns=["HORA_CREADO"])
+    df_backlog = df_backlog.rename(columns={"Hora_AMPM": "HORA_CREADO"})
+    df_backlog["CEDULA_VENDEDOR"] = (
+        df_backlog["CEDULA_VENDEDOR"]
+        .astype("string")
+        .str.replace(r"\.0$", "", regex=True)
+    )
+    df_residential_plant["CC_COMPLETA"] = (
+        df_residential_plant["CC_COMPLETA"]
+        .astype(dtype="string")
+        .str.replace(r"\.0$", "", regex=True)
     )
     # fmt: on
 
     # Removemos columnas que no necesitamos
-    df_backlog_copy = CleanDataFrame.drop_columns(
+    df_backlog = CleanDataFrame.drop_columns(
         columns_preserve=COLUMNS_TO_RESERVE["backlog"],
-        df=df_backlog_copy,
+        df=df_backlog,
     )
-    df_residential_plant_copy = CleanDataFrame.drop_columns(
+    df_residential_plant = CleanDataFrame.drop_columns(
         columns_preserve=COLUMNS_TO_RESERVE["residential_plant"],
-        df=df_residential_plant_copy,
+        df=df_residential_plant,
     )
 
     # Filtramos para eliminar filas que no necesitamos
-    df_backlog_copy = CleanDataFrame.filter(
+    df_backlog = CleanDataFrame.filter(
         filters=FILTERS["backlog"],
-        df=df_backlog_copy,
+        df=df_backlog,
     )
-    sellers = df_backlog_copy["CEDULA_VENDEDOR"].unique().tolist()
-    df_residential_plant_copy = CleanDataFrame.filter(
-        df=df_residential_plant_copy,
+    sellers = df_backlog["CEDULA_VENDEDOR"].unique().tolist()
+    df_residential_plant = CleanDataFrame.filter(
+        df=df_residential_plant,
         filters={"contains": {"CC_COMPLETA": sellers, "TCARGU": sellers}},
         combine="or",
     )
 
     # Completamos las columnas del backlog con la información de planta residencial
-    df_residential_plant_copy = df_residential_plant_copy.rename(
+    df_residential_plant = df_residential_plant.rename(
         columns={"CC_COMPLETA": "CEDULA_VENDEDOR"},
     )
-    df_backlog_copy["GV-Especialista"] = None
-    df_backlog_copy["GV-Descripcion"] = None
-    df_backlog_copy["JEFE 1 CANAL REGIONAL"] = None
-    df_backlog_copy["CANAL2"] = None
+    df_backlog["GV-Especialista"] = None
+    df_backlog["GV-Descripcion"] = None
+    df_backlog["JEFE 1 CANAL REGIONAL"] = None
+    df_backlog["CANAL2"] = None
     df_output = complete_data(
-        df=df_backlog_copy,
-        df_dictionary=df_residential_plant_copy,
+        df=df_backlog,
+        df_dictionary=df_residential_plant,
         column="CEDULA_VENDEDOR",
         key_match="contains",
     )
-    df_residential_plant_copy = df_residential_plant_copy.drop(
-        columns=["CEDULA_VENDEDOR"]
-    )
-    df_residential_plant_copy = df_residential_plant_copy.rename(
+    df_residential_plant = df_residential_plant.drop(columns=["CEDULA_VENDEDOR"])
+    df_residential_plant = df_residential_plant.rename(
         columns={"TCARGU": "CEDULA_VENDEDOR"},
     )
 
     df_output = complete_data(
         df=df_output,
-        df_dictionary=df_residential_plant_copy,
+        df_dictionary=df_residential_plant,
         column="CEDULA_VENDEDOR",
         key_match="contains",
     )
 
-    # Eliminamos dataframes que ya no se usaran más para liberar memoria
-    del df_residential_plant_copy
-    del df_backlog_copy
-    gc.collect()
-
     # Renombramos columnas
-    # df_output.rename(columns=FINAL_COLUMNS, inplace=True)
+    df_output.rename(columns=FINAL_COLUMNS, inplace=True)
 
     return df_output

@@ -10,7 +10,7 @@ class CleanDataFrame:
     def drop_columns(df: pd.DataFrame, columns_preserve: list[str]) -> pd.DataFrame:
         """Devuelve un `DataFrame` con solo las columnas a preservar."""
 
-        return df.drop(columns=df.columns.difference(columns_preserve))
+        return df.drop(columns=df.columns.difference(columns_preserve), errors="ignore")
 
     @staticmethod
     def drop_duplicate_columns(

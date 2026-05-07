@@ -1,0 +1,127 @@
+"[{
+    "Razón": "CLIENTE SOLICITA REPROGRAMAR",
+    "Nota de Cierre": "El técnico contactó al cliente. Este respondió que no podía atender. Por ello, la orden se marcó como no realizada. Aunque el técnico reintentó y el cliente dijo que atendería después, la orden ya estaba cerrada por la imposibilidad inicial.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "165"
+},
+{
+    "Razón": "CLIENTE SOLICITA REPROGRAMAR",
+    "Nota de Cierre": "Se envió un mensaje al cliente por inactividad, que fue entregado. El cliente respondió pidiendo reagendar el servicio. A pesar de esta respuesta, la orden se marcó como No Atendido con la razón No puedo atenderlo, ya que el sistema no procesó la solicitud, quedando no realizada.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "166"
+},
+{
+    "Razón": "NO CONTACTO CON EL CLIENTE",
+    "Nota de Cierre": "El técnico informó que el cliente no estaba en el lugar. Luego, se intentó contactar al cliente por WhatsApp, pero no hubo respuesta. Por eso, la orden quedó sin completar.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "167"
+},
+{
+    "Razón": "PERMISOS DE ADMINISTRACION",
+    "Nota de Cierre": "El técnico envió un mensaje al cliente. El cliente respondió: No hay permisos de administración. Por ello, la orden no se pudo completar y quedó como no realizada.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "168"
+},
+{
+    "Razón": "NO CONTACTO CON EL CLIENTE",
+    "Nota de Cierre": "Se intentó contactar al cliente, pero no respondió. El sistema envió un mensaje automático indicando esta situación. Luego, el técnico confirmó que no hubo contacto para la visita. Debido a esta falta de comunicación con el cliente, la orden no pudo completarse y quedó pendiente (notDone).",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "169"
+},
+{
+    "Razón": "CLIENTE SOLICITA REPROGRAMAR",
+    "Nota de Cierre": "El técnico intentó realizar la visita, pero no pudo contactar al cliente. Por esta razón, el sistema envió un mensaje automático al cliente. Como no se logró la comunicación, la orden quedó como no realizada.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "170"
+},
+{
+    "Razón": "FUERA ZONA/ SIN COBERTURA RED",
+    "Nota de Cierre": "Cuenta 49330045 OT No 470303238_O_CO_12 Porfavor razonar OT por   Fuera de zona",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "171"
+},
+{
+    "Razón": "FUERA ZONA/ SIN COBERTURA RED",
+    "Nota de Cierre": "Razonar por fuera de zona: Atiende. Esposa: Fiana Ariza Cc. 1075291748 Cel. 3002654234 la cual se le indica que no se puede completar el servicio porque lo agendaron como hfc y ya en el sector cuenta con la red de fibra óptica y aparte la dirección del local que aparece en el aplicativo es el 162 pero la el local correcto es el 462 esto se validó con el supervisor dilmer Sepúlveda el cual valida con el interventor de claro Héctor salas para razonar por de vuelta al asesor Troncal PIEDA6 pero el internet todo le indica el supervisor que no se puede razonar por de vuelta al asesor sino por fuera de zona no se puede instalar ni hfc ni ftth porque no tiene cuenta matriz la plaza",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "172"
+},
+{
+    "Razón": "CLIENTE SOLICITA REPROGRAMAR",
+    "Nota de Cierre": "はい、その状況を自然な言葉で、技術的な専門用語を使わずに、時系列で説明します。  ---  まず、テクニシャンがお客様へ「お客様の活動がない」ことを知らせるメッセージを送りました。このメッセージはシステムから正常に送信されたことが確認されました。  しかし、お客様からはこのメッセージに対して何の返信もありませんでした。テクニシャンは「お客様が対応しない」と記録し、その結果、この作業は「未完了」として処理されました。  ---",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "173"
+},
+{
+    "Razón": "NO CONTACTO CON EL CLIENTE",
+    "Nota de Cierre": "El técnico llegó al lugar, pero no había nadie. El sistema avisó al cliente por WhatsApp que no respondía. Sin contacto ni acceso, la orden no pudo realizarse y quedó como notDone.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "174"
+},
+{
+    "Razón": "VENTA DEVUELTA AL ASESOR",
+    "Nota de Cierre": "4",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "175"
+},
+{
+    "Razón": "VENTA DEVUELTA AL ASESOR",
+    "Nota de Cierre": "4",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "176"
+},
+{
+    "Razón": "INCUMPLIMIENTO ALIADO",
+    "Nota de Cierre": "El técnico informó que el cliente no atendía. Tras un segundo intento fallido, el sistema envió un mensaje al cliente por no responder. Al no lograr contacto, la orden no pudo completarse y quedó como notDone. --- El técnico reportó que el cliente no atendía. Al no obtener respuesta, el sistema envió un aviso automático. Como no hubo comunicación, la orden no pudo completarse y quedó como no realizada.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "177"
+},
+{
+    "Razón": "NO CONTACTO CON EL CLIENTE",
+    "Nota de Cierre": "El técnico intentó contactar al cliente dos veces, pero este no respondió. Se registraron los intentos y se enviaron mensajes automáticos de no respuesta. Al no lograr comunicación con el cliente, la orden no pudo completarse y quedó como notDone.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "178"
+},
+{
+    "Razón": "NO CONTACTO CON EL CLIENTE",
+    "Nota de Cierre": "El sistema avisó que el cliente no respondía. Luego, el técnico informó que no pudo hacer la orden. Por eso, la orden quedó en estado notDone.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "179"
+},
+{
+    "Razón": "NO CONTACTO CON EL CLIENTE",
+    "Nota de Cierre": "Se intentó contactar al cliente por WhatsApp, pero no hubo respuesta. Por eso, el técnico informó que la orden no se podía realizar. Así, la orden quedó como no completada.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "180"
+},
+{
+    "Razón": "NO CONTACTO CON EL CLIENTE",
+    "Nota de Cierre": "TT indica que no se encuentra en el domicilio y nos puede recibir sobre el medio día. --- El técnico intentó contactar al cliente por WhatsApp, pero no obtuvo respuesta. Al no poder comunicarse, el técnico informó que el cliente no deseaba el servicio o no fue posible realizarlo. Por eso, la orden se marcó como no realizada, ya que no se pudo concretar la visita.",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "181"
+},
+{
+    "Razón": "VENTA DEVUELTA AL ASESOR",
+    "Nota de Cierre": "técnico informa: Esta orden no se puede realizar porque los repetidores trae códigos diferentes  ** se valida con el super del tecnico quien confirma que deben ser los mismos codigos de repetidor para poder garantizar el servicio, se devuelve al comercial y se le informa al tt que lo deben validar para corregir y retomar la visita., null: , Fecha: 06/05/2026, Hora: 11:00:53",
+    "Razón Sugerida": "",
+    "Estado de la Razón": "",
+    "id": "182"
+}
+]"

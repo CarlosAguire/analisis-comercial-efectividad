@@ -209,6 +209,10 @@ def __clean_data(
     # Reordenamos columnas
     df_output = reorder_columns(df=df_output, order=COLUMN_ORDER)
 
+    # Reindexamos el dataframe y creamos columna de id
+    df_output = df_output.reset_index(drop=True)
+    df_output["id"] = df_output.index + 1
+
     return df_output
 
 

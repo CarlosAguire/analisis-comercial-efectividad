@@ -96,6 +96,69 @@ def clean_df_backlog(
     )
 
     # Renombramos columnas
-    df_output.rename(columns=FINAL_COLUMNS, inplace=True)
+    df_output.rename(columns=FINAL_COLUMNS["backlog"], inplace=True)
 
     return df_output
+
+
+def clean_df_ofsc(df: pd.DataFrame) -> pd.DataFrame:
+
+    # Removemos columnas que no necesitamos
+    df_output = CleanDataFrame.drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["ofsc"],
+        df=df,
+    )
+
+    # Renombramos columnas
+    df_output.rename(columns={"Orden de trabajo": "OT"}, inplace=True)
+
+    return df_output
+
+
+def clean_df_ofsc_capacity(df: pd.DataFrame) -> pd.DataFrame:
+    # Filtramos para eliminar filas que no necesitamos
+    cleaned_df_ofsc_capacity = CleanDataFrame.filter(
+        filters=FILTERS["ofsc_capacity"],
+        df=df,
+    )
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_ofsc_capacity = CleanDataFrame.drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["ofsc_capacity"],
+        df=cleaned_df_ofsc_capacity,
+    )
+
+    return cleaned_df_ofsc_capacity
+
+
+def clean_df_residential_plant(
+    df_residential_plant: pd.DataFrame,
+    df_ofsc_capacity: pd.DataFrame,
+) -> pd.DataFrame:
+
+    # Filtramos para eliminar filas que no necesitamos
+    sellers = df_ofsc_capacity["Asesor comercial"].unique().tolist()
+    cleaned_df_residential_plant = CleanDataFrame.filter(
+        filters={"include": {"NOMBRE": sellers}},
+        df=df_residential_plant,
+    )
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_residential_plant = CleanDataFrame.drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["residential_plant"],
+        df=cleaned_df_residential_plant,
+    )
+
+    # Removemos filas duplicadas que no necesitamos
+    cleaned_df_residential_plant = CleanDataFrame.drop_duplicate_rows_by_column(
+        df=cleaned_df_residential_plant,
+        column="NOMBRE",
+    )
+
+    # Renombramos columnas
+    cleaned_df_residential_plant.rename(
+        columns={"NOMBRE": "Asesor comercial"},
+        inplace=True,
+    )
+
+    return cleaned_df_residential_plant

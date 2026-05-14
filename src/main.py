@@ -26,6 +26,8 @@ FTTH_HFC_DISPATCH_FOLDER = FTTH_HFC_TREE_FOLDER / "OFSC" / "Area de Despacho"
 
 FO_CAPACITY_FOLDER = parameters.FO_TREE_FOLDER / "OFSC"
 
+BACKLOG_OFSC_FOLDER = parameters.BACKLOG_OFSC_FOLDER
+
 
 def run_analysis(
     productivity_analysis_parameter: bool,
@@ -49,12 +51,30 @@ def run_analysis(
         df_residential_plant.attrs["path"] = parameters.RESIDENTIAL_PLANT_PATH
 
         if backlog_analysis_parameter:
-            df_backlog = read_csv_file(path=parameters.BACKLOG_PATH)
-            df_backlog.attrs["path"] = parameters.BACKLOG_PATH
+            df_backlog = None
+            dfs_capacity = []
+            dfs_ofsc = []
+
+            for path in parameters.BACKLOG_FOLDER.iterdir():
+                if path.is_file() and path.suffix == ".xlsx":
+                    df = read_xlsx_file(path=path, sheet=0)
+                    df.attrs["path"] = path
+                    dfs_ofsc.append(df)
+                if path.is_file() and path.suffix == ".csv":
+                    df_backlog = read_csv_file(path=path)
+                    df_backlog.attrs["path"] = path
+            for file_path in [
+                path for path in BACKLOG_OFSC_FOLDER.iterdir() if path.is_file()
+            ]:
+                df = read_xlsx_file(path=file_path, sheet=0)
+                df.attrs["path"] = file_path
+                dfs_capacity.append(df)
 
             backlog_analysis.run(
                 df_residential_plant=df_residential_plant,
-                df_backlog=df_backlog,
+                df_backlog=df_backlog,  # type: ignore
+                dfs_ofsc_capacity=dfs_capacity,
+                dfs_ofsc=dfs_ofsc,
             )
 
             # Si no se requieren los otros análisis, se termina la función aquí

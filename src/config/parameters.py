@@ -12,20 +12,21 @@ PROJECT_ROOT = THIS_FILE.parent.parent.parent
 # Configuración de rutas de carpetas
 DATABASES_FOLDER = PROJECT_ROOT / "databases"
 FTTH_HFC_TREE_FOLDER = DATABASES_FOLDER / "FTTH y HFC"
-BACKLOG_FOLDER = DATABASES_FOLDER / "Back Transversal"
+FO_TREE_FOLDER = DATABASES_FOLDER / "FO"
+BACKLOG_FOLDER = DATABASES_FOLDER / "Backlog"
+BACKLOG_OFSC_FOLDER = BACKLOG_FOLDER / "Historico OFSC"
 DEBUGGING_FOLDER = PROJECT_ROOT / "debugging"
 COMERCIAL_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "comercial"
 CONTACT_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "contacto"
 BACKLOG_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "backlog"
 PRODUCTIVITY_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "productividad"
 MIGRATIONS_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "migraciones"
-FO_TREE_FOLDER = DATABASES_FOLDER / "FO"
 LOGS_FOLDER = PROJECT_ROOT / "logs"
 
 
 # Configuración de rutas de archivos
 RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsb"
-BACKLOG_PATH = DATABASES_FOLDER / "Backlog_Nacional_Por_Produccion.csv"
+BACKLOG_PATH = BACKLOG_FOLDER / "Backlog_Nacional_Por_Produccion.csv"
 GPON_BASES_PATH = DATABASES_FOLDER / "BASES CENTROS COMERCIALES GPON.xlsx"
 BROWNFIELD_BASES_PATH = DATABASES_FOLDER / "BASE BROWNFIELD 2026 Oriente.xlsx"
 PY_OUT_LOGS_PATH = LOGS_FOLDER / "py_out_logs.txt"
@@ -98,20 +99,19 @@ COLUMNS_TO_RESERVE = {
             "TIPO_BACKLOG",
             "CUENTA",
             "OT/LL",
-            "FECHA_CREADO",
             "Region",
             "CONVENIENCIA",
             "Comunidad",
             "Opera",
             "Red",
-            "FECHA_AGENDA_FUTURO",
+            "NODO",
             "ESTADO_ORDEN",
             "ESTADO_VISITA",
+            "FECHA_AGENDA_FUTURO",
             "ANTIGUEDAD_ULTIMA_VISITA",
             "CUENTA_MATRIZ",
             "CEDULA_VENDEDOR",
             "ANTIGUEDAD_DIGITACION",
-            "HORA_CREADO",
             "CLASE",
             "SEGMENTO",
             "Aliado Zonificado",
@@ -123,6 +123,21 @@ COLUMNS_TO_RESERVE = {
             "GV-Descripcion",
             "JEFE 1 CANAL REGIONAL",
             "CANAL2",
+            "NOMBRE",
+        ],
+        "ofsc_capacity": [
+            "Orden de trabajo",
+            "Tipo de Actividad",
+            "Estado",
+            "Ciudad",
+            "Tipo de Red",
+            "Compañia",
+            "Fecha de agendamiento",
+            "Asesor comercial",
+        ],
+        "ofsc": [
+            "Orden de trabajo",
+            "Ventana de servicio",
         ],
     },
     MIGRATIONS_ANALYSIS: {
@@ -201,6 +216,12 @@ FILTERS = {
                 ],
             },
         },
+        "ofsc_capacity": {
+            "include": {
+                "Owner": "Onnet",
+                "Tipo de Red": ["Pymes", "FTTX"],
+            },
+        },
     },
 }
 
@@ -230,28 +251,37 @@ FINAL_COLUMNS = {
         "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
     },
     BACKLOG_ANALYSIS: {
-        "TIPO_TRABAJO": "Tipo de Trabajo",
-        "TIPO_BACKLOG": "Tipo de Backlog",
-        "CUENTA": "Cuenta",
-        "OT/LL": "OT",
-        "FECHA_CREADO": "Fecha de Creación",
-        "HORA_CREADO": "Hora de Creación",
-        "CONVENIENCIA": "Convivencia",
-        "ESTADO_ORDEN": "Estado de la Orden",
-        "Aliado Zonificado": "Aliado",
-        "ANTIGUEDAD_DIGITACION": "Antiguedad desde la Digitación",
-        "CLASE": "Clase",
-        "CEDULA_VENDEDOR": "Cédula del Vendedor",
-        "SEGMENTO": "Segmento",
-        "Comunidad": "Ciudad",
-        "FECHA_AGENDA_FUTURO": "Fecha Agenda Futuro",
-        "ESTADO_VISITA": "Estado de la Visita",
-        "ANTIGUEDAD_ULTIMA_VISITA": "Antiguedad desde la Última Visita",
-        "CUENTA_MATRIZ": "Cuenta Matriz",
-        "GV-Especialista": "Especialista",
-        "GV-Descripcion": "Proveedor",
-        "CANAL2": "Canal",
-        "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
+        "backlog": {
+            "TIPO_TRABAJO": "Tipo de Trabajo",
+            "TIPO_BACKLOG": "Tipo de Backlog",
+            "CUENTA": "Cuenta",
+            "OT/LL": "OT",
+            "CONVENIENCIA": "Convivencia",
+            "ESTADO_ORDEN": "Estado de la Orden",
+            "Aliado Zonificado": "Aliado",
+            "ANTIGUEDAD_DIGITACION": "Antiguedad desde la Digitación",
+            "CLASE": "Clase",
+            "NODO": "Nodo",
+            "CEDULA_VENDEDOR": "Cédula del Vendedor",
+            "SEGMENTO": "Segmento",
+            "Comunidad": "Ciudad",
+            "FECHA_AGENDA_FUTURO": "Fecha Agenda Futuro",
+            "ESTADO_VISITA": "Estado de la Visita",
+            "ANTIGUEDAD_ULTIMA_VISITA": "Antiguedad desde la Última Visita",
+            "CUENTA_MATRIZ": "Cuenta Matriz",
+            "GV-Especialista": "Especialista",
+            "GV-Descripcion": "Proveedor",
+            "CANAL2": "Canal",
+            "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
+        },
+        "backlog_onnet": {
+            "Orden de trabajo": "Orden de Trabajo",
+            "Compañia": "Aliado",
+            "GV-Especialista": "Especialista",
+            "GV-Descripcion": "Proveedor",
+            "CANAL2": "Canal",
+            "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
+        },
     },
     MIGRATIONS_ANALYSIS: {
         "brownfield_bases": {
@@ -327,6 +357,7 @@ PRODUCTIVITY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-productividad.xlsx"
 MIGRATIONS_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-migraciones.xlsx"
 CONTACT_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-contacto.xlsx"
 BACKLOG_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-backlog.xlsx"
+BACKLOG_ONNET_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-backlog-onnet.xlsx"
 
 
 # Salidas individuales de archivos de apoyo

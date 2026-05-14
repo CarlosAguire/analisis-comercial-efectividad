@@ -66,7 +66,6 @@ def __clean_data(
 
         df_ofsc_dispatch_copy = df_ofsc_dispatch.copy()
         df_ofsc_dispatch_copy = clean_df_ofsc_dispatch(df=df_ofsc_dispatch_copy)
-
         cleaned_dfs_ofsc_dispatch.append(df_ofsc_dispatch_copy)
 
     # Unimos todos loas archivos del área de capacidades en uno solo

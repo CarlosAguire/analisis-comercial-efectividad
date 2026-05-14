@@ -44,7 +44,7 @@ def run(ftth_hfc_tree: list[pd.DataFrame], fo_tree: list[pd.DataFrame]) -> None:
 
     logging(message="Limpieza completada", level="INFO")
     logging(
-        message=f"Creando archivo final: {parameters.CONTACT_ANALYSIS_FILE_PATH}",
+        message=f"Creando archivo final: {parameters.PRODUCTIVITY_ANALYSIS_FILE_PATH}",
         level="INFO",
     )
 

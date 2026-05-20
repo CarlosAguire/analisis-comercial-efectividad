@@ -1,127 +1,57 @@
-"[{
-    "Razón": "CLIENTE SOLICITA REPROGRAMAR",
-    "Nota de Cierre": "El técnico contactó al cliente. Este respondió que no podía atender. Por ello, la orden se marcó como no realizada. Aunque el técnico reintentó y el cliente dijo que atendería después, la orden ya estaba cerrada por la imposibilidad inicial.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "165"
-},
 {
-    "Razón": "CLIENTE SOLICITA REPROGRAMAR",
-    "Nota de Cierre": "Se envió un mensaje al cliente por inactividad, que fue entregado. El cliente respondió pidiendo reagendar el servicio. A pesar de esta respuesta, la orden se marcó como No Atendido con la razón No puedo atenderlo, ya que el sistema no procesó la solicitud, quedando no realizada.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "166"
-},
-{
-    "Razón": "NO CONTACTO CON EL CLIENTE",
-    "Nota de Cierre": "El técnico informó que el cliente no estaba en el lugar. Luego, se intentó contactar al cliente por WhatsApp, pero no hubo respuesta. Por eso, la orden quedó sin completar.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "167"
-},
-{
-    "Razón": "PERMISOS DE ADMINISTRACION",
-    "Nota de Cierre": "El técnico envió un mensaje al cliente. El cliente respondió: No hay permisos de administración. Por ello, la orden no se pudo completar y quedó como no realizada.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "168"
-},
-{
-    "Razón": "NO CONTACTO CON EL CLIENTE",
-    "Nota de Cierre": "Se intentó contactar al cliente, pero no respondió. El sistema envió un mensaje automático indicando esta situación. Luego, el técnico confirmó que no hubo contacto para la visita. Debido a esta falta de comunicación con el cliente, la orden no pudo completarse y quedó pendiente (notDone).",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "169"
-},
-{
-    "Razón": "CLIENTE SOLICITA REPROGRAMAR",
-    "Nota de Cierre": "El técnico intentó realizar la visita, pero no pudo contactar al cliente. Por esta razón, el sistema envió un mensaje automático al cliente. Como no se logró la comunicación, la orden quedó como no realizada.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "170"
-},
-{
-    "Razón": "FUERA ZONA/ SIN COBERTURA RED",
-    "Nota de Cierre": "Cuenta 49330045 OT No 470303238_O_CO_12 Porfavor razonar OT por   Fuera de zona",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "171"
-},
-{
-    "Razón": "FUERA ZONA/ SIN COBERTURA RED",
-    "Nota de Cierre": "Razonar por fuera de zona: Atiende. Esposa: Fiana Ariza Cc. 1075291748 Cel. 3002654234 la cual se le indica que no se puede completar el servicio porque lo agendaron como hfc y ya en el sector cuenta con la red de fibra óptica y aparte la dirección del local que aparece en el aplicativo es el 162 pero la el local correcto es el 462 esto se validó con el supervisor dilmer Sepúlveda el cual valida con el interventor de claro Héctor salas para razonar por de vuelta al asesor Troncal PIEDA6 pero el internet todo le indica el supervisor que no se puede razonar por de vuelta al asesor sino por fuera de zona no se puede instalar ni hfc ni ftth porque no tiene cuenta matriz la plaza",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "172"
-},
-{
-    "Razón": "CLIENTE SOLICITA REPROGRAMAR",
-    "Nota de Cierre": "はい、その状況を自然な言葉で、技術的な専門用語を使わずに、時系列で説明します。  ---  まず、テクニシャンがお客様へ「お客様の活動がない」ことを知らせるメッセージを送りました。このメッセージはシステムから正常に送信されたことが確認されました。  しかし、お客様からはこのメッセージに対して何の返信もありませんでした。テクニシャンは「お客様が対応しない」と記録し、その結果、この作業は「未完了」として処理されました。  ---",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "173"
-},
-{
-    "Razón": "NO CONTACTO CON EL CLIENTE",
-    "Nota de Cierre": "El técnico llegó al lugar, pero no había nadie. El sistema avisó al cliente por WhatsApp que no respondía. Sin contacto ni acceso, la orden no pudo realizarse y quedó como notDone.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "174"
-},
-{
-    "Razón": "VENTA DEVUELTA AL ASESOR",
-    "Nota de Cierre": "4",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "175"
-},
-{
-    "Razón": "VENTA DEVUELTA AL ASESOR",
-    "Nota de Cierre": "4",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "176"
-},
-{
-    "Razón": "INCUMPLIMIENTO ALIADO",
-    "Nota de Cierre": "El técnico informó que el cliente no atendía. Tras un segundo intento fallido, el sistema envió un mensaje al cliente por no responder. Al no lograr contacto, la orden no pudo completarse y quedó como notDone. --- El técnico reportó que el cliente no atendía. Al no obtener respuesta, el sistema envió un aviso automático. Como no hubo comunicación, la orden no pudo completarse y quedó como no realizada.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "177"
-},
-{
-    "Razón": "NO CONTACTO CON EL CLIENTE",
-    "Nota de Cierre": "El técnico intentó contactar al cliente dos veces, pero este no respondió. Se registraron los intentos y se enviaron mensajes automáticos de no respuesta. Al no lograr comunicación con el cliente, la orden no pudo completarse y quedó como notDone.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "178"
-},
-{
-    "Razón": "NO CONTACTO CON EL CLIENTE",
-    "Nota de Cierre": "El sistema avisó que el cliente no respondía. Luego, el técnico informó que no pudo hacer la orden. Por eso, la orden quedó en estado notDone.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "179"
-},
-{
-    "Razón": "NO CONTACTO CON EL CLIENTE",
-    "Nota de Cierre": "Se intentó contactar al cliente por WhatsApp, pero no hubo respuesta. Por eso, el técnico informó que la orden no se podía realizar. Así, la orden quedó como no completada.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "180"
-},
-{
-    "Razón": "NO CONTACTO CON EL CLIENTE",
-    "Nota de Cierre": "TT indica que no se encuentra en el domicilio y nos puede recibir sobre el medio día. --- El técnico intentó contactar al cliente por WhatsApp, pero no obtuvo respuesta. Al no poder comunicarse, el técnico informó que el cliente no deseaba el servicio o no fue posible realizarlo. Por eso, la orden se marcó como no realizada, ya que no se pudo concretar la visita.",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "181"
-},
-{
-    "Razón": "VENTA DEVUELTA AL ASESOR",
-    "Nota de Cierre": "técnico informa: Esta orden no se puede realizar porque los repetidores trae códigos diferentes  ** se valida con el super del tecnico quien confirma que deben ser los mismos codigos de repetidor para poder garantizar el servicio, se devuelve al comercial y se le informa al tt que lo deben validar para corregir y retomar la visita., null: , Fecha: 06/05/2026, Hora: 11:00:53",
-    "Razón Sugerida": "",
-    "Estado de la Razón": "",
-    "id": "182"
+    "statusCode": 200,
+    "headers": {
+        "Cache-Control": "no-cache",
+        "Vary": "Accept-Encoding",
+        "Set-Cookie": "ARRAffinity=2a0e56507b163049358aeedab7f0fe686ff7ddbef75d240675e387d36ee74e0d15134d20c556b0b34b9b6ae43ec3f5dcdad61788de889ffc592af7aca85fc1c508DEB105CABDD4780000001981638731; path=/; secure; HttpOnly,ReqClientId=f2896e48-0ff8-4acd-846e-69ae1bf934c5; expires=Wed, 13-May-2076 15:09:16 GMT; path=/; secure; HttpOnly,ARRAffinity=2a0e56507b163049358aeedab7f0fe686ff7ddbef75d240675e387d36ee74e0d15134d20c556b0b34b9b6ae43ec3f5dcdad61788de889ffc592af7aca85fc1c508DEB105CABDD4780000001981638731; path=/; secure; HttpOnly",
+        "x-ms-service-request-id": "b8d2f8d8-4988-4d48-b887-4a3094c56f06",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "REQ_ID": "b8d2f8d8-4988-4d48-b887-4a3094c56f06",
+        "AuthActivityId": "2863f6d5-8e6e-4fe7-a70f-e4039785bf68",
+        "x-ms-dop-hint": "4",
+        "x-ms-ratelimit-time-remaining-xrm-requests": "1,191.24",
+        "x-ms-ratelimit-burst-remaining-xrm-requests": "7994",
+        "X-Content-Type-Options": "nosniff",
+        "OData-Version": "4.0",
+        "X-Source": "229235441681268539319118740115526565117142203134132116230227481351224212422123722627,262025722162164107126194402034620610825086157254298953136735520896171108177144121234",
+        "Public": "OPTIONS,GET,HEAD,POST",
+        "Date": "Wed, 13 May 2026 15:09:17 GMT",
+        "Allow": "OPTIONS,GET,HEAD,POST",
+        "Content-Type": "application/json; odata.metadata=minimal",
+        "Expires": "-1",
+        "Content-Length": "7370"
+    },
+    "body": {
+        "@odata.context": "https://org6e9a25f8.crm.dynamics.com/api/data/v9.1/$metadata#Microsoft.Dynamics.CRM.PredictResponse",
+        "responsev2": {
+            "@odata.type": "#Microsoft.Dynamics.CRM.expando",
+            "operationStatus": "Success",
+            "predictionOutput": {
+                "@odata.type": "#Microsoft.Dynamics.CRM.expando",
+                "text": "Error writing audit results: Access denied to datos_auditados.json",
+                "mimetype": "",
+                "textMimeType": "",
+                "finishReason": "stop",
+                "code": "\nimport logging\nimport json\nimport re\nimport unicodedata\nfrom typing import List, Dict, Any\nfrom workerinterfaces import ExecutorInterface, ConnectorClient, ExecutionResult, HttpMethod\n\nclass PromptExecutor(ExecutorInterface):\n    async def execute(self, logger: logging.Logger, connector_client: ConnectorClient, input: Dict[str, Any]) -> ExecutionResult:\n        # Get the JSON_TABLE input; expected to be a JSON string or already parsed\n        raw_json = input.get(\"JSON_TABLE\")\n        if raw_json is None:\n            logger.error(\"Input JSON_TABLE is missing.\")\n            return ExecutionResult(400, {}, {\"text\": \"Error: JSON_TABLE input is required.\"})\n\n        # Parse the input JSON into a list of records\n        try:\n            # If input is string, parse it; if list/dict already, use as is\n            if isinstance(raw_json, str):\n                records = json.loads(raw_json)\n            else:\n                records = raw_json\n            if not isinstance(records, list):\n                raise ValueError(\"Input JSON must be an array of objects.\")\n        except Exception as e:\n            logger.error(f\"Failed to parse JSON_TABLE input: {str(e)}\")\n            return ExecutionResult(400, {}, {\"text\": f\"Error parsing JSON_TABLE input: {str(e)}\"})\n\n        def is_non_latin(text: str) -> bool:\n            for char in text:\n                # Check if character is not Latin script\n                if char.isalpha():\n                    try:\n                        name = unicodedata.name(char)\n                        # Latin letters have 'LATIN' in their name\n                        if \"LATIN\" not in name:\n                            return True\n                    except ValueError:\n                        # Characters with no name treated as non-latin\n                        return True\n            return False\n\n        def contains_english(text: str) -> bool:\n            # Simple heuristic: Check for common English words or grammar patterns\n            # Match presence of common English words or verb forms\n            english_words = {\"the\", \"and\", \"is\", \"are\", \"this\", \"that\", \"because\", \"which\",\n                             \"with\", \"for\", \"was\", \"were\", \"will\", \"can\", \"have\", \"has\",\n                             \"they\", \"you\", \"we\", \"but\", \"or\", \"not\", \"from\", \"as\"}\n            # Tokenize the text to words (case insensitive)\n            words = re.findall(r\"\\b[a-zA-Z]{2,}\\b\", text.lower())\n            matches = sum(1 for w in words if w in english_words)\n            # If more than 1 English word found, likely English text\n            return matches > 1\n\n        def is_repetitive_pattern(text: str) -> bool:\n            # Rule: Ignore if length <=3 or single letter/number\n            stripped_text = text.strip()\n            if len(stripped_text) <= 3:\n                return False\n\n            # Check if all characters are identical (e.g., \"aaaaaa\")\n            if len(set(stripped_text)) == 1:\n                return True\n\n            # Check for repetitive mathematical like pattern: e.g., \"1+1+1+1\"\n            # Pattern: sequence of digits/symbols repeated multiple times\n            # We'll detect if the whole string matches repeated subpattern\n            max_sub_length = min(5, len(stripped_text)//2)\n            for sub_len in range(1, max_sub_length +1):\n                subpattern = stripped_text[:sub_len]\n                repetitions = len(stripped_text) // sub_len\n                if subpattern * repetitions == stripped_text:\n                    # Verify that subpattern is not a real word or meaningful pattern\n                    # If subpattern is 1 char repeated, caught above already\n                    # If subpattern contains only digits and mathematical symbols\n                    if re.fullmatch(r\"[\\d\\+\\-\\*/\\^\\.]+\", subpattern):\n                        return True\n\n            return False\n\n        for record in records:\n            nota_cierre = record.get(\"Nota de Cierre\", \"\")\n            # Apply Step 1 conditions\n            cond_a = False\n            cond_b = False\n            # Condition A: English sentences or non-Latin script\n            if nota_cierre:\n                if contains_english(nota_cierre):\n                    cond_a = True\n                elif is_non_latin(nota_cierre):\n                    cond_a = True\n\n                # Condition B: repetitive patterns excluding very short\n                if not cond_a:  # Only check B if A not met\n                    if is_repetitive_pattern(nota_cierre):\n                        cond_b = True\n\n            # Step 2: If any cond true, set fields accordingly\n            if cond_a or cond_b:\n                record[\"Estado de la Razón\"] = \"ERROR DE OTO\"\n                record[\"Razón Sugerida\"] = \"NO REQUIERE\"\n            else:\n                # Do not modify \"Estado de la Razón\" or \"Razón Sugerida\"\n                pass\n\n        # Save the resulting JSON array to 'datos_auditados.json' (UTF-8)\n        filename = 'datos_auditados.json'\n        try:\n            with open(filename, 'w', encoding='utf-8') as f:\n                json.dump(records, f, ensure_ascii=False, indent=2)\n            logger.info(f\"Audit file '{filename}' written successfully.\")\n        except Exception as e:\n            logger.error(f\"Failed to write audit file: {str(e)}\")\n            return ExecutionResult(500, {}, {\"text\": f\"Error writing audit results: {str(e)}\"})\n\n        # Return with files key per functional requirement, no base64 encoding or structure alteration\n        return ExecutionResult(\n            status_code=200,\n            headers={},\n            body={\n                \"files\": [filename]\n            }\n        )\n",
+                "signature": "AQAAAK4AAADvu797Ikdlb2dyYXBoeSI6InVzIiwiRW52aXJvbm1lbnQiOiJwcm9kIiwiQ2x1c3RlcklkIjoiZXVzIiwiS2V5VmVyc2lvbiI6ImJlMDRiOGQ1NTJkODQ3Zjg5ZWRhMjQ1MWM5NzdjZDRkIiwiU2lnbmF0dXJlVmVyc2lvbiI6InYxIiwiU2lnbmF0dXJlRGF0ZUJpbmFyeSI6NTI1MDgyODgyNDEyOTM2Njc5NX0gAAAAXN5GN09EEVdGWuFBHvMwcrU30jTd88VAWK6MsHwwRFo=",
+                "logs": "2026-05-13 15:09:17,375 - CodeExecution [code.py:114 in function execute] - ERROR - Failed to write audit file: Access denied to datos_auditados.json\n",
+                "dataUsed": "[]",
+                "costAsAiBuilderCredits@odata.type": "#Int64",
+                "costAsAiBuilderCredits": 0,
+                "costAsCopilotCredits": 0,
+                "codeThinking": {
+                    "@odata.type": "#Microsoft.Dynamics.CRM.expando"
+                },
+                "files@odata.type": "#Collection(Microsoft.Dynamics.CRM.crmbaseentity)",
+                "files": [],
+                "structuredOutput": {
+                    "@odata.type": "#Microsoft.Dynamics.CRM.expando",
+                    "text": "Error writing audit results: Access denied to datos_auditados.json"
+                },
+                "artifacts": {
+                    "@odata.type": "#Microsoft.Dynamics.CRM.expando"
+                }
+            }
+        }
+    }
 }
-]"

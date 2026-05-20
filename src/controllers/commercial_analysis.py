@@ -3,20 +3,20 @@ import gc
 import pandas as pd
 
 from config import parameters
-from data.clean.commercial_analysis import (
+from logs_setup import logging
+from operations.clean.commercial_analysis import (
     clean_df_ofsc_capacity,
     clean_df_ofsc_dispatch,
     clean_df_residential_plant,
 )
-from data.clean.manager import CleanDataFrame
-from data.operations import (
+from operations.clean.manager import CleanDataFrame
+from operations.data_frame import (
     complete_data,
     create_file,
     join,
     normalize_date,
     reorder_columns,
 )
-from logs_setup import logging
 
 COMERCIAL_EFFICACY_ANALYSIS = parameters.COMERCIAL_EFFICACY_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[COMERCIAL_EFFICACY_ANALYSIS]

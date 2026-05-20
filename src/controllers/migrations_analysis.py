@@ -3,12 +3,12 @@ import gc
 import pandas as pd
 
 from config import parameters
-from data.clean.migrations_analysis import (
+from logs_setup import logging
+from operations.clean.migrations_analysis import (
     clean_df_brownfield,
     clean_df_gpon,
 )
-from data.operations import create_file, reorder_columns
-from logs_setup import logging
+from operations.data_frame import create_file, reorder_columns
 
 MIGRATIONS_ANALYSIS = parameters.MIGRATIONS_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[MIGRATIONS_ANALYSIS]

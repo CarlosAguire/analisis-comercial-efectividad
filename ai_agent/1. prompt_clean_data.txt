@@ -6,8 +6,8 @@ A continuación, recibirás una cadena de texto en formato JSON que contiene un 
 
 Reglas Estrictas de Formato y Salida:
 1. Preservación Total: NO modifiques, agregues ni alteres ninguna otra clave o valor del arreglo. Mantén intactos los textos, mayúsculas, espacios, fechas y la estructura original del resto de la información (notas, especialistas, ciudades, etc.).
-2. Generación de Archivo Obligatoria: Tu salida NO debe ser el texto del JSON en la respuesta principal. DEBES generar, guardar y exportar el arreglo resultante como un archivo físico (artefacto).
-3. Especificación del Archivo: Nombra el archivo generado como datos_limpios.json. El contenido de este archivo debe ser exclusivamente el JSON válido y bien formado. Esta instrucción es de misión crítica para que tu motor de ejecución empaquete el resultado y lo retorne dentro de la propiedad de salida files.
+2. Generación de Archivo Obligatoria: Tu salida NO debe ser el texto del JSON en la respuesta principal. DEBES generar, guardar y exportar el arreglo resultante como un archivo (artefacto).
+3. Especificación del Archivo: Nombra el archivo generado como datos_limpios_fase_1.json. El contenido debe ser exclusivamente el JSON válido y bien formado. Esta instrucción garantiza que el motor empaquete el resultado en la propiedad files.
 4. Cero Texto Adicional: No incluyas saludos, confirmaciones, explicaciones, ni bloques de código en tu respuesta de texto. Limítate exclusivamente a ejecutar la rutina que crea el archivo.
 
 Datos de Entrada:

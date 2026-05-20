@@ -4,13 +4,13 @@ from collections import Counter
 import pandas as pd
 
 from config import parameters
-from data.clean.contact_analysis import (
+from logs_setup import logging
+from operations.clean.contact_analysis import (
     clean_df_ofsc_capacity,
     clean_df_residential_plant,
 )
-from data.clean.manager import CleanDataFrame
-from data.operations import complete_data, create_file, normalize_date
-from logs_setup import logging
+from operations.clean.manager import CleanDataFrame
+from operations.data_frame import complete_data, create_file, normalize_date
 
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]

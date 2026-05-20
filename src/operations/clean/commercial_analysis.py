@@ -1,7 +1,7 @@
 import pandas as pd
 
 from config import parameters
-from data.clean.manager import CleanDataFrame
+from operations.clean.manager import CleanDataFrame
 
 COMERCIAL_EFFICACY_ANALYSIS = parameters.COMERCIAL_EFFICACY_ANALYSIS
 FILTERS = parameters.FILTERS[COMERCIAL_EFFICACY_ANALYSIS]

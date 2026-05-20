@@ -1,32 +1,20 @@
 from pathlib import Path
 
-# Configuración del modo de ejecución
-DEBUG = False
-
-
 # Configuración de ruta raíz del proyecto
 THIS_FILE = Path(__file__).resolve()
 PROJECT_ROOT = THIS_FILE.parent.parent.parent
 
 
-# Configuración de rutas de carpetas
+# Configuraciónes y rutas de archivos
 DATABASES_FOLDER = PROJECT_ROOT / "databases"
-FTTH_HFC_TREE_FOLDER = DATABASES_FOLDER / "FTTH y HFC"
-FO_TREE_FOLDER = DATABASES_FOLDER / "FO"
+FTTH_HFC_FOLDER = DATABASES_FOLDER / "FTTH-HFC"
+FO_FOLDER = DATABASES_FOLDER / "FO"
 BACKLOG_FOLDER = DATABASES_FOLDER / "Backlog"
-BACKLOG_OFSC_FOLDER = BACKLOG_FOLDER / "Historico OFSC"
-DEBUGGING_FOLDER = PROJECT_ROOT / "debugging"
-COMERCIAL_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "comercial"
-CONTACT_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "contacto"
-BACKLOG_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "backlog"
-PRODUCTIVITY_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "productividad"
-MIGRATIONS_DEBUGGING_FOLDER = DEBUGGING_FOLDER / "migraciones"
 LOGS_FOLDER = PROJECT_ROOT / "logs"
 
 
 # Configuración de rutas de archivos
 RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsb"
-BACKLOG_PATH = BACKLOG_FOLDER / "Backlog_Nacional_Por_Produccion.csv"
 GPON_BASES_PATH = DATABASES_FOLDER / "BASES CENTROS COMERCIALES GPON.xlsx"
 BROWNFIELD_BASES_PATH = DATABASES_FOLDER / "BASE BROWNFIELD 2026 Oriente.xlsx"
 PY_OUT_LOGS_PATH = LOGS_FOLDER / "py_out_logs.txt"
@@ -34,24 +22,88 @@ LOGS_PATH = LOGS_FOLDER / "logs.txt"
 
 
 # Tipos de análisis
-COMERCIAL_EFFICACY_ANALYSIS = "análisis de efectividad comercial"
+REASONED_ANALYSIS = "análisis de razonadas"
 CONTACT_ANALYSIS = "análisis de contacto"
 BACKLOG_ANALYSIS = "análisis de backlog"
+BACKLOG_ONNET_ANALYSIS = "análisis de backlog onnet"
 PRODUCTIVITY_ANALYSIS = "análisis de productividad"
 MIGRATIONS_ANALYSIS = "análisis de migraciones"
 
 
+# Filtros para cada tipo de análisis
+FILTERS = {
+    REASONED_ANALYSIS: {
+        "dispatch_files": {
+            "include": {
+                "Estado": "No completado",
+                "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
+                "Tipo de Red": ["Pymes", "FTTX"],
+            },
+        },
+        "capacity_files": {
+            "include": {
+                "Estado": "No completado",
+                "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
+                "Tipo de Red": ["Pymes", "FTTX"],
+            }
+        },
+    },
+    CONTACT_ANALYSIS: {
+        "capacity_files": {
+            "include": {
+                "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
+                "Tipo de Red": ["Pymes", "FTTX"],
+            }
+        },
+    },
+    BACKLOG_ANALYSIS: {
+        "backlog_file": {
+            "include": {
+                "Region": "REGION ORIENTE",
+            },
+            "exclude": {
+                "TIPO_TRABAJO": [
+                    "Cambio Control",
+                    "Demostracion",
+                    "Desconexiones",
+                    "Reconexiones",
+                    "Supervision",
+                ],
+                "SEGMENTO": [
+                    "RE",
+                    "RAN",
+                    "RAT",
+                    "RVA",
+                    "REC",
+                ],
+            },
+        },
+    },
+    BACKLOG_ONNET_ANALYSIS: {
+        "capacity_file": {
+            "include": {
+                "Owner": "Onnet",
+                "Tipo de Red": ["Pymes", "FTTX"],
+            },
+            "contains": {
+                "Nodo": "K",
+            },
+        },
+    },
+}
+
+
 # Lista de columnas a conservar
 COLUMNS_TO_RESERVE = {
-    COMERCIAL_EFFICACY_ANALYSIS: {
-        "ofsc_dispatch": [
+    REASONED_ANALYSIS: {
+        "dispatch_files": [
             "Notas de Cierre",
             "Orden de trabajo",
             "Fecha",
             "Inicio",
             "Compañia",
         ],
-        "ofsc_capacity": [
+        "capacity_files": [
             "Estado",
             "Razón",
             "Tipo de Actividad",
@@ -63,7 +115,7 @@ COLUMNS_TO_RESERVE = {
             "Fecha",
             "Inicio",
         ],
-        "residential_plant": [
+        "residential_plant_file": [
             "NOMBRE",
             "GV-Especialista",
             "GV-Descripcion",
@@ -72,7 +124,7 @@ COLUMNS_TO_RESERVE = {
         ],
     },
     CONTACT_ANALYSIS: {
-        "ofsc_capacity": [
+        "capacity_files": [
             "Tipo de Actividad",
             "Ciudad",
             "Orden de trabajo",
@@ -85,7 +137,7 @@ COLUMNS_TO_RESERVE = {
             "Celuar del contacto",
             "Fecha",
         ],
-        "residential_plant": [
+        "residential_plant_file": [
             "NOMBRE",
             "GV-Especialista",
             "GV-Descripcion",
@@ -94,7 +146,7 @@ COLUMNS_TO_RESERVE = {
         ],
     },
     BACKLOG_ANALYSIS: {
-        "backlog": [
+        "backlog_file": [
             "TIPO_TRABAJO",
             "TIPO_BACKLOG",
             "CUENTA",
@@ -116,7 +168,26 @@ COLUMNS_TO_RESERVE = {
             "SEGMENTO",
             "Aliado Zonificado",
         ],
-        "residential_plant": [
+        "residential_plant_file": [
+            "TCARGU",
+            "CC_COMPLETA",
+            "GV-Especialista",
+            "GV-Descripcion",
+            "JEFE 1 CANAL REGIONAL",
+            "CANAL2",
+            "NOMBRE",
+        ],
+        "capacity_file": [
+            "Orden de trabajo",
+            "Ventana de servicio",
+        ],
+        "fo_file": [
+            "Orden de trabajo",
+            "Ventana de servicio",
+        ],
+    },
+    BACKLOG_ONNET_ANALYSIS: {
+        "residential_plant_file": [
             "TCARGU",
             "CC_COMPLETA",
             "GV-Especialista",
@@ -130,14 +201,12 @@ COLUMNS_TO_RESERVE = {
             "Tipo de Actividad",
             "Estado",
             "Ciudad",
+            "Razón",
             "Tipo de Red",
             "Compañia",
-            "Fecha de agendamiento",
-            "Asesor comercial",
-        ],
-        "ofsc": [
-            "Orden de trabajo",
             "Ventana de servicio",
+            "Fecha",
+            "Asesor comercial",
         ],
     },
     MIGRATIONS_ANALYSIS: {
@@ -168,67 +237,9 @@ COLUMNS_TO_RESERVE = {
 }
 
 
-# Filtros para cada tipo de análisis
-FILTERS = {
-    COMERCIAL_EFFICACY_ANALYSIS: {
-        "ofsc_dispatch": {
-            "include": {
-                "Estado": "No completado",
-                "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
-                "Tipo de Red": ["Pymes", "FTTX"],
-            },
-        },
-        "ofsc_capacity": {
-            "include": {
-                "Estado": "No completado",
-                "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
-                "Tipo de Red": ["Pymes", "FTTX"],
-            }
-        },
-    },
-    CONTACT_ANALYSIS: {
-        "ofsc_capacity": {
-            "include": {
-                "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
-                "Tipo de Red": ["Pymes", "FTTX"],
-            }
-        },
-    },
-    BACKLOG_ANALYSIS: {
-        "backlog": {
-            "include": {
-                "Region": "REGION ORIENTE",
-            },
-            "exclude": {
-                "TIPO_TRABAJO": [
-                    "Cambio Control",
-                    "Demostracion",
-                    "Desconexiones",
-                    "Reconexiones",
-                    "Supervision",
-                ],
-                "SEGMENTO": [
-                    "RE",
-                    "RAN",
-                    "RAT",
-                    "RVA",
-                    "REC",
-                ],
-            },
-        },
-        "ofsc_capacity": {
-            "include": {
-                "Owner": "Onnet",
-                "Tipo de Red": ["Pymes", "FTTX"],
-            },
-        },
-    },
-}
-
-
 # Nombre de columnas finales para cada análisis
 FINAL_COLUMNS = {
-    COMERCIAL_EFFICACY_ANALYSIS: {
+    REASONED_ANALYSIS: {
         "Orden de trabajo": "Orden de Trabajo",
         "Notas de Cierre": "Nota de Cierre",
         "Compañia": "Aliado",
@@ -251,37 +262,35 @@ FINAL_COLUMNS = {
         "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
     },
     BACKLOG_ANALYSIS: {
-        "backlog": {
-            "TIPO_TRABAJO": "Tipo de Trabajo",
-            "TIPO_BACKLOG": "Tipo de Backlog",
-            "CUENTA": "Cuenta",
-            "OT/LL": "OT",
-            "CONVENIENCIA": "Convivencia",
-            "ESTADO_ORDEN": "Estado de la Orden",
-            "Aliado Zonificado": "Aliado",
-            "ANTIGUEDAD_DIGITACION": "Antiguedad desde la Digitación",
-            "CLASE": "Clase",
-            "NODO": "Nodo",
-            "CEDULA_VENDEDOR": "Cédula del Vendedor",
-            "SEGMENTO": "Segmento",
-            "Comunidad": "Ciudad",
-            "FECHA_AGENDA_FUTURO": "Fecha Agenda Futuro",
-            "ESTADO_VISITA": "Estado de la Visita",
-            "ANTIGUEDAD_ULTIMA_VISITA": "Antiguedad desde la Última Visita",
-            "CUENTA_MATRIZ": "Cuenta Matriz",
-            "GV-Especialista": "Especialista",
-            "GV-Descripcion": "Proveedor",
-            "CANAL2": "Canal",
-            "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
-        },
-        "backlog_onnet": {
-            "Orden de trabajo": "Orden de Trabajo",
-            "Compañia": "Aliado",
-            "GV-Especialista": "Especialista",
-            "GV-Descripcion": "Proveedor",
-            "CANAL2": "Canal",
-            "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
-        },
+        "TIPO_TRABAJO": "Tipo de Trabajo",
+        "TIPO_BACKLOG": "Tipo de Backlog",
+        "CUENTA": "Cuenta",
+        "OT/LL": "OT",
+        "CONVENIENCIA": "Convivencia",
+        "ESTADO_ORDEN": "Estado de la Orden",
+        "Aliado Zonificado": "Aliado",
+        "ANTIGUEDAD_DIGITACION": "Antiguedad desde la Digitación",
+        "CLASE": "Clase",
+        "NODO": "Nodo",
+        "CEDULA_VENDEDOR": "Cédula del Vendedor",
+        "SEGMENTO": "Segmento",
+        "Comunidad": "Ciudad",
+        "FECHA_AGENDA_FUTURO": "Fecha Agenda Futuro",
+        "ESTADO_VISITA": "Estado de la Visita",
+        "ANTIGUEDAD_ULTIMA_VISITA": "Antiguedad desde la Última Visita",
+        "CUENTA_MATRIZ": "Cuenta Matriz",
+        "GV-Especialista": "Especialista",
+        "GV-Descripcion": "Proveedor",
+        "CANAL2": "Canal",
+        "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
+    },
+    BACKLOG_ONNET_ANALYSIS: {
+        "Orden de trabajo": "Orden de Trabajo",
+        "Compañia": "Aliado",
+        "GV-Especialista": "Especialista",
+        "GV-Descripcion": "Proveedor",
+        "CANAL2": "Canal",
+        "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
     },
     MIGRATIONS_ANALYSIS: {
         "brownfield_bases": {
@@ -313,7 +322,7 @@ FINAL_COLUMNS = {
 
 # Orden de columnas para el archivo final de cada análisis
 COLUMN_ORDER = {
-    COMERCIAL_EFFICACY_ANALYSIS: [
+    REASONED_ANALYSIS: [
         "Orden de Trabajo",
         "Tipo de Actividad",
         "Estado",
@@ -352,24 +361,9 @@ COLUMN_ORDER = {
 
 
 # Archivo de salida
-EFFICACY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-efectividad-comercial.xlsx"
+REASONED_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-razonadas.xlsx"
 PRODUCTIVITY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-productividad.xlsx"
 MIGRATIONS_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-migraciones.xlsx"
 CONTACT_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-contacto.xlsx"
 BACKLOG_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-backlog.xlsx"
 BACKLOG_ONNET_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-backlog-onnet.xlsx"
-
-
-# Salidas individuales de archivos de apoyo
-COMERCIAL_OFSC_PATH = COMERCIAL_DEBUGGING_FOLDER / "ofsc_capacity_dispatch.xlsx"
-COMERCIAL_OFSC_CAPACITY_PATH = COMERCIAL_DEBUGGING_FOLDER / "ofsc_capacity.xlsx"
-COMERCIAL_OFSC_DISPATCH_PATH = COMERCIAL_DEBUGGING_FOLDER / "ofsc_dispatch.xlsx"
-CONTACT_RESIDENTIAL_PLANT_PATH = CONTACT_DEBUGGING_FOLDER / "planta_residencial.xlsx"
-CONTACT_OFSC_CAPACITY_PATH = CONTACT_DEBUGGING_FOLDER / "ofsc_capacity.xlsx"
-PRODUCTIVITY_OFSC_FTTH_HFC_PATH = PRODUCTIVITY_DEBUGGING_FOLDER / "ofsc_ftth_hfc.xlsx"
-PRODUCTIVITY_OFSC_FO_PATH = PRODUCTIVITY_DEBUGGING_FOLDER / "ofsc_fo.xlsx"
-BACKLOG_OFSC_FO_PATH = BACKLOG_DEBUGGING_FOLDER / "backlog.xlsx"
-BACKLOG_RESIDENTIAL_PLANT = BACKLOG_DEBUGGING_FOLDER / "planta_residencial.xlsx"
-COMERCIAL_RESIDENTIAL_PLANT_PATH = (
-    COMERCIAL_DEBUGGING_FOLDER / "planta_residencial.xlsx"
-)

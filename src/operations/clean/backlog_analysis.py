@@ -1,8 +1,8 @@
 import pandas as pd
 
 from config import parameters
-from data.clean.manager import CleanDataFrame
-from data.operations import complete_data
+from operations.clean.manager import CleanDataFrame
+from operations.data_frame import complete_data
 
 BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[BACKLOG_ANALYSIS]

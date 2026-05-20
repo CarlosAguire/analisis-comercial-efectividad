@@ -1,7 +1,7 @@
 import pandas as pd
 
 from config import parameters
-from data.clean.manager import CleanDataFrame
+from operations.clean.manager import CleanDataFrame
 
 MIGRATIONS_ANALYSIS = parameters.MIGRATIONS_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[MIGRATIONS_ANALYSIS]

@@ -3,15 +3,15 @@ import gc
 import pandas as pd
 
 from config import parameters
-from data.clean.backlog_analysis import (
+from logs_setup import logging
+from operations.clean.backlog_analysis import (
     clean_df_backlog,
     clean_df_ofsc,
     clean_df_ofsc_capacity,
     clean_df_residential_plant,
 )
-from data.clean.manager import CleanDataFrame
-from data.operations import complete_data, create_file
-from logs_setup import logging
+from operations.clean.manager import CleanDataFrame
+from operations.data_frame import complete_data, create_file
 
 BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
 FINAL_COLUMNS = parameters.FINAL_COLUMNS[BACKLOG_ANALYSIS]

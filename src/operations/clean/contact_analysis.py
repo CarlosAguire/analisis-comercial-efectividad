@@ -1,7 +1,7 @@
 import pandas as pd
 
 from config import parameters
-from data.clean.manager import CleanDataFrame
+from operations.clean.manager import CleanDataFrame
 
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 FILTERS = parameters.FILTERS[CONTACT_ANALYSIS]

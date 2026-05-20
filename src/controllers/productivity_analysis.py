@@ -1,8 +1,8 @@
 import pandas as pd
 
 from config import parameters
-from data.operations import create_file
 from logs_setup import logging
+from operations.data_frame import create_file
 
 PRODUCTIVITY_ANALYSIS = parameters.PRODUCTIVITY_ANALYSIS
 

@@ -1,76 +1,81 @@
 import argparse
 import sys
 import traceback
+from datetime import date
 
 from config import parameters
-from controllers import (
-    backlog_analysis,
-    commercial_analysis,
-    contact_analysis,
-    migrations_analysis,
-    productivity_analysis,
-)
-from data.match_files import pair_files
-from data.operations import read_csv_file, read_xlsb_file, read_xlsx_file
 from logs_setup import logging
+from operations.data_frame import read_csv_file, read_xlsb_file, read_xlsx_file
+from operations.files import filter_files_by_date, get_latest_file, process_file_folders
+from src import controllers
 
-COMERCIAL_EFFICACY_ANALYSIS = parameters.COMERCIAL_EFFICACY_ANALYSIS
+REASONED_ANALYSIS = parameters.REASONED_ANALYSIS
 PRODUCTIVITY_ANALYSIS = parameters.PRODUCTIVITY_ANALYSIS
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
+BACKLOG_ONNET_ANALYSIS = parameters.BACKLOG_ONNET_ANALYSIS
 MIGRATIONS_ANALYSIS = parameters.MIGRATIONS_ANALYSIS
 
-FTTH_HFC_TREE_FOLDER = parameters.FTTH_HFC_TREE_FOLDER
-FTTH_HFC_CAPACITY_FOLDER = FTTH_HFC_TREE_FOLDER / "OFSC" / "Area de Capacidades"
-FTTH_HFC_DISPATCH_FOLDER = FTTH_HFC_TREE_FOLDER / "OFSC" / "Area de Despacho"
-
-FO_CAPACITY_FOLDER = parameters.FO_TREE_FOLDER / "OFSC"
-
-BACKLOG_OFSC_FOLDER = parameters.BACKLOG_OFSC_FOLDER
+FTTH_HFC_CAPACITY_FOLDER = parameters.FTTH_HFC_FOLDER / "Capacidades"
+FTTH_HFC_DISPATCH_FOLDER = parameters.FTTH_HFC_FOLDER / "Despacho"
 
 
 def run_analysis(
-    productivity_analysis_parameter: bool,
-    commercial_analysis_parameter: bool,
-    contact_analysis_parameter: bool,
-    backlog_analysis_parameter: bool,
-    migrations_analysis_parameter: bool,
+    productivity_analysis: bool,
+    reasoned_analysis: bool,
+    contact_analysis: bool,
+    backlog_analysis: bool,
+    backlog_onnet_analysis: bool,
+    migrations_analysis: bool,
 ) -> None:
+
+    catalog_result = process_file_folders(
+        ftth_hfc_capacity_folder=FTTH_HFC_CAPACITY_FOLDER,
+        ftth_hfc_dispatch_folder=FTTH_HFC_DISPATCH_FOLDER,
+        fo_folder=parameters.FO_FOLDER,
+        date_format_ftth_hfc_capacity_folder="dmy",
+        date_format_ftth_hfc_dispatch_folder="mdy",
+        date_format_fo_folder="dmy",
+    )
 
     dfs_ftth_hfc_tree = []
 
     if (
-        commercial_analysis_parameter
-        or contact_analysis_parameter
-        or backlog_analysis_parameter
+        reasoned_analysis
+        or contact_analysis
+        or backlog_analysis
+        or backlog_onnet_analysis
     ):
+        # Creamos DF del archivo de planta residencial
         df_residential_plant = read_xlsb_file(
             path=parameters.RESIDENTIAL_PLANT_PATH,
             sheet=1,
         )
-        df_residential_plant.attrs["path"] = parameters.RESIDENTIAL_PLANT_PATH
+        df_residential_plant.attrs["file_path"] = parameters.RESIDENTIAL_PLANT_PATH
 
-        if backlog_analysis_parameter:
-            df_backlog = None
-            dfs_capacity = []
-            dfs_ofsc = []
+        if backlog_analysis:
+            # Creamos DF del archivo del backlog
+            file_path_backlog = get_latest_file(folder_path=parameters.BACKLOG_FOLDER)
+            df_backlog = read_csv_file(path=file_path_backlog)
+            df_backlog.attrs["file_path"] = file_path_backlog
 
-            for path in parameters.BACKLOG_FOLDER.iterdir():
-                if path.is_file() and path.suffix == ".xlsx":
-                    df = read_xlsx_file(path=path, sheet=0)
-                    df.attrs["path"] = path
-                    dfs_ofsc.append(df)
-                if path.is_file() and path.suffix == ".csv":
-                    df_backlog = read_csv_file(path=path)
-                    df_backlog.attrs["path"] = path
-            for file_path in [
-                path for path in BACKLOG_OFSC_FOLDER.iterdir() if path.is_file()
-            ]:
-                df = read_xlsx_file(path=file_path, sheet=0)
-                df.attrs["path"] = file_path
-                dfs_capacity.append(df)
+            # Creamos DF del archivo de capacidades del arbol FTTH-HFC
+            file_path_ftth_hfc = filter_files_by_date(
+                inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
+                exact_date=date.today(),
+            )[0]
+            df_ftth_hfc = read_xlsx_file(path=file_path_ftth_hfc, sheet=0)
+            df_ftth_hfc.attrs["file_path"] = file_path_ftth_hfc
 
-            backlog_analysis.run(
+            # Creamos DF del archivo del arbol FO
+            file_path_fo = filter_files_by_date(
+                inventory=catalog_result.files_by_date_fo_folder,
+                exact_date=date.today(),
+            )[0]
+            df_fo = read_xlsx_file(path=file_path_fo, sheet=0)
+            df_fo.attrs["file_path"] = file_path_fo
+
+            controllers.run_backlog_analysis(
                 df_residential_plant=df_residential_plant,
                 df_backlog=df_backlog,  # type: ignore
                 dfs_ofsc_capacity=dfs_capacity,
@@ -86,11 +91,6 @@ def run_analysis(
                 and not commercial_analysis_parameter
             ):
                 return None
-
-        file_paths = pair_files(
-            dir1=FTTH_HFC_CAPACITY_FOLDER,
-            dir2=FTTH_HFC_DISPATCH_FOLDER,
-        )
 
         dfs_capacity = []
 
@@ -188,52 +188,55 @@ def run_analysis(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--commercial_analysis", action="store_true")
-    parser.add_argument("--contact_analysis", action="store_true")
-    parser.add_argument("--backlog_analysis", action="store_true")
-    parser.add_argument("--productivity_analysis", action="store_true")
-    parser.add_argument("--migrations_analysis", action="store_true")
+    parser.add_argument("--reasoned", action="store_true")
+    parser.add_argument("--contact", action="store_true")
+    parser.add_argument("--backlog", action="store_true")
+    parser.add_argument("--backlog_onnet", action="store_true")
+    parser.add_argument("--productivity", action="store_true")
+    parser.add_argument("--migrations", action="store_true")
     args = parser.parse_args()
 
     try:
-        commercial_analysis_parameter = args.commercial_analysis
-        contact_analysis_parameter = args.contact_analysis
-        backlog_analysis_parameter = args.backlog_analysis
-        productivity_analysis_parameter = args.productivity_analysis
-        migrations_analysis_parameter = args.migrations_analysis
-
+        reasoned_analysis = args.reasoned
+        contact_analysis = args.contact
+        backlog_analysis = args.backlog
+        backlog_onnet_analysis = args.backlog_onnet
+        productivity_analysis = args.productivity
+        migrations_analysis = args.migrations
         analysis_to_run = []
 
-        if commercial_analysis_parameter:
-            analysis_to_run.append(f"\n    >> {COMERCIAL_EFFICACY_ANALYSIS}")
-        if contact_analysis_parameter:
+        if reasoned_analysis:
+            analysis_to_run.append(f"\n    >> {REASONED_ANALYSIS}")
+        if contact_analysis:
             analysis_to_run.append(f"\n    >> {CONTACT_ANALYSIS}")
-        if backlog_analysis_parameter:
+        if backlog_analysis:
             analysis_to_run.append(f"\n    >> {BACKLOG_ANALYSIS}")
-        if productivity_analysis_parameter:
+        if backlog_onnet_analysis:
+            analysis_to_run.append(f"\n    >> {BACKLOG_ONNET_ANALYSIS}")
+        if productivity_analysis:
             analysis_to_run.append(f"\n    >> {PRODUCTIVITY_ANALYSIS}")
-        if migrations_analysis_parameter:
+        if migrations_analysis:
             analysis_to_run.append(f"\n    >> {MIGRATIONS_ANALYSIS}")
 
         message = "Preparando archivos para ejecutar los siguientes análisis:"
         message += "".join(analysis_to_run)
         logging(message=message, level="INFO")
 
+        # Ejecutamos análisis solicitados
         run_analysis(
-            productivity_analysis_parameter=productivity_analysis_parameter,
-            commercial_analysis_parameter=commercial_analysis_parameter,
-            contact_analysis_parameter=contact_analysis_parameter,
-            backlog_analysis_parameter=backlog_analysis_parameter,
-            migrations_analysis_parameter=migrations_analysis_parameter,
+            productivity_analysis=productivity_analysis,
+            reasoned_analysis=reasoned_analysis,
+            contact_analysis=contact_analysis,
+            backlog_analysis=backlog_analysis,
+            backlog_onnet_analysis=backlog_onnet_analysis,
+            migrations_analysis=migrations_analysis,
         )
 
         logging(message="Datos procesados correctamente.", level="INFO")
-
         print("Datos procesados correctamente.", flush=True)
         sys.exit(0)
     except Exception as e:
         logging(message="Ocurrió un error:\n", level="ERROR")
-
         print(f"{e}", flush=True)
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)

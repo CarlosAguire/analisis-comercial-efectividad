@@ -33,14 +33,14 @@ MIGRATIONS_ANALYSIS = "análisis de migraciones"
 # Filtros para cada tipo de análisis
 FILTERS = {
     REASONED_ANALYSIS: {
-        "dispatch_files": {
+        "dispatch_file": {
             "include": {
                 "Estado": "No completado",
                 "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
                 "Tipo de Red": ["Pymes", "FTTX"],
             },
         },
-        "capacity_files": {
+        "capacity_file": {
             "include": {
                 "Estado": "No completado",
                 "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
@@ -49,7 +49,7 @@ FILTERS = {
         },
     },
     CONTACT_ANALYSIS: {
-        "capacity_files": {
+        "capacity_file": {
             "include": {
                 "Tipo de Actividad": ["Instalaciones", "INSTALACIONES FTTH"],
                 "Tipo de Red": ["Pymes", "FTTX"],
@@ -96,14 +96,14 @@ FILTERS = {
 # Lista de columnas a conservar
 COLUMNS_TO_RESERVE = {
     REASONED_ANALYSIS: {
-        "dispatch_files": [
+        "dispatch_file": [
             "Notas de Cierre",
             "Orden de trabajo",
             "Fecha",
             "Inicio",
             "Compañia",
         ],
-        "capacity_files": [
+        "capacity_file": [
             "Estado",
             "Razón",
             "Tipo de Actividad",
@@ -124,7 +124,7 @@ COLUMNS_TO_RESERVE = {
         ],
     },
     CONTACT_ANALYSIS: {
-        "capacity_files": [
+        "capacity_file": [
             "Tipo de Actividad",
             "Ciudad",
             "Orden de trabajo",
@@ -210,7 +210,7 @@ COLUMNS_TO_RESERVE = {
         ],
     },
     MIGRATIONS_ANALYSIS: {
-        "brownfield_bases": [
+        "brownfield_file": [
             "ESTADO REGIONAL",
             "CRONOGRAMA DESMONTE REGIONAL",
             "CRONOGRAMA DESMONTE TRANSVERSAL",
@@ -223,7 +223,7 @@ COLUMNS_TO_RESERVE = {
             "FECHA AGENDA",
             "NOTA",
         ],
-        "gpon_bases": [
+        "gpon_file": [
             "CODIGO",
             "CUENTA",
             "TIPIFICACION REGIONAL",
@@ -293,7 +293,7 @@ FINAL_COLUMNS = {
         "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
     },
     MIGRATIONS_ANALYSIS: {
-        "brownfield_bases": {
+        "brownfield_file": {
             "ESTADO REGIONAL": "Estado",
             "CUENTA MATRIZ": "Cuenta Matriz",
             "CUENTA": "Cuenta",
@@ -306,7 +306,7 @@ FINAL_COLUMNS = {
             "CRONOGRAMA DESMONTE TRANSVERSAL": "Cronograma Desmonte Transversal",
             "NOTA": "Nota",
         },
-        "gpon_bases": {
+        "gpon_file": {
             "TIPIFICACION REGIONAL": "Estado",
             "CUENTA MATRIZ": "Cuenta Matriz",
             "CUENTA": "Cuenta",

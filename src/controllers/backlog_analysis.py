@@ -1,167 +1,179 @@
-import gc
-
 import pandas as pd
 
 from config import parameters
 from logs_setup import logging
-from operations.clean.backlog_analysis import (
-    clean_df_backlog,
-    clean_df_ofsc,
-    clean_df_ofsc_capacity,
-    clean_df_residential_plant,
-)
-from operations.clean.manager import CleanDataFrame
-from operations.data_frame import complete_data, create_file
+from operations.data_frame import complete_data, create_file, drop_columns, filter_df
 
 BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
 FINAL_COLUMNS = parameters.FINAL_COLUMNS[BACKLOG_ANALYSIS]
+COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[BACKLOG_ANALYSIS]
+FILTERS = parameters.FILTERS[BACKLOG_ANALYSIS]
 
 
-def __clean_data(
-    df_residential_plant: pd.DataFrame,
-    dfs_ofsc_capacity: list[pd.DataFrame],
-    dfs_ofsc: list[pd.DataFrame],
+def __prepare_df_backlog(
     df_backlog: pd.DataFrame,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    logging(
-        message=f"Iniciando limpieza: {df_backlog.attrs['path']}",
-        level="INFO",
+    df_residential_plant: pd.DataFrame,
+    df_ftth_hfc: pd.DataFrame,
+    df_fo: pd.DataFrame,
+) -> pd.DataFrame:
+    message = f"Iniciando limpieza: {df_backlog.attrs['file_path']}"
+    logging(message=message, level="INFO")
+
+    # Normalizamos los nombres de las columnas de df_backlog
+    df_backlog.columns = df_backlog.columns.str.replace(
+        pat="ï»¿",
+        repl="",
+        regex=False,
+    ).str.strip()
+
+    # Ajustamos tipos de datos de df_backlog
+    # fmt: off
+    df_backlog["HORA_CREADO"] = df_backlog["HORA_CREADO"].astype("string")
+    df_backlog["Hora_AMPM"] = (
+        pd.to_datetime(
+            df_backlog["HORA_CREADO"].astype("string").str.zfill(6),
+            format="%H%M%S",
+            errors="coerce",
+        )
+        .dt.strftime("%I:%M %p")
+    )
+    df_backlog = df_backlog.drop(columns=["HORA_CREADO"])
+    df_backlog = df_backlog.rename(columns={"Hora_AMPM": "HORA_CREADO"})
+    df_backlog["CEDULA_VENDEDOR"] = (
+        df_backlog["CEDULA_VENDEDOR"]
+        .astype("string")
+        .str.replace(r"\.0$", "", regex=True)
+    )
+    df_residential_plant["CC_COMPLETA"] = (
+        df_residential_plant["CC_COMPLETA"]
+        .astype(dtype="string")
+        .str.replace(r"\.0$", "", regex=True)
+    )
+    # fmt: on
+
+    # Filtramos para eliminar filas que no necesitamos de df_backlog
+    cleaned_df_backlog = filter_df(
+        filters=FILTERS["backlog_file"],
+        df=df_backlog,
+    )
+    sellers = cleaned_df_backlog["CEDULA_VENDEDOR"].unique().tolist()
+    cleaned_df_residential_plant = filter_df(
+        df=df_residential_plant,
+        filters={"contains": {"CC_COMPLETA": sellers, "TCARGU": sellers}},
+        combine="or",
     )
 
-    df_residential_plant_copy = df_residential_plant.copy()
-    df_backlog_copy = df_backlog.copy()
-
-    # Iniciamos a limpiar backlog
-    cleaned_df_backlog = clean_df_backlog(
-        df_backlog=df_backlog_copy,
-        df_residential_plant=df_residential_plant_copy,
-    )
-
-    # Iniciamos limpieza de los archivos de OFSC
-    cleaned_dfs_ofsc: list[pd.DataFrame] = []
-
-    for df in dfs_ofsc:
-        logging(message=f"Iniciando limpieza: {df.attrs['path']}", level="INFO")
-
-        df_copy = df.copy()
-        df_copy = clean_df_ofsc(df=df_copy)
-        cleaned_dfs_ofsc.append(df_copy)
-
-    # Unimos todos loas archivos de OFSC
-    cleaned_df_ofsc = pd.concat(
-        objs=cleaned_dfs_ofsc,
-        ignore_index=True,
-    )
-
-    # Completamos la data uniendo backlog con OFSC
-    logging(message="Completando datos", level="INFO")
-
-    cleaned_df_backlog["Ventana de servicio"] = None
-    df_backlog = complete_data(
-        df_dictionary=cleaned_df_ofsc,
+    # Removemos columnas que no necesitamos de df_backlog
+    cleaned_df_backlog = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["backlog_file"],
         df=cleaned_df_backlog,
-        column="OT",
+    )
+    cleaned_df_residential_plant = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["residential_plant_file"],
+        df=cleaned_df_residential_plant,
+    )
+
+    # Completamos las columnas de df_backlog con la información de df_residential_plant
+    cleaned_df_residential_plant = cleaned_df_residential_plant.rename(
+        columns={"CC_COMPLETA": "CEDULA_VENDEDOR"},
+    )
+    cleaned_df_backlog["GV-Especialista"] = None
+    cleaned_df_backlog["GV-Descripcion"] = None
+    cleaned_df_backlog["JEFE 1 CANAL REGIONAL"] = None
+    cleaned_df_backlog["CANAL2"] = None
+    cleaned_df_backlog = complete_data(
+        df=cleaned_df_backlog,
+        df_dictionary=cleaned_df_residential_plant,
+        column="CEDULA_VENDEDOR",
+        key_match="contains",
+    )
+    cleaned_df_residential_plant = cleaned_df_residential_plant.drop(
+        columns=["CEDULA_VENDEDOR"]
+    )
+    cleaned_df_residential_plant = cleaned_df_residential_plant.rename(
+        columns={"TCARGU": "CEDULA_VENDEDOR"},
+    )
+    cleaned_df_backlog = complete_data(
+        df=cleaned_df_backlog,
+        df_dictionary=cleaned_df_residential_plant,
+        column="CEDULA_VENDEDOR",
         key_match="contains",
     )
 
-    # Iniciamos limpieza de los archivos de capacidad de OFSC
-    cleaned_dfs_residential_plant: list[pd.DataFrame] = []
-    cleaned_dfs_capacity: list[pd.DataFrame] = []
-
-    for df in dfs_ofsc_capacity:
-        logging(
-            message=f"Iniciando limpieza: {df.attrs['path']}",
-            level="INFO",
-        )
-
-        df_ofsc_capacity_copy = df.copy()
-        df_ofsc_capacity_copy = clean_df_ofsc_capacity(df=df_ofsc_capacity_copy)
-
-        df_residential_plant_copy = df_residential_plant.copy()
-        df_residential_plant_copy = clean_df_residential_plant(
-            df_ofsc_capacity=df_ofsc_capacity_copy,
-            df_residential_plant=df_residential_plant_copy,
-        )
-
-        cleaned_dfs_residential_plant.append(df_residential_plant_copy)
-        cleaned_dfs_capacity.append(df_ofsc_capacity_copy)
-
-    df_backlog_onnet = pd.concat(
-        objs=cleaned_dfs_capacity,
+    # Unimos de manera verical df_ftth_hfc y df_fo
+    cleaned_df_ofsc = pd.concat(
+        objs=[df_ftth_hfc, df_fo],
         ignore_index=True,
     )
-    df_residential_plant = pd.concat(
-        objs=cleaned_dfs_residential_plant,
-        ignore_index=True,
-    )
-    df_residential_plant = CleanDataFrame.drop_duplicate_rows_by_column(
-        df=df_residential_plant,
-        column="Asesor comercial",
-    )
-    df_backlog_onnet["GV-Especialista"] = None
-    df_backlog_onnet["GV-Descripcion"] = None
-    df_backlog_onnet["JEFE 1 CANAL REGIONAL"] = None
-    df_backlog_onnet["CANAL2"] = None
-    df_backlog_onnet = complete_data(
-        df_dictionary=df_residential_plant,
-        df=df_backlog_onnet,
-        column="Asesor comercial",
+
+    # Completamos las columnas de df_backlog con la información de cleaned_df_ofsc
+    cleaned_df_backlog["Ventana de servicio"] = None
+    cleaned_df_backlog = complete_data(
+        df_dictionary=cleaned_df_ofsc,
+        df=cleaned_df_backlog,
+        column="OT",
         key_match="contains",
     )
 
     # Renombramos columnas
-    df_backlog_onnet.rename(columns=FINAL_COLUMNS["backlog_onnet"], inplace=True)
+    cleaned_df_backlog.rename(columns=FINAL_COLUMNS, inplace=True)
 
-    # Completamos la data uniendo backlog con OFSC
-    logging(message="Completando datos", level="INFO")
+    return cleaned_df_backlog
 
-    cleaned_df_backlog["Ventana de servicio"] = None
-    df_backlog = complete_data(
-        df_dictionary=cleaned_df_ofsc,
-        df=cleaned_df_backlog,
-        column="OT",
-        key_match="contains",
+
+def __prepare_df_ftth_hfc(df_ftth_hfc: pd.DataFrame) -> pd.DataFrame:
+    message = f"Iniciando limpieza: {df_ftth_hfc.attrs['file_path']}"
+    logging(message=message, level="INFO")
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_ftth_hfc = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["capacity_file"],
+        df=df_ftth_hfc,
     )
 
-    # Eliminamos dataframes que ya no se usaran más para liberar memoria
-    for df in cleaned_dfs_ofsc + cleaned_dfs_residential_plant + cleaned_dfs_capacity:
-        del df
+    # Renombramos columnas
+    cleaned_df_ftth_hfc.rename(columns={"Orden de trabajo": "OT"}, inplace=True)
 
-    del df_residential_plant_copy
-    del df_backlog_copy
-    del cleaned_df_backlog
-    del cleaned_df_ofsc
+    return cleaned_df_ftth_hfc
 
-    gc.collect()
 
-    return df_backlog, df_backlog_onnet
+def __prepare_df_fo(df_fo: pd.DataFrame) -> pd.DataFrame:
+    message = f"Iniciando limpieza: {df_fo.attrs['file_path']}"
+    logging(message=message, level="INFO")
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_fo = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["fo_file"],
+        df=df_fo,
+    )
+
+    # Renombramos columnas
+    cleaned_df_fo.rename(columns={"Orden de trabajo": "OT"}, inplace=True)
+
+    return cleaned_df_fo
 
 
 def run(
     df_residential_plant: pd.DataFrame,
     df_backlog: pd.DataFrame,
-    dfs_ofsc: list[pd.DataFrame],
-    dfs_ofsc_capacity: list[pd.DataFrame],
+    df_ftth_hfc: pd.DataFrame,
+    df_fo: pd.DataFrame,
 ) -> None:
     message = f"Preparando limpieza de los datos para el {BACKLOG_ANALYSIS}"
     logging(message=message, level="INFO")
 
-    df_backlog, df_backlog_onnet = __clean_data(
-        df_residential_plant=df_residential_plant,
-        df_backlog=df_backlog,
-        dfs_ofsc_capacity=dfs_ofsc_capacity,
-        dfs_ofsc=dfs_ofsc,
+    cleaned_df_ftth_hfc = __prepare_df_ftth_hfc(df_ftth_hfc=df_ftth_hfc.copy())
+    cleaned_df_fo = __prepare_df_fo(df_fo=df_fo.copy())
+    df_output = __prepare_df_backlog(
+        df_residential_plant=df_residential_plant.copy(),
+        df_backlog=df_backlog.copy(),
+        df_ftth_hfc=cleaned_df_ftth_hfc,
+        df_fo=cleaned_df_fo,
     )
 
-    logging(message="Limpieza completada", level="INFO")
-    logging(
-        message=f"Creando archivo final: {parameters.BACKLOG_ANALYSIS_FILE_PATH}",
-        level="INFO",
-    )
-    logging(
-        message=f"Creando archivo final: {parameters.BACKLOG_ONNET_ANALYSIS_FILE_PATH}",
-        level="INFO",
-    )
+    message = "Limpieza de los datos completada"
+    logging(message=message, level="INFO")
+    message = f"Creando archivo final: {parameters.BACKLOG_ANALYSIS_FILE_PATH}"
+    logging(message=message, level="INFO")
 
-    create_file(df=df_backlog, path=parameters.BACKLOG_ANALYSIS_FILE_PATH)
-    create_file(df=df_backlog_onnet, path=parameters.BACKLOG_ONNET_ANALYSIS_FILE_PATH)
+    create_file(df=df_output, path=parameters.BACKLOG_ANALYSIS_FILE_PATH)

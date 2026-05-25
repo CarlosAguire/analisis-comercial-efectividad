@@ -1,7 +1,9 @@
 import argparse
 import sys
 import traceback
-from datetime import date
+from datetime import date, timedelta
+
+import pandas as pd
 
 from config import parameters
 from logs_setup import logging
@@ -38,7 +40,8 @@ def run_analysis(
         date_format_fo_folder="dmy",
     )
 
-    dfs_ftth_hfc_tree = []
+    # Lista de DF que se usaran en otros análisis
+    dfs_capacity: list[pd.DataFrame] = []
 
     if (
         reasoned_analysis
@@ -77,109 +80,133 @@ def run_analysis(
 
             controllers.run_backlog_analysis(
                 df_residential_plant=df_residential_plant,
-                df_backlog=df_backlog,  # type: ignore
-                dfs_ofsc_capacity=dfs_capacity,
-                dfs_ofsc=dfs_ofsc,
+                df_backlog=df_backlog,
+                df_ftth_hfc=df_ftth_hfc,
+                df_fo=df_fo,
             )
 
             # Si no se requieren los otros análisis, se termina la función aquí
             if (
-                backlog_analysis_parameter
-                and not contact_analysis_parameter
-                and not productivity_analysis_parameter
-                and not migrations_analysis_parameter
-                and not commercial_analysis_parameter
+                backlog_analysis
+                and not contact_analysis
+                and not reasoned_analysis
+                and not backlog_onnet_analysis
+                and not productivity_analysis
+                and not migrations_analysis
             ):
                 return None
+        if reasoned_analysis:
+            files_path_ftth_hfc_capacity = filter_files_by_date(
+                inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
+                end_date=date.today() - timedelta(days=1),
+            )
 
-        dfs_capacity = []
+            for file_path in files_path_ftth_hfc_capacity:
+                df_capacity = read_xlsx_file(path=file_path, sheet=0)
+                df_capacity.attrs["file_path"] = file_path
+                dfs_capacity.append(df_capacity)
 
-        for capacity_file_path in [paths[0] for paths in file_paths.pairs]:
-            df_capacity = read_xlsx_file(path=capacity_file_path, sheet=0)
-            df_capacity.attrs["path"] = capacity_file_path
-            dfs_capacity.append(df_capacity)
+            files_path_ftth_hfc_dispatch = filter_files_by_date(
+                inventory=catalog_result.files_by_date_ftth_hfc_dispatch_folder,
+                end_date=date.today() - timedelta(days=1),
+            )
 
-        if productivity_analysis_parameter:
-            dfs_ftth_hfc_tree = dfs_capacity
+            dfs_dispatch: list[pd.DataFrame] = []
 
-        if commercial_analysis_parameter:
-            dfs_dispatch = []
-
-            for dispatch_file_path in [paths[-1] for paths in file_paths.pairs]:
-                df_dispatch = read_xlsx_file(path=dispatch_file_path, sheet=0)
-                df_dispatch.attrs["path"] = dispatch_file_path
+            for file_path in files_path_ftth_hfc_dispatch:
+                df_dispatch = read_xlsx_file(path=file_path, sheet=0)
+                df_dispatch.attrs["file_path"] = file_path
                 dfs_dispatch.append(df_dispatch)
 
-            commercial_analysis.run(
+            controllers.run_reasoned_analysis(
                 df_residential_plant=df_residential_plant,
-                dfs_ofsc_capacity=dfs_capacity,
-                dfs_ofsc_dispatch=dfs_dispatch,
+                dfs_capacity=dfs_capacity,
+                dfs_dispatch=dfs_dispatch,
             )
 
             # Si no se requieren los otros análisis, se termina la función aquí
             if (
-                commercial_analysis_parameter
-                and not contact_analysis_parameter
-                and not productivity_analysis_parameter
-                and not migrations_analysis_parameter
-                and not backlog_analysis_parameter
+                reasoned_analysis
+                and not contact_analysis
+                and not productivity_analysis
+                and not migrations_analysis
+                and not backlog_analysis
+                and not backlog_onnet_analysis
             ):
                 return None
-        if contact_analysis_parameter:
-            contact_analysis.run(
+        if contact_analysis:
+            controllers.run_contact_analysis(
                 df_residential_plant=df_residential_plant,
-                dfs_ofsc_capacity=dfs_capacity,
+                dfs_capacity=dfs_capacity,
             )
 
             # Si no se requieren los otros análisis, se termina la función aquí
             if (
-                contact_analysis_parameter
-                and not commercial_analysis_parameter
-                and not productivity_analysis_parameter
-                and not migrations_analysis_parameter
-                and not backlog_analysis_parameter
+                contact_analysis
+                and not reasoned_analysis
+                and not productivity_analysis
+                and not migrations_analysis
+                and not backlog_analysis
+                and not backlog_onnet_analysis
             ):
                 return None
-    if productivity_analysis_parameter:
-        dfs_fo_tree = []
+    if productivity_analysis:
+        if not dfs_capacity:
+            files_path_ftth_hfc_capacity = filter_files_by_date(
+                inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
+                end_date=date.today() - timedelta(days=1),
+            )
 
-        for file_path in [
-            path for path in FO_CAPACITY_FOLDER.iterdir() if path.is_file()
-        ]:
-            df = read_xlsx_file(path=file_path, sheet=0)
-            df.attrs["path"] = file_path
-            dfs_fo_tree.append(df)
+            for file_path in files_path_ftth_hfc_capacity:
+                df_capacity = read_xlsx_file(path=file_path, sheet=0)
+                df_capacity.attrs["file_path"] = file_path
+                dfs_capacity.append(df_capacity)
 
-        productivity_analysis.run(ftth_hfc_tree=dfs_ftth_hfc_tree, fo_tree=dfs_fo_tree)
+        dfs_ftth_hfc = dfs_capacity
+        dfs_fo = []
+
+        files_path_fo = filter_files_by_date(
+            inventory=catalog_result.files_by_date_fo_folder,
+            end_date=date.today() - timedelta(days=1),
+        )
+
+        for file_path in files_path_fo:
+            df_fo = read_xlsx_file(path=file_path, sheet=0)
+            df_fo.attrs["file_path"] = file_path
+            dfs_fo.append(df_fo)
+
+        controllers.run_productivity_analysis(dfs_ftth_hfc=dfs_ftth_hfc, dfs_fo=dfs_fo)
 
         # Si no se requieren los otros análisis, se termina la función aquí
         if (
-            productivity_analysis_parameter
-            and not commercial_analysis_parameter
-            and not contact_analysis_parameter
-            and not migrations_analysis_parameter
-            and not backlog_analysis_parameter
+            productivity_analysis
+            and not reasoned_analysis
+            and not contact_analysis
+            and not migrations_analysis
+            and not backlog_analysis
+            and not backlog_onnet_analysis
         ):
             return None
-    if migrations_analysis_parameter:
-        df_gpon = read_xlsx_file(
-            path=parameters.GPON_BASES_PATH,
-            sheet="TOTAL",
-        )
+    if migrations_analysis:
+        df_gpon = read_xlsx_file(path=parameters.GPON_BASES_PATH, sheet="TOTAL")
         df_brownfield = read_xlsx_file(
             path=parameters.BROWNFIELD_BASES_PATH,
             sheet="BASE BROWNFIELD 2025(BASE)",
         )
 
-        migrations_analysis.run(df_gpon=df_gpon, df_brownfield=df_brownfield)
+        controllers.run_migrations_analysis(
+            df_gpon=df_gpon,
+            df_brownfield=df_brownfield,
+        )
 
         # Si no se requieren los otros análisis, se termina la función aquí
         if (
-            migrations_analysis_parameter
-            and not commercial_analysis_parameter
-            and not contact_analysis_parameter
-            and not productivity_analysis_parameter
-            and not backlog_analysis_parameter
+            migrations_analysis
+            and not reasoned_analysis
+            and not contact_analysis
+            and not productivity_analysis
+            and not backlog_analysis
+            and not backlog_onnet_analysis
         ):
             return None
 

@@ -14,7 +14,7 @@ LOGS_FOLDER = PROJECT_ROOT / "logs"
 
 
 # Configuración de rutas de archivos
-RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.xlsb"
+RESIDENTIAL_PLANT_PATH = DATABASES_FOLDER / "RM Planta Residencial.csv"
 GPON_BASES_PATH = DATABASES_FOLDER / "BASES CENTROS COMERCIALES GPON.xlsx"
 BROWNFIELD_BASES_PATH = DATABASES_FOLDER / "BASE BROWNFIELD 2026 Oriente.xlsx"
 PY_OUT_LOGS_PATH = LOGS_FOLDER / "py_out_logs.txt"
@@ -29,6 +29,88 @@ BACKLOG_ONNET_ANALYSIS = "análisis de backlog onnet"
 PRODUCTIVITY_ANALYSIS = "análisis de productividad"
 MIGRATIONS_ANALYSIS = "análisis de migraciones"
 
+
+# Tipos de datos para cada archivo
+RESIDENTIAL_PLANT_TYPES = {
+    "TCARGU": "string",
+    "CC_COMPLETA": "string",
+    "NOMBRE": "string",
+    "GV-Especialista": "string",
+    "GV-Descripcion": "string",
+    "CANAL2": "string",
+    "JEFE 1 CANAL REGIONAL": "string",
+}
+FTTH_HFC_CAPACITY_TYPES = {
+    "Estado": "string",
+    "Razón": "string",
+    "Tipo de Actividad": "string",
+    "Ciudad": "string",
+    "Orden de trabajo": "string",
+    "Tipo de Red": "string",
+    "Asesor comercial": "string",
+    "Código Asesor comercial": "string",
+    "Ventana de servicio": "string",
+    "Fecha": "string",
+    "Inicio": "string",
+}
+FTTH_HFC_DISPATCH_TYPES = {
+    "Notas de Cierre": "string",
+    "Orden de trabajo": "string",
+    "Tipo de Actividad": "string",
+    "Fecha": "string",
+    "Inicio": "string",
+    "Compañia": "string",
+}
+FO_TYPES = {
+    "Orden de trabajo": "string",
+    "Ventana de servicio": "string",
+}
+BACKLOG_TYPES = {
+    "TIPO_TRABAJO": "string",
+    "TIPO_BACKLOG": "string",
+    "CUENTA": "string",
+    "OT/LL": "string",
+    "Region": "string",
+    "CONVENIENCIA": "string",
+    "Comunidad": "string",
+    "Opera": "string",
+    "Red": "string",
+    "NODO": "string",
+    "ESTADO_ORDEN": "string",
+    "ESTADO_VISITA": "string",
+    "FECHA_AGENDA_FUTURO": "string",
+    "ANTIGUEDAD_ULTIMA_VISITA": "string",
+    "CUENTA_MATRIZ": "string",
+    "CEDULA_VENDEDOR": "string",
+    "ANTIGUEDAD_DIGITACION": "string",
+    "CLASE": "string",
+    "SEGMENTO": "string",
+    "Aliado Zonificado": "string",
+}
+GPON_TYPES = {
+    "CODIGO": "string",
+    "CUENTA": "string",
+    "TIPIFICACION REGIONAL": "string",
+    "CUENTA MATRIZ": "string",
+    "BASE TV": "string",
+    "ALIADO": "string",
+    "Ciudad": "string",
+    "FECHA DE MIGRACION": "string",
+}
+BROWNFIELD_TYPES = {
+    "ESTADO REGIONAL": "string",
+    "CRONOGRAMA DESMONTE REGIONAL": "string",
+    "CRONOGRAMA DESMONTE TRANSVERSAL": "string",
+    "TIPIFICACION": "string",
+    "ESTADO": "string",
+    "CUENTA MATRIZ": "string",
+    "CRUCE POTENCIAL": "string",
+    "CUENTA": "string",
+    "ALIADO": "string",
+    "CIUDAD": "string",
+    "FECHA AGENDA": "string",
+    "NOTA": "string",
+}
 
 # Filtros para cada tipo de análisis
 FILTERS = {
@@ -207,31 +289,6 @@ COLUMNS_TO_RESERVE = {
             "Ventana de servicio",
             "Fecha",
             "Asesor comercial",
-        ],
-    },
-    MIGRATIONS_ANALYSIS: {
-        "brownfield_file": [
-            "ESTADO REGIONAL",
-            "CRONOGRAMA DESMONTE REGIONAL",
-            "CRONOGRAMA DESMONTE TRANSVERSAL",
-            "TIPIFICACION",
-            "CUENTA MATRIZ",
-            "CRUCE POTENCIAL",
-            "CUENTA",
-            "ALIADO",
-            "CIUDAD",
-            "FECHA AGENDA",
-            "NOTA",
-        ],
-        "gpon_file": [
-            "CODIGO",
-            "CUENTA",
-            "TIPIFICACION REGIONAL",
-            "CUENTA MATRIZ",
-            "BASE TV",
-            "ALIADO",
-            "Ciudad",
-            "FECHA DE MIGRACION",
         ],
     },
 }

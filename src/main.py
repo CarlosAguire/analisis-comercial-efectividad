@@ -5,11 +5,14 @@ from datetime import date, timedelta
 
 import pandas as pd
 
+import controllers
 from config import parameters
 from logs_setup import logging
-from operations.data_frame import read_csv_file, read_xlsb_file, read_xlsx_file
+from operations.data_frame import (
+    read_csv_file,
+    read_xlsx_file,
+)
 from operations.files import filter_files_by_date, get_latest_file, process_file_folders
-from src import controllers
 
 REASONED_ANALYSIS = parameters.REASONED_ANALYSIS
 PRODUCTIVITY_ANALYSIS = parameters.PRODUCTIVITY_ANALYSIS
@@ -50,16 +53,19 @@ def run_analysis(
         or backlog_onnet_analysis
     ):
         # Creamos DF del archivo de planta residencial
-        df_residential_plant = read_xlsb_file(
+        df_residential_plant = read_csv_file(
             path=parameters.RESIDENTIAL_PLANT_PATH,
-            sheet=1,
+            dtype=parameters.RESIDENTIAL_PLANT_TYPES,
         )
         df_residential_plant.attrs["file_path"] = parameters.RESIDENTIAL_PLANT_PATH
 
         if backlog_analysis:
             # Creamos DF del archivo del backlog
             file_path_backlog = get_latest_file(folder_path=parameters.BACKLOG_FOLDER)
-            df_backlog = read_csv_file(path=file_path_backlog)
+            df_backlog = read_csv_file(
+                path=file_path_backlog,
+                dtype=parameters.BACKLOG_TYPES,
+            )
             df_backlog.attrs["file_path"] = file_path_backlog
 
             # Creamos DF del archivo de capacidades del arbol FTTH-HFC
@@ -67,7 +73,11 @@ def run_analysis(
                 inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
                 exact_date=date.today(),
             )[0]
-            df_ftth_hfc = read_xlsx_file(path=file_path_ftth_hfc, sheet=0)
+            df_ftth_hfc = read_xlsx_file(
+                dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
+                path=file_path_ftth_hfc,
+                sheet=0,
+            )
             df_ftth_hfc.attrs["file_path"] = file_path_ftth_hfc
 
             # Creamos DF del archivo del arbol FO
@@ -75,7 +85,11 @@ def run_analysis(
                 inventory=catalog_result.files_by_date_fo_folder,
                 exact_date=date.today(),
             )[0]
-            df_fo = read_xlsx_file(path=file_path_fo, sheet=0)
+            df_fo = read_xlsx_file(
+                dtype=parameters.FO_TYPES,
+                path=file_path_fo,
+                sheet=0,
+            )
             df_fo.attrs["file_path"] = file_path_fo
 
             controllers.run_backlog_analysis(
@@ -102,7 +116,11 @@ def run_analysis(
             )
 
             for file_path in files_path_ftth_hfc_capacity:
-                df_capacity = read_xlsx_file(path=file_path, sheet=0)
+                df_capacity = read_xlsx_file(
+                    dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
+                    path=file_path,
+                    sheet=0,
+                )
                 df_capacity.attrs["file_path"] = file_path
                 dfs_capacity.append(df_capacity)
 
@@ -114,7 +132,11 @@ def run_analysis(
             dfs_dispatch: list[pd.DataFrame] = []
 
             for file_path in files_path_ftth_hfc_dispatch:
-                df_dispatch = read_xlsx_file(path=file_path, sheet=0)
+                df_dispatch = read_xlsx_file(
+                    dtype=parameters.FTTH_HFC_DISPATCH_TYPES,
+                    path=file_path,
+                    sheet=0,
+                )
                 df_dispatch.attrs["file_path"] = file_path
                 dfs_dispatch.append(df_dispatch)
 
@@ -158,7 +180,11 @@ def run_analysis(
             )
 
             for file_path in files_path_ftth_hfc_capacity:
-                df_capacity = read_xlsx_file(path=file_path, sheet=0)
+                df_capacity = read_xlsx_file(
+                    dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
+                    path=file_path,
+                    sheet=0,
+                )
                 df_capacity.attrs["file_path"] = file_path
                 dfs_capacity.append(df_capacity)
 
@@ -171,7 +197,7 @@ def run_analysis(
         )
 
         for file_path in files_path_fo:
-            df_fo = read_xlsx_file(path=file_path, sheet=0)
+            df_fo = read_xlsx_file(path=file_path, sheet=0, dtype=parameters.FO_TYPES)
             df_fo.attrs["file_path"] = file_path
             dfs_fo.append(df_fo)
 
@@ -188,11 +214,18 @@ def run_analysis(
         ):
             return None
     if migrations_analysis:
-        df_gpon = read_xlsx_file(path=parameters.GPON_BASES_PATH, sheet="TOTAL")
+        df_gpon = read_xlsx_file(
+            path=parameters.GPON_BASES_PATH,
+            dtype=parameters.GPON_TYPES,
+            sheet="TOTAL",
+        )
+        df_gpon.attrs["file_path"] = parameters.GPON_BASES_PATH
         df_brownfield = read_xlsx_file(
             path=parameters.BROWNFIELD_BASES_PATH,
             sheet="BASE BROWNFIELD 2025(BASE)",
+            dtype=parameters.BROWNFIELD_TYPES,
         )
+        df_brownfield.attrs["file_path"] = parameters.BROWNFIELD_BASES_PATH
 
         controllers.run_migrations_analysis(
             df_gpon=df_gpon,

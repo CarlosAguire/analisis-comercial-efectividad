@@ -7,7 +7,7 @@ from typing import Any, Literal
 import pandas as pd
 
 
-def read_xlsx_file(path: Path, sheet: int | str) -> pd.DataFrame:
+def read_xlsx_file(path: Path, sheet: int | str, dtype: dict[str, str]) -> pd.DataFrame:
     """
     Lee una hoja de Excel.
     - No se recortan espacios.
@@ -25,6 +25,8 @@ def read_xlsx_file(path: Path, sheet: int | str) -> pd.DataFrame:
         io=path,
         sheet_name=sheet,
         engine="openpyxl",
+        usecols=list(dtype.keys()),
+        dtype=dtype,
     )
 
 
@@ -39,11 +41,11 @@ def read_xlsb_file(path: Path, sheet: int | str) -> pd.DataFrame:
     return pd.read_excel(
         io=path,
         sheet_name=sheet,
-        engine="pyxlsb",
+        engine="calamine",
     )
 
 
-def read_csv_file(path: Path) -> pd.DataFrame:
+def read_csv_file(path: Path, dtype: dict[str, str]) -> pd.DataFrame:
     """
     Lee una hoja de Excel.
     - No se recortan espacios.
@@ -53,8 +55,11 @@ def read_csv_file(path: Path) -> pd.DataFrame:
 
     return pd.read_csv(
         filepath_or_buffer=path,
-        encoding="latin1",
-        low_memory=False,
+        engine="pyarrow",
+        dtype_backend="pyarrow",
+        usecols=list(dtype.keys()),
+        dtype=dtype,  # type: ignore
+        sep=";",
     )
 
 
@@ -185,10 +190,12 @@ def join(
     # Helpers
     # ------------------------------------------------------------
     def __infer_dayfirst_by_12_rule(s: pd.Series) -> bool | None:
+
         if pd.api.types.is_datetime64_any_dtype(s):
             return True
 
         parts = s.dropna().astype(str).str.split("/", expand=True)
+
         if parts.shape[1] != 3 or parts.empty:
             return None
 
@@ -199,18 +206,29 @@ def join(
             return True
         if (b > 12).any() and not (a > 12).any():
             return False
+
         return None
 
     def __parse_date(s: pd.Series, dayfirst: bool) -> pd.Series:
         fmt = "%d/%m/%Y" if dayfirst else "%m/%d/%Y"
+
         return pd.to_datetime(s, format=fmt, errors="coerce")
 
     def __parse_time_12h(s: pd.Series) -> pd.Series:
-        dt = pd.to_datetime(
-            s.astype(str).str.strip(),
-            format="%I:%M %p",
-            errors="coerce",
-        )
+
+        # 1. Convertir a texto y pasar a mayúsculas
+        s_clean = s.astype(str).str.upper()
+
+        # 2. Eliminar los puntos (ej: "A. M." -> "A M")
+        s_clean = s_clean.str.replace(".", "", regex=False)
+
+        # 3. Quitar el espacio entre la letra y la M (ej: "A M" -> "AM")
+        s_clean = s_clean.str.replace("A M", "AM", regex=False)
+        s_clean = s_clean.str.replace("P M", "PM", regex=False)
+
+        # 4. Ahora sí, Pandas lo podrá interpretar sin problemas
+        dt = pd.to_datetime(s_clean.str.strip(), errors="coerce")
+
         return dt.dt.strftime("%I:%M %p")
 
     # ------------------------------------------------------------
@@ -277,10 +295,30 @@ def join(
             df1["_time_str_"] = __parse_time_12h(df1[time_column])
             df2["_time_str_"] = __parse_time_12h(df2[time_column])
 
-            if df1.loc[dup1_after, "_time_str_"].isna().any():
-                raise ValueError("Horas inválidas en DF1 para órdenes duplicadas")
-            if df2.loc[dup2_after, "_time_str_"].isna().any():
-                raise ValueError("Horas inválidas en DF2 para órdenes duplicadas")
+            # Validación para DF1
+            mask_invalid_df1 = df1.loc[dup1_after, "_time_str_"].isna()
+            if mask_invalid_df1.any():
+                bad_rows_df1 = df1.loc[dup1_after][mask_invalid_df1]
+                print(
+                    "\n[ 🚨 ALERTA DF1 ] Valores problemáticos encontrados en la columna de tiempo:"
+                )
+                # Imprimimos la llave y el valor original de la columna de tiempo que falló
+                print(bad_rows_df1[[foreign_key, time_column, date_column]])
+                raise ValueError(
+                    "Horas inválidas en DF1 para órdenes duplicadas (Revisa la consola para ver los datos)."
+                )
+
+            # Validación para DF2
+            mask_invalid_df2 = df2.loc[dup2_after, "_time_str_"].isna()
+            if mask_invalid_df2.any():
+                bad_rows_df2 = df2.loc[dup2_after][mask_invalid_df2]
+                print(
+                    "\n[ 🚨 ALERTA DF2 ] Valores problemáticos encontrados en la columna de tiempo:"
+                )
+                print(bad_rows_df2[[foreign_key, time_column, date_column]])
+                raise ValueError(
+                    "Horas inválidas en DF2 para órdenes duplicadas (Revisa la consola para ver los datos)."
+                )
 
             df1.loc[dup1_after, "__join_key__"] = (
                 df1.loc[dup1_after, "__join_key__"]
@@ -636,5 +674,8 @@ def filter_df(
             mask = series.str.contains(str(value), regex=False, na=False)
 
         final_mask = __combine_masks(mask1=final_mask, mask2=mask)
+
+    print(df.attrs["file_path"])
+    print(final_mask)
 
     return df[final_mask] if final_mask is not None else df

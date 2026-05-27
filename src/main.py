@@ -18,7 +18,6 @@ REASONED_ANALYSIS = parameters.REASONED_ANALYSIS
 PRODUCTIVITY_ANALYSIS = parameters.PRODUCTIVITY_ANALYSIS
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
-BACKLOG_ONNET_ANALYSIS = parameters.BACKLOG_ONNET_ANALYSIS
 MIGRATIONS_ANALYSIS = parameters.MIGRATIONS_ANALYSIS
 
 FTTH_HFC_CAPACITY_FOLDER = parameters.FTTH_HFC_FOLDER / "Capacidades"
@@ -30,7 +29,6 @@ def run_analysis(
     reasoned_analysis: bool,
     contact_analysis: bool,
     backlog_analysis: bool,
-    backlog_onnet_analysis: bool,
     migrations_analysis: bool,
 ) -> None:
 
@@ -46,12 +44,7 @@ def run_analysis(
     # Lista de DF que se usaran en otros análisis
     dfs_capacity: list[pd.DataFrame] = []
 
-    if (
-        reasoned_analysis
-        or contact_analysis
-        or backlog_analysis
-        or backlog_onnet_analysis
-    ):
+    if reasoned_analysis or contact_analysis or backlog_analysis:
         # Creamos DF del archivo de planta residencial
         df_residential_plant = read_csv_file(
             path=parameters.RESIDENTIAL_PLANT_PATH,
@@ -104,7 +97,6 @@ def run_analysis(
                 backlog_analysis
                 and not contact_analysis
                 and not reasoned_analysis
-                and not backlog_onnet_analysis
                 and not productivity_analysis
                 and not migrations_analysis
             ):
@@ -153,7 +145,6 @@ def run_analysis(
                 and not productivity_analysis
                 and not migrations_analysis
                 and not backlog_analysis
-                and not backlog_onnet_analysis
             ):
                 return None
         if contact_analysis:
@@ -169,7 +160,6 @@ def run_analysis(
                 and not productivity_analysis
                 and not migrations_analysis
                 and not backlog_analysis
-                and not backlog_onnet_analysis
             ):
                 return None
     if productivity_analysis:
@@ -210,7 +200,6 @@ def run_analysis(
             and not contact_analysis
             and not migrations_analysis
             and not backlog_analysis
-            and not backlog_onnet_analysis
         ):
             return None
     if migrations_analysis:
@@ -239,7 +228,6 @@ def run_analysis(
             and not contact_analysis
             and not productivity_analysis
             and not backlog_analysis
-            and not backlog_onnet_analysis
         ):
             return None
 
@@ -251,7 +239,6 @@ if __name__ == "__main__":
     parser.add_argument("--reasoned", action="store_true")
     parser.add_argument("--contact", action="store_true")
     parser.add_argument("--backlog", action="store_true")
-    parser.add_argument("--backlog_onnet", action="store_true")
     parser.add_argument("--productivity", action="store_true")
     parser.add_argument("--migrations", action="store_true")
     args = parser.parse_args()
@@ -260,7 +247,6 @@ if __name__ == "__main__":
         reasoned_analysis = args.reasoned
         contact_analysis = args.contact
         backlog_analysis = args.backlog
-        backlog_onnet_analysis = args.backlog_onnet
         productivity_analysis = args.productivity
         migrations_analysis = args.migrations
         analysis_to_run = []
@@ -271,8 +257,6 @@ if __name__ == "__main__":
             analysis_to_run.append(f"\n    >> {CONTACT_ANALYSIS}")
         if backlog_analysis:
             analysis_to_run.append(f"\n    >> {BACKLOG_ANALYSIS}")
-        if backlog_onnet_analysis:
-            analysis_to_run.append(f"\n    >> {BACKLOG_ONNET_ANALYSIS}")
         if productivity_analysis:
             analysis_to_run.append(f"\n    >> {PRODUCTIVITY_ANALYSIS}")
         if migrations_analysis:
@@ -288,7 +272,6 @@ if __name__ == "__main__":
             reasoned_analysis=reasoned_analysis,
             contact_analysis=contact_analysis,
             backlog_analysis=backlog_analysis,
-            backlog_onnet_analysis=backlog_onnet_analysis,
             migrations_analysis=migrations_analysis,
         )
 

@@ -2,10 +2,9 @@ import pandas as pd
 
 from config import parameters
 from logs_setup import logging
-from operations.data_frame import create_file, drop_columns, reorder_columns
+from operations.data_frame import create_file, reorder_columns
 
 MIGRATIONS_ANALYSIS = parameters.MIGRATIONS_ANALYSIS
-COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[MIGRATIONS_ANALYSIS]
 COLUMN_ORDER = parameters.COLUMN_ORDER[MIGRATIONS_ANALYSIS]
 FINAL_COLUMNS = parameters.FINAL_COLUMNS[MIGRATIONS_ANALYSIS]
 
@@ -15,26 +14,20 @@ def __prepare_df_gpon(df_gpon: pd.DataFrame) -> pd.DataFrame:
     message = f"Iniciando limpieza: {df_gpon.attrs['file_path']}"
     logging(message=message, level="INFO")
 
-    # Removemos columnas que no necesitamos de df_gpon
-    cleaned_df_gpon = drop_columns(
-        columns_preserve=COLUMNS_TO_RESERVE["gpon_file"],
-        df=df_gpon,
-    )
-
     # Creamos columnas faltantes
-    cleaned_df_gpon["Tipificación"] = None
-    cleaned_df_gpon["Nota"] = "NO REQUIERE"
-    cleaned_df_gpon["Cronograma Desmonte Regional"] = "NO APLICA"
-    cleaned_df_gpon["Cronograma Desmonte Transversal"] = "NO APLICA"
-    cleaned_df_gpon["Tipo de Red"] = "GPON"
+    df_gpon["Tipificación"] = None
+    df_gpon["Nota"] = "NO REQUIERE"
+    df_gpon["Cronograma Desmonte Regional"] = "NO APLICA"
+    df_gpon["Cronograma Desmonte Transversal"] = "NO APLICA"
+    df_gpon["Tipo de Red"] = "GPON"
 
     # Renombramos columnas de planta residencial
-    cleaned_df_gpon.rename(
+    df_gpon.rename(
         columns=FINAL_COLUMNS["gpon_file"],
         inplace=True,
     )
 
-    return cleaned_df_gpon
+    return df_gpon
 
 
 def __prepare_df_brownfield(df_brownfield: pd.DataFrame) -> pd.DataFrame:
@@ -42,23 +35,17 @@ def __prepare_df_brownfield(df_brownfield: pd.DataFrame) -> pd.DataFrame:
     message = f"Iniciando limpieza: {df_brownfield.attrs['file_path']}"
     logging(message=message, level="INFO")
 
-    # Removemos columnas que no necesitamos de df_brownfield
-    cleaned_df_brownfield = drop_columns(
-        columns_preserve=COLUMNS_TO_RESERVE["brownfield_file"],
-        df=df_brownfield,
-    )
-
     # Creamos columnas faltantes
-    cleaned_df_brownfield["Tipo de Red"] = "HFC"
-    cleaned_df_brownfield["Código"] = "NO REQUIERE"
+    df_brownfield["Tipo de Red"] = "HFC"
+    df_brownfield["Código"] = "NO REQUIERE"
 
     # Renombramos columnas de planta residencial
-    cleaned_df_brownfield.rename(
+    df_brownfield.rename(
         columns=FINAL_COLUMNS["brownfield_file"],
         inplace=True,
     )
 
-    return cleaned_df_brownfield
+    return df_brownfield
 
 
 def run(df_gpon: pd.DataFrame, df_brownfield: pd.DataFrame) -> None:

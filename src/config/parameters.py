@@ -25,7 +25,6 @@ LOGS_PATH = LOGS_FOLDER / "logs.txt"
 REASONED_ANALYSIS = "análisis de razonadas"
 CONTACT_ANALYSIS = "análisis de contacto"
 BACKLOG_ANALYSIS = "análisis de backlog"
-BACKLOG_ONNET_ANALYSIS = "análisis de backlog onnet"
 PRODUCTIVITY_ANALYSIS = "análisis de productividad"
 MIGRATIONS_ANALYSIS = "análisis de migraciones"
 
@@ -57,6 +56,8 @@ FTTH_HFC_DISPATCH_TYPES = {
     "Notas de Cierre": "string",
     "Orden de trabajo": "string",
     "Tipo de Actividad": "string",
+    "Tipo de Red": "string",
+    "Estado": "string",
     "Fecha": "string",
     "Inicio": "string",
     "Compañia": "string",
@@ -64,6 +65,8 @@ FTTH_HFC_DISPATCH_TYPES = {
 FO_TYPES = {
     "Orden de trabajo": "string",
     "Ventana de servicio": "string",
+    "Tipo de Actividad": "string",
+    "Razón": "string",
 }
 BACKLOG_TYPES = {
     "TIPO_TRABAJO": "string",
@@ -160,136 +163,25 @@ FILTERS = {
                 ],
             },
         },
-    },
-    BACKLOG_ONNET_ANALYSIS: {
         "capacity_file": {
+            "exclude": {
+                "Tipo de Actividad": [
+                    "Actividades de Almacen",
+                    "Almuerzo",
+                ],
+            },
             "include": {
-                "Owner": "Onnet",
                 "Tipo de Red": ["Pymes", "FTTX"],
             },
-            "contains": {
-                "Nodo": "K",
+        },
+        "fo_file": {
+            "exclude": {
+                "Tipo de Actividad": [
+                    "Actividades de Almacen",
+                    "Almuerzo",
+                ],
             },
         },
-    },
-}
-
-
-# Lista de columnas a conservar
-COLUMNS_TO_RESERVE = {
-    REASONED_ANALYSIS: {
-        "dispatch_file": [
-            "Notas de Cierre",
-            "Orden de trabajo",
-            "Fecha",
-            "Inicio",
-            "Compañia",
-        ],
-        "capacity_file": [
-            "Estado",
-            "Razón",
-            "Tipo de Actividad",
-            "Ciudad",
-            "Orden de trabajo",
-            "Tipo de Red",
-            "Asesor comercial",
-            "Código Asesor comercial",
-            "Fecha",
-            "Inicio",
-        ],
-        "residential_plant_file": [
-            "NOMBRE",
-            "GV-Especialista",
-            "GV-Descripcion",
-            "JEFE 1 CANAL REGIONAL",
-            "CANAL2",
-        ],
-    },
-    CONTACT_ANALYSIS: {
-        "capacity_file": [
-            "Tipo de Actividad",
-            "Ciudad",
-            "Orden de trabajo",
-            "Tipo de Red",
-            "Compañia",
-            "Asesor comercial",
-            "Código Asesor comercial",
-            "Telefono dos del cliente",
-            "Teléfono 3",
-            "Celuar del contacto",
-            "Fecha",
-        ],
-        "residential_plant_file": [
-            "NOMBRE",
-            "GV-Especialista",
-            "GV-Descripcion",
-            "JEFE 1 CANAL REGIONAL",
-            "CANAL2",
-        ],
-    },
-    BACKLOG_ANALYSIS: {
-        "backlog_file": [
-            "TIPO_TRABAJO",
-            "TIPO_BACKLOG",
-            "CUENTA",
-            "OT/LL",
-            "Region",
-            "CONVENIENCIA",
-            "Comunidad",
-            "Opera",
-            "Red",
-            "NODO",
-            "ESTADO_ORDEN",
-            "ESTADO_VISITA",
-            "FECHA_AGENDA_FUTURO",
-            "ANTIGUEDAD_ULTIMA_VISITA",
-            "CUENTA_MATRIZ",
-            "CEDULA_VENDEDOR",
-            "ANTIGUEDAD_DIGITACION",
-            "CLASE",
-            "SEGMENTO",
-            "Aliado Zonificado",
-        ],
-        "residential_plant_file": [
-            "TCARGU",
-            "CC_COMPLETA",
-            "GV-Especialista",
-            "GV-Descripcion",
-            "JEFE 1 CANAL REGIONAL",
-            "CANAL2",
-            "NOMBRE",
-        ],
-        "capacity_file": [
-            "Orden de trabajo",
-            "Ventana de servicio",
-        ],
-        "fo_file": [
-            "Orden de trabajo",
-            "Ventana de servicio",
-        ],
-    },
-    BACKLOG_ONNET_ANALYSIS: {
-        "residential_plant_file": [
-            "TCARGU",
-            "CC_COMPLETA",
-            "GV-Especialista",
-            "GV-Descripcion",
-            "JEFE 1 CANAL REGIONAL",
-            "CANAL2",
-            "NOMBRE",
-        ],
-        "ofsc_capacity": [
-            "Orden de trabajo",
-            "Tipo de Actividad",
-            "Estado",
-            "Ciudad",
-            "Razón",
-            "Tipo de Red",
-            "Compañia",
-            "Ventana de servicio",
-            "Fecha",
-            "Asesor comercial",
-        ],
     },
 }
 
@@ -336,14 +228,6 @@ FINAL_COLUMNS = {
         "ESTADO_VISITA": "Estado de la Visita",
         "ANTIGUEDAD_ULTIMA_VISITA": "Antiguedad desde la Última Visita",
         "CUENTA_MATRIZ": "Cuenta Matriz",
-        "GV-Especialista": "Especialista",
-        "GV-Descripcion": "Proveedor",
-        "CANAL2": "Canal",
-        "JEFE 1 CANAL REGIONAL": "Jefe de Canal",
-    },
-    BACKLOG_ONNET_ANALYSIS: {
-        "Orden de trabajo": "Orden de Trabajo",
-        "Compañia": "Aliado",
         "GV-Especialista": "Especialista",
         "GV-Descripcion": "Proveedor",
         "CANAL2": "Canal",
@@ -423,4 +307,3 @@ PRODUCTIVITY_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-productividad.xlsx"
 MIGRATIONS_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-migraciones.xlsx"
 CONTACT_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-contacto.xlsx"
 BACKLOG_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-backlog.xlsx"
-BACKLOG_ONNET_ANALYSIS_FILE_PATH = PROJECT_ROOT / "datos-backlog-onnet.xlsx"

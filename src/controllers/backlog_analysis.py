@@ -2,11 +2,10 @@ import pandas as pd
 
 from config import parameters
 from logs_setup import logging
-from operations.data_frame import complete_data, create_file, drop_columns, filter_df
+from operations.data_frame import complete_data, create_file, filter_df
 
 BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
 FINAL_COLUMNS = parameters.FINAL_COLUMNS[BACKLOG_ANALYSIS]
-COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[BACKLOG_ANALYSIS]
 FILTERS = parameters.FILTERS[BACKLOG_ANALYSIS]
 
 
@@ -16,40 +15,9 @@ def __prepare_df_backlog(
     df_ftth_hfc: pd.DataFrame,
     df_fo: pd.DataFrame,
 ) -> pd.DataFrame:
+
     message = f"Iniciando limpieza: {df_backlog.attrs['file_path']}"
     logging(message=message, level="INFO")
-
-    # Normalizamos los nombres de las columnas de df_backlog
-    df_backlog.columns = df_backlog.columns.str.replace(
-        pat="ï»¿",
-        repl="",
-        regex=False,
-    ).str.strip()
-
-    # Ajustamos tipos de datos de df_backlog
-    # fmt: off
-    df_backlog["HORA_CREADO"] = df_backlog["HORA_CREADO"].astype("string")
-    df_backlog["Hora_AMPM"] = (
-        pd.to_datetime(
-            df_backlog["HORA_CREADO"].astype("string").str.zfill(6),
-            format="%H%M%S",
-            errors="coerce",
-        )
-        .dt.strftime("%I:%M %p")
-    )
-    df_backlog = df_backlog.drop(columns=["HORA_CREADO"])
-    df_backlog = df_backlog.rename(columns={"Hora_AMPM": "HORA_CREADO"})
-    df_backlog["CEDULA_VENDEDOR"] = (
-        df_backlog["CEDULA_VENDEDOR"]
-        .astype("string")
-        .str.replace(r"\.0$", "", regex=True)
-    )
-    df_residential_plant["CC_COMPLETA"] = (
-        df_residential_plant["CC_COMPLETA"]
-        .astype(dtype="string")
-        .str.replace(r"\.0$", "", regex=True)
-    )
-    # fmt: on
 
     # Filtramos para eliminar filas que no necesitamos de df_backlog
     cleaned_df_backlog = filter_df(
@@ -61,16 +29,6 @@ def __prepare_df_backlog(
         df=df_residential_plant,
         filters={"contains": {"CC_COMPLETA": sellers, "TCARGU": sellers}},
         combine="or",
-    )
-
-    # Removemos columnas que no necesitamos de df_backlog
-    cleaned_df_backlog = drop_columns(
-        columns_preserve=COLUMNS_TO_RESERVE["backlog_file"],
-        df=cleaned_df_backlog,
-    )
-    cleaned_df_residential_plant = drop_columns(
-        columns_preserve=COLUMNS_TO_RESERVE["residential_plant_file"],
-        df=cleaned_df_residential_plant,
     )
 
     # Completamos las columnas de df_backlog con la información de df_residential_plant
@@ -101,7 +59,7 @@ def __prepare_df_backlog(
     )
 
     # Unimos de manera verical df_ftth_hfc y df_fo
-    cleaned_df_ofsc = pd.concat(
+    unified_df_ofsc = pd.concat(
         objs=[df_ftth_hfc, df_fo],
         ignore_index=True,
     )
@@ -109,7 +67,7 @@ def __prepare_df_backlog(
     # Completamos las columnas de df_backlog con la información de cleaned_df_ofsc
     cleaned_df_backlog["Ventana de servicio"] = None
     cleaned_df_backlog = complete_data(
-        df_dictionary=cleaned_df_ofsc,
+        df_dictionary=unified_df_ofsc,
         df=cleaned_df_backlog,
         column="OT",
         key_match="contains",
@@ -122,12 +80,13 @@ def __prepare_df_backlog(
 
 
 def __prepare_df_ftth_hfc(df_ftth_hfc: pd.DataFrame) -> pd.DataFrame:
+
     message = f"Iniciando limpieza: {df_ftth_hfc.attrs['file_path']}"
     logging(message=message, level="INFO")
 
     # Removemos columnas que no necesitamos
-    cleaned_df_ftth_hfc = drop_columns(
-        columns_preserve=COLUMNS_TO_RESERVE["capacity_file"],
+    cleaned_df_ftth_hfc = filter_df(
+        filters=FILTERS["capacity_file"],
         df=df_ftth_hfc,
     )
 
@@ -138,12 +97,13 @@ def __prepare_df_ftth_hfc(df_ftth_hfc: pd.DataFrame) -> pd.DataFrame:
 
 
 def __prepare_df_fo(df_fo: pd.DataFrame) -> pd.DataFrame:
+
     message = f"Iniciando limpieza: {df_fo.attrs['file_path']}"
     logging(message=message, level="INFO")
 
     # Removemos columnas que no necesitamos
-    cleaned_df_fo = drop_columns(
-        columns_preserve=COLUMNS_TO_RESERVE["fo_file"],
+    cleaned_df_fo = filter_df(
+        filters=FILTERS["fo_file"],
         df=df_fo,
     )
 
@@ -159,6 +119,7 @@ def run(
     df_ftth_hfc: pd.DataFrame,
     df_fo: pd.DataFrame,
 ) -> None:
+
     message = f"Preparando limpieza de los datos para el {BACKLOG_ANALYSIS}"
     logging(message=message, level="INFO")
 
@@ -171,9 +132,9 @@ def run(
         df_fo=cleaned_df_fo,
     )
 
-    message = "Limpieza de los datos completada"
-    logging(message=message, level="INFO")
     message = f"Creando archivo final: {parameters.BACKLOG_ANALYSIS_FILE_PATH}"
     logging(message=message, level="INFO")
 
     create_file(df=df_output, path=parameters.BACKLOG_ANALYSIS_FILE_PATH)
+
+    logging(message="Limpieza completada", level="INFO")

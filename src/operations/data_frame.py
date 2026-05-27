@@ -92,8 +92,6 @@ def join(
     foreign_key: str,
     date_column: str | None = None,
     time_column: str | None = None,
-    columns_df1: Iterable[str] | None = None,
-    columns_df2: Iterable[str] | None = None,
     normalize_spaces: bool = True,
     ignore_nulls_key: bool = True,
     verify_uniqueness: bool = True,
@@ -111,36 +109,6 @@ def join(
 
     La hora SOLO se usa si FK+Fecha sigue duplicada.
     """
-
-    # ------------------------------------------------------------
-    # Subset de columnas
-    # ------------------------------------------------------------
-    cols1 = {foreign_key}
-    cols2 = {foreign_key}
-
-    if columns_df1 is not None:
-        cols1 |= set(columns_df1)
-    if columns_df2 is not None:
-        cols2 |= set(columns_df2)
-
-    if date_column is not None:
-        cols1.add(date_column)
-        cols2.add(date_column)
-
-    if time_column is not None:
-        cols1.add(time_column)
-        cols2.add(time_column)
-
-    df1 = (
-        df1
-        if (columns_df1 is None and date_column is None and time_column is None)
-        else df1.loc[:, list(cols1)]
-    )
-    df2 = (
-        df2
-        if (columns_df2 is None and date_column is None and time_column is None)
-        else df2.loc[:, list(cols2)]
-    )
 
     # ------------------------------------------------------------
     # Validaciones de existencia
@@ -297,28 +265,15 @@ def join(
 
             # Validación para DF1
             mask_invalid_df1 = df1.loc[dup1_after, "_time_str_"].isna()
+
             if mask_invalid_df1.any():
-                bad_rows_df1 = df1.loc[dup1_after][mask_invalid_df1]
-                print(
-                    "\n[ 🚨 ALERTA DF1 ] Valores problemáticos encontrados en la columna de tiempo:"
-                )
-                # Imprimimos la llave y el valor original de la columna de tiempo que falló
-                print(bad_rows_df1[[foreign_key, time_column, date_column]])
-                raise ValueError(
-                    "Horas inválidas en DF1 para órdenes duplicadas (Revisa la consola para ver los datos)."
-                )
+                raise ValueError("Horas inválidas en DF1 para órdenes duplicadas.")
 
             # Validación para DF2
             mask_invalid_df2 = df2.loc[dup2_after, "_time_str_"].isna()
+
             if mask_invalid_df2.any():
-                bad_rows_df2 = df2.loc[dup2_after][mask_invalid_df2]
-                print(
-                    "\n[ 🚨 ALERTA DF2 ] Valores problemáticos encontrados en la columna de tiempo:"
-                )
-                print(bad_rows_df2[[foreign_key, time_column, date_column]])
-                raise ValueError(
-                    "Horas inválidas en DF2 para órdenes duplicadas (Revisa la consola para ver los datos)."
-                )
+                raise ValueError("Horas inválidas en DF2 para órdenes duplicadas.")
 
             df1.loc[dup1_after, "__join_key__"] = (
                 df1.loc[dup1_after, "__join_key__"]
@@ -359,6 +314,7 @@ def join(
     if verify_keys:
         k1 = set(df1["__join_key__"])
         k2 = set(df2["__join_key__"])
+
         if k1 != k2:
             raise KeyError(
                 "Los conjuntos de llaves efectivas no coinciden entre DF1 y DF2"
@@ -619,9 +575,6 @@ def filter_df(
     - "or": al menos una condición debe cumplirse
     """
 
-    if not filters:
-        return df
-
     final_mask = None
 
     def __is_iterable(value: Any) -> bool:
@@ -635,10 +588,14 @@ def filter_df(
 
         return mask1 & mask2 if combine == "and" else mask1 | mask2
 
+    def __validate_column(field: str) -> None:
+
+        if field not in df.columns:
+            raise KeyError(f"Error crítico en filtro: La columna '{field}' no existe.")
+
     # ---------- INCLUDE ----------
     for field, value in filters.get("include", {}).items():
-        if field not in df.columns:
-            continue
+        __validate_column(field)
 
         if __is_iterable(value=value):
             mask = df[field].isin(value)
@@ -649,8 +606,7 @@ def filter_df(
 
     # ---------- EXCLUDE ----------
     for field, value in filters.get("exclude", {}).items():
-        if field not in df.columns:
-            continue
+        __validate_column(field)
 
         if __is_iterable(value=value):
             mask = ~df[field].isin(value)
@@ -661,8 +617,7 @@ def filter_df(
 
     # ---------- CONTAINS ----------
     for field, value in filters.get("contains", {}).items():
-        if field not in df.columns:
-            continue
+        __validate_column(field)
 
         series = df[field].astype("string")
 
@@ -675,7 +630,4 @@ def filter_df(
 
         final_mask = __combine_masks(mask1=final_mask, mask2=mask)
 
-    print(df.attrs["file_path"])
-    print(final_mask)
-
-    return df[final_mask] if final_mask is not None else df
+    return df[final_mask]  # type: ignore

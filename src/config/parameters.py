@@ -51,9 +51,13 @@ FTTH_HFC_CAPACITY_TYPES = {
     "Ventana de servicio": "string",
     "Fecha": "string",
     "Inicio": "string",
+    "Telefono dos del cliente": "string",
+    "Teléfono 3": "string",
+    "Celuar del contacto": "string",
 }
 FTTH_HFC_DISPATCH_TYPES = {
     "Notas de Cierre": "string",
+    "Notas de Cierre.1": "string",
     "Orden de trabajo": "string",
     "Tipo de Actividad": "string",
     "Tipo de Red": "string",
@@ -67,6 +71,7 @@ FO_TYPES = {
     "Ventana de servicio": "string",
     "Tipo de Actividad": "string",
     "Razón": "string",
+    "Estado": "string",
 }
 BACKLOG_TYPES = {
     "TIPO_TRABAJO": "string",
@@ -105,7 +110,6 @@ BROWNFIELD_TYPES = {
     "CRONOGRAMA DESMONTE REGIONAL": "string",
     "CRONOGRAMA DESMONTE TRANSVERSAL": "string",
     "TIPIFICACION": "string",
-    "ESTADO": "string",
     "CUENTA MATRIZ": "string",
     "CRUCE POTENCIAL": "string",
     "CUENTA": "string",
@@ -114,6 +118,129 @@ BROWNFIELD_TYPES = {
     "FECHA AGENDA": "string",
     "NOTA": "string",
 }
+
+
+# Lista de columnas a conservarpara cada análisis
+COLUMNS_TO_RESERVE = {
+    REASONED_ANALYSIS: {
+        "dispatch_file": [
+            "Notas de Cierre",
+            "Orden de trabajo",
+            "Fecha",
+            "Inicio",
+            "Compañia",
+        ],
+        "capacity_file": [
+            "Estado",
+            "Razón",
+            "Tipo de Actividad",
+            "Ciudad",
+            "Orden de trabajo",
+            "Tipo de Red",
+            "Asesor comercial",
+            "Código Asesor comercial",
+            "Fecha",
+            "Inicio",
+        ],
+        "residential_plant_file": [
+            "NOMBRE",
+            "GV-Especialista",
+            "GV-Descripcion",
+            "JEFE 1 CANAL REGIONAL",
+            "CANAL2",
+        ],
+    },
+    CONTACT_ANALYSIS: {
+        "capacity_file": [
+            "Tipo de Actividad",
+            "Ciudad",
+            "Orden de trabajo",
+            "Tipo de Red",
+            "Compañia",
+            "Asesor comercial",
+            "Código Asesor comercial",
+            "Telefono dos del cliente",
+            "Teléfono 3",
+            "Celuar del contacto",
+            "Fecha",
+        ],
+        "residential_plant_file": [
+            "NOMBRE",
+            "GV-Especialista",
+            "GV-Descripcion",
+            "JEFE 1 CANAL REGIONAL",
+            "CANAL2",
+        ],
+    },
+    BACKLOG_ANALYSIS: {
+        "backlog_file": [
+            "TIPO_TRABAJO",
+            "TIPO_BACKLOG",
+            "CUENTA",
+            "OT/LL",
+            "Region",
+            "CONVENIENCIA",
+            "Comunidad",
+            "Opera",
+            "Red",
+            "NODO",
+            "ESTADO_ORDEN",
+            "ESTADO_VISITA",
+            "FECHA_AGENDA_FUTURO",
+            "ANTIGUEDAD_ULTIMA_VISITA",
+            "CUENTA_MATRIZ",
+            "CEDULA_VENDEDOR",
+            "ANTIGUEDAD_DIGITACION",
+            "CLASE",
+            "SEGMENTO",
+            "Aliado Zonificado",
+        ],
+        "capacity_file": [
+            "Orden de trabajo",
+            "Estado",
+            "Ventana de servicio",
+        ],
+        "fo_file": [
+            "Orden de trabajo",
+            "Estado",
+            "Ventana de servicio",
+        ],
+        "residential_plant": [
+            "NOMBRE",
+            "GV-Especialista",
+            "GV-Descripcion",
+            "JEFE 1 CANAL REGIONAL",
+            "CANAL2",
+            "CC_COMPLETA",
+            "TCARGU",
+        ],
+    },
+    MIGRATIONS_ANALYSIS: {
+        "brownfield_bases": [
+            "ESTADO REGIONAL",
+            "DESMONTE DE NODOS 1",
+            "TIPIFICACION",
+            "CUENTA MATRIZ",
+            "CUENTA",
+            "TIPO DE RED",
+            "ALIADO",
+            "Mes",
+            "CIUDAD",
+        ],
+        "gpon_bases": [
+            "CODIGO",
+            "CUENTA",
+            "ESTADO GENERAL DE  LA MIGRACION",
+            "TIPIFICACION REGIONAL",
+            "CUENTA MATRIZ",
+            "Tipo Red (GPON-Unifilar)",
+            "ALIADO",
+            "MES",
+            "Ciudad",
+        ],
+    },
+}
+
 
 # Filtros para cada tipo de análisis
 FILTERS = {

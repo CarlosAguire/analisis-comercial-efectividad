@@ -6,6 +6,8 @@ from typing import Any, Literal
 
 import pandas as pd
 
+from config import parameters
+
 
 def read_xlsx_file(path: Path, sheet: int | str, dtype: dict[str, str]) -> pd.DataFrame:
     """
@@ -53,13 +55,20 @@ def read_csv_file(path: Path, dtype: dict[str, str]) -> pd.DataFrame:
     - No se normalizan caracteres.
     """
 
+    if path == parameters.RESIDENTIAL_PLANT_PATH:
+        return pd.read_csv(
+            filepath_or_buffer=path,
+            engine="pyarrow",
+            dtype_backend="pyarrow",
+            usecols=list(dtype.keys()),
+            dtype=dtype,  # type: ignore
+            sep=";",
+        )
+
     return pd.read_csv(
         filepath_or_buffer=path,
-        engine="pyarrow",
-        dtype_backend="pyarrow",
-        usecols=list(dtype.keys()),
-        dtype=dtype,  # type: ignore
-        sep=";",
+        encoding="latin1",
+        low_memory=False,
     )
 
 

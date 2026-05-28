@@ -2,10 +2,11 @@ import pandas as pd
 
 from config import parameters
 from logs_setup import logging
-from operations.data_frame import complete_data, create_file, filter_df
+from operations.data_frame import complete_data, create_file, drop_columns, filter_df
 
 BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
 FINAL_COLUMNS = parameters.FINAL_COLUMNS[BACKLOG_ANALYSIS]
+COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[BACKLOG_ANALYSIS]
 FILTERS = parameters.FILTERS[BACKLOG_ANALYSIS]
 
 
@@ -24,6 +25,14 @@ def __prepare_df_backlog(
         filters=FILTERS["backlog_file"],
         df=df_backlog,
     )
+
+    # Removemos columnas que no necesitamos de df_backlog
+    cleaned_df_backlog = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["backlog_file"],
+        df=cleaned_df_backlog,
+    )
+
+    # Filtramos para eliminar filas que no necesitamos de df_residential_plant
     sellers = cleaned_df_backlog["CEDULA_VENDEDOR"].unique().tolist()
     cleaned_df_residential_plant = filter_df(
         df=df_residential_plant,
@@ -35,6 +44,7 @@ def __prepare_df_backlog(
     cleaned_df_residential_plant = cleaned_df_residential_plant.rename(
         columns={"CC_COMPLETA": "CEDULA_VENDEDOR"},
     )
+    cleaned_df_backlog["NOMBRE"] = None
     cleaned_df_backlog["GV-Especialista"] = None
     cleaned_df_backlog["GV-Descripcion"] = None
     cleaned_df_backlog["JEFE 1 CANAL REGIONAL"] = None
@@ -66,6 +76,8 @@ def __prepare_df_backlog(
 
     # Completamos las columnas de df_backlog con la información de cleaned_df_ofsc
     cleaned_df_backlog["Ventana de servicio"] = None
+    cleaned_df_backlog["Estado"] = None
+    cleaned_df_backlog.rename(columns={"OT/LL": "OT"}, inplace=True)
     cleaned_df_backlog = complete_data(
         df_dictionary=unified_df_ofsc,
         df=cleaned_df_backlog,
@@ -84,10 +96,16 @@ def __prepare_df_ftth_hfc(df_ftth_hfc: pd.DataFrame) -> pd.DataFrame:
     message = f"Iniciando limpieza: {df_ftth_hfc.attrs['file_path']}"
     logging(message=message, level="INFO")
 
-    # Removemos columnas que no necesitamos
+    # Filtramos para eliminar filas que no necesitamos
     cleaned_df_ftth_hfc = filter_df(
         filters=FILTERS["capacity_file"],
         df=df_ftth_hfc,
+    )
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_ftth_hfc = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["capacity_file"],
+        df=cleaned_df_ftth_hfc,
     )
 
     # Renombramos columnas
@@ -101,10 +119,16 @@ def __prepare_df_fo(df_fo: pd.DataFrame) -> pd.DataFrame:
     message = f"Iniciando limpieza: {df_fo.attrs['file_path']}"
     logging(message=message, level="INFO")
 
-    # Removemos columnas que no necesitamos
+    # Filtramos para eliminar filas que no necesitamos
     cleaned_df_fo = filter_df(
         filters=FILTERS["fo_file"],
         df=df_fo,
+    )
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_fo = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["fo_file"],
+        df=cleaned_df_fo,
     )
 
     # Renombramos columnas

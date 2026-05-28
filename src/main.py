@@ -148,6 +148,21 @@ def run_analysis(
             ):
                 return None
         if contact_analysis:
+            if not dfs_capacity:
+                files_path_ftth_hfc_capacity = filter_files_by_date(
+                    inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
+                    end_date=date.today() - timedelta(days=1),
+                )
+
+                for file_path in files_path_ftth_hfc_capacity:
+                    df_capacity = read_xlsx_file(
+                        dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
+                        path=file_path,
+                        sheet=0,
+                    )
+                    df_capacity.attrs["file_path"] = file_path
+                    dfs_capacity.append(df_capacity)
+
             controllers.run_contact_analysis(
                 df_residential_plant=df_residential_plant,
                 dfs_capacity=dfs_capacity,

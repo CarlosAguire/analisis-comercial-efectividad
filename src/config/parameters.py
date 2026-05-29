@@ -44,6 +44,7 @@ FTTH_HFC_CAPACITY_TYPES = {
     "Razón": "string",
     "Tipo de Actividad": "string",
     "Ciudad": "string",
+    "Compañia": "string",
     "Orden de trabajo": "string",
     "Tipo de Red": "string",
     "Asesor comercial": "string",
@@ -85,7 +86,6 @@ BACKLOG_TYPES = {
     "Red": "string",
     "NODO": "string",
     "ESTADO_ORDEN": "string",
-    "ESTADO_VISITA": "string",
     "FECHA_AGENDA_FUTURO": "string",
     "ANTIGUEDAD_ULTIMA_VISITA": "string",
     "CUENTA_MATRIZ": "string",
@@ -125,6 +125,7 @@ COLUMNS_TO_RESERVE = {
     REASONED_ANALYSIS: {
         "dispatch_file": [
             "Notas de Cierre",
+            "Notas de Cierre.1",
             "Orden de trabajo",
             "Fecha",
             "Inicio",
@@ -185,7 +186,6 @@ COLUMNS_TO_RESERVE = {
             "Red",
             "NODO",
             "ESTADO_ORDEN",
-            "ESTADO_VISITA",
             "FECHA_AGENDA_FUTURO",
             "ANTIGUEDAD_ULTIMA_VISITA",
             "CUENTA_MATRIZ",
@@ -206,7 +206,6 @@ COLUMNS_TO_RESERVE = {
             "Ventana de servicio",
         ],
         "residential_plant": [
-            "NOMBRE",
             "GV-Especialista",
             "GV-Descripcion",
             "JEFE 1 CANAL REGIONAL",
@@ -226,6 +225,7 @@ COLUMNS_TO_RESERVE = {
             "ALIADO",
             "Mes",
             "CIUDAD",
+            "NOTA",
         ],
         "gpon_bases": [
             "CODIGO",
@@ -352,7 +352,6 @@ FINAL_COLUMNS = {
         "SEGMENTO": "Segmento",
         "Comunidad": "Ciudad",
         "FECHA_AGENDA_FUTURO": "Fecha Agenda Futuro",
-        "ESTADO_VISITA": "Estado de la Visita",
         "ANTIGUEDAD_ULTIMA_VISITA": "Antiguedad desde la Última Visita",
         "CUENTA_MATRIZ": "Cuenta Matriz",
         "GV-Especialista": "Especialista",

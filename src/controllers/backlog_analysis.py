@@ -20,6 +20,13 @@ def __prepare_df_backlog(
     message = f"Iniciando limpieza: {df_backlog.attrs['file_path']}"
     logging(message=message, level="INFO")
 
+    # Normalizamos los nombres de las columnas
+    df_backlog.columns = df_backlog.columns.str.replace(
+        pat="ï»¿",
+        repl="",
+        regex=False,
+    ).str.strip()
+
     # Filtramos para eliminar filas que no necesitamos de df_backlog
     cleaned_df_backlog = filter_df(
         filters=FILTERS["backlog_file"],
@@ -44,7 +51,6 @@ def __prepare_df_backlog(
     cleaned_df_residential_plant = cleaned_df_residential_plant.rename(
         columns={"CC_COMPLETA": "CEDULA_VENDEDOR"},
     )
-    cleaned_df_backlog["NOMBRE"] = None
     cleaned_df_backlog["GV-Especialista"] = None
     cleaned_df_backlog["GV-Descripcion"] = None
     cleaned_df_backlog["JEFE 1 CANAL REGIONAL"] = None
@@ -137,6 +143,17 @@ def __prepare_df_fo(df_fo: pd.DataFrame) -> pd.DataFrame:
     return cleaned_df_fo
 
 
+def __prepare_df_residential_plant(df_residential_plant: pd.DataFrame) -> pd.DataFrame:
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_residential_plant = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["residential_plant"],
+        df=df_residential_plant,
+    )
+
+    return cleaned_df_residential_plant
+
+
 def run(
     df_residential_plant: pd.DataFrame,
     df_backlog: pd.DataFrame,
@@ -149,11 +166,14 @@ def run(
 
     cleaned_df_ftth_hfc = __prepare_df_ftth_hfc(df_ftth_hfc=df_ftth_hfc.copy())
     cleaned_df_fo = __prepare_df_fo(df_fo=df_fo.copy())
+    cleaned_df_residential_plant = __prepare_df_residential_plant(
+        df_residential_plant=df_residential_plant.copy()
+    )
     df_output = __prepare_df_backlog(
-        df_residential_plant=df_residential_plant.copy(),
-        df_backlog=df_backlog.copy(),
+        df_residential_plant=cleaned_df_residential_plant,
         df_ftth_hfc=cleaned_df_ftth_hfc,
         df_fo=cleaned_df_fo,
+        df_backlog=df_backlog.copy(),
     )
 
     message = f"Creando archivo final: {parameters.BACKLOG_ANALYSIS_FILE_PATH}"

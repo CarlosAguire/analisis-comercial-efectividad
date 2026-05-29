@@ -8,6 +8,7 @@ from logs_setup import logging
 from operations.data_frame import (
     complete_data,
     create_file,
+    drop_columns,
     drop_duplicate_rows_by_column,
     filter_df,
     normalize_date,
@@ -16,6 +17,7 @@ from operations.data_frame import (
 CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 FILTERS = parameters.FILTERS[CONTACT_ANALYSIS]
 FINAL_COLUMNS = parameters.FINAL_COLUMNS[CONTACT_ANALYSIS]
+COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[CONTACT_ANALYSIS]
 
 
 def __prepare_df_capacity(df_capacity: pd.DataFrame) -> pd.DataFrame:
@@ -27,6 +29,12 @@ def __prepare_df_capacity(df_capacity: pd.DataFrame) -> pd.DataFrame:
     cleaned_df_capacity = filter_df(
         filters=FILTERS["capacity_file"],
         df=df_capacity,
+    )
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_capacity = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["capacity_file"],
+        df=cleaned_df_capacity,
     )
 
     return cleaned_df_capacity
@@ -42,6 +50,12 @@ def __prepare_df_residential_plant(
     cleaned_df_residential_plant = filter_df(
         filters={"include": {"NOMBRE": sellers}},
         df=df_residential_plant,
+    )
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_residential_plant = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["residential_plant_file"],
+        df=cleaned_df_residential_plant,
     )
 
     # Removemos filas duplicadas que no necesitamos de df_residential_plant

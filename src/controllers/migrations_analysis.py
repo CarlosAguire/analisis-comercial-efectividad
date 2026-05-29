@@ -14,6 +14,13 @@ def __prepare_df_gpon(df_gpon: pd.DataFrame) -> pd.DataFrame:
     message = f"Iniciando limpieza: {df_gpon.attrs['file_path']}"
     logging(message=message, level="INFO")
 
+    # Limpiamos columna de fecha
+    df_gpon["FECHA DE MIGRACION"] = pd.to_datetime(
+        df_gpon["FECHA DE MIGRACION"],
+        format="%Y-%m-%d %H:%M:%S",
+        errors="coerce",
+    ).dt.date
+
     # Creamos columnas faltantes
     df_gpon["Tipificación"] = None
     df_gpon["Nota"] = "NO REQUIERE"
@@ -34,6 +41,13 @@ def __prepare_df_brownfield(df_brownfield: pd.DataFrame) -> pd.DataFrame:
 
     message = f"Iniciando limpieza: {df_brownfield.attrs['file_path']}"
     logging(message=message, level="INFO")
+
+    # Limpiamos columna de fecha
+    df_brownfield["FECHA AGENDA"] = pd.to_datetime(
+        df_brownfield["FECHA AGENDA"],
+        format="%Y-%m-%d %H:%M:%S",
+        errors="coerce",
+    ).dt.date
 
     # Creamos columnas faltantes
     df_brownfield["Tipo de Red"] = "HFC"

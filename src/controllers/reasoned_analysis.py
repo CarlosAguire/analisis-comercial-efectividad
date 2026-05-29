@@ -5,17 +5,20 @@ from logs_setup import logging
 from operations.data_frame import (
     complete_data,
     create_file,
+    drop_columns,
     drop_duplicate_columns,
     drop_duplicate_rows_by_column,
     filter_df,
     join,
     normalize_date,
+    reorder_columns,
 )
 
 REASONED_ANALYSIS = parameters.REASONED_ANALYSIS
 COLUMN_ORDER = parameters.COLUMN_ORDER[REASONED_ANALYSIS]
 FILTERS = parameters.FILTERS[REASONED_ANALYSIS]
 FINAL_COLUMNS = parameters.FINAL_COLUMNS[REASONED_ANALYSIS]
+COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[REASONED_ANALYSIS]
 
 
 def __prepare_df_capacity(df_capacity: pd.DataFrame) -> pd.DataFrame:
@@ -27,6 +30,12 @@ def __prepare_df_capacity(df_capacity: pd.DataFrame) -> pd.DataFrame:
     cleaned_df_capacity = filter_df(
         filters=FILTERS["capacity_file"],
         df=df_capacity,
+    )
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_capacity = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["capacity_file"],
+        df=cleaned_df_capacity,
     )
 
     return cleaned_df_capacity
@@ -41,6 +50,12 @@ def __prepare_df_dispatch(df_dispatch: pd.DataFrame) -> pd.DataFrame:
     cleaned_df_dispatch = filter_df(
         filters=FILTERS["dispatch_file"],
         df=df_dispatch,
+    )
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_dispatch = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["dispatch_file"],
+        df=cleaned_df_dispatch,
     )
 
     # Removemos columnas duplicadas de df_dispatch
@@ -62,6 +77,12 @@ def __prepare_df_residential_plant(
     cleaned_df_residential_plant = filter_df(
         filters={"include": {"NOMBRE": sellers}},
         df=df_residential_plant,
+    )
+
+    # Removemos columnas que no necesitamos
+    cleaned_df_residential_plant = drop_columns(
+        columns_preserve=COLUMNS_TO_RESERVE["residential_plant_file"],
+        df=cleaned_df_residential_plant,
     )
 
     # Removemos filas duplicadas que no necesitamos de df_residential_plant
@@ -157,7 +178,15 @@ def run(
     )
 
     # Renombramos los encabezados de df_output
+    print(df_output.columns)
     df_output.rename(columns=FINAL_COLUMNS, inplace=True)
+
+    # Agregamos columnas para el análisis de las razones
+    df_output["Estado de la Razón"] = None
+    df_output["Razón Sugerida"] = None
+
+    # Reordenamos las columnas
+    df_output = reorder_columns(df=df_output, order=COLUMN_ORDER)
 
     # Creamos archivo de salida
     message = f"Creando archivo: {parameters.REASONED_ANALYSIS_FILE_PATH}"

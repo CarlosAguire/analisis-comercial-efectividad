@@ -13,6 +13,7 @@ from operations.data_frame import (
     normalize_date,
     reorder_columns,
 )
+from operations.validations import validate_row_counts
 
 REASONED_ANALYSIS = parameters.REASONED_ANALYSIS
 COLUMN_ORDER = parameters.COLUMN_ORDER[REASONED_ANALYSIS]
@@ -145,6 +146,11 @@ def run(
             continue
 
         cleaned_dfs_dispatch.append(cleaned_df_dispatch)
+
+    validate_row_counts(
+        dfs_capacity=cleaned_dfs_capacity,
+        dfs_dispatch=cleaned_dfs_dispatch,
+    )
 
     # Unimos todos los dfs del área de capacidades en uno solo
     unified_df_capacity = pd.concat(

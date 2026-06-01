@@ -13,6 +13,7 @@ from operations.data_frame import (
     read_xlsx_file,
 )
 from operations.files import filter_files_by_date, get_latest_file, process_file_folders
+from operations.validations import validate_duplicate_suffix, validate_xlsx
 
 REASONED_ANALYSIS = parameters.REASONED_ANALYSIS
 PRODUCTIVITY_ANALYSIS = parameters.PRODUCTIVITY_ANALYSIS
@@ -31,6 +32,13 @@ def run_analysis(
     backlog_analysis: bool,
     migrations_analysis: bool,
 ) -> None:
+
+    validate_xlsx(folder_path=FTTH_HFC_CAPACITY_FOLDER)
+    validate_xlsx(folder_path=FTTH_HFC_DISPATCH_FOLDER)
+    validate_xlsx(folder_path=parameters.FO_FOLDER)
+    validate_duplicate_suffix(folder_path=FTTH_HFC_CAPACITY_FOLDER)
+    validate_duplicate_suffix(folder_path=FTTH_HFC_DISPATCH_FOLDER)
+    validate_duplicate_suffix(folder_path=parameters.FO_FOLDER)
 
     catalog_result = process_file_folders(
         ftth_hfc_capacity_folder=FTTH_HFC_CAPACITY_FOLDER,

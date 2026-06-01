@@ -1,6 +1,6 @@
 # === Ruff Configuration ===
 [tool.ruff]
-line-length = 88
+line-length = 92
 target-version = "py312"
 src = ["src"]
 exclude = [

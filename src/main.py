@@ -13,7 +13,13 @@ from operations.data_frame import (
     read_xlsx_file,
 )
 from operations.files import filter_files_by_date, get_latest_file, process_file_folders
-from operations.validations import validate_duplicate_suffix, validate_xlsx
+from operations.validations import (
+    validate_csv,
+    validate_duplicate_suffix,
+    validate_exact_file_path,
+    validate_file_dates,
+    validate_xlsx,
+)
 
 REASONED_ANALYSIS = parameters.REASONED_ANALYSIS
 PRODUCTIVITY_ANALYSIS = parameters.PRODUCTIVITY_ANALYSIS
@@ -21,11 +27,50 @@ CONTACT_ANALYSIS = parameters.CONTACT_ANALYSIS
 BACKLOG_ANALYSIS = parameters.BACKLOG_ANALYSIS
 MIGRATIONS_ANALYSIS = parameters.MIGRATIONS_ANALYSIS
 
-FTTH_HFC_CAPACITY_FOLDER = parameters.FTTH_HFC_FOLDER / "Capacidades"
-FTTH_HFC_DISPATCH_FOLDER = parameters.FTTH_HFC_FOLDER / "Despacho"
+
+def __run_validations() -> None:
+    """Ejecuta todas las validaciones necesarias antes de procesar los datos."""
+
+    message = "Ejecutando validaciones estructurales y de formato."
+    logging(message=message, level="INFO")
+
+    # Validamos que los archivos tengan extensión .xlsx
+    validate_xlsx(folder_path=parameters.FTTH_HFC_CAPACITY_FOLDER)
+    validate_xlsx(folder_path=parameters.FTTH_HFC_DISPATCH_FOLDER)
+    validate_xlsx(folder_path=parameters.FO_FOLDER)
+
+    # Validamos que los archivos tengan extensión .csv
+    validate_csv(folder_path=parameters.BACKLOG_FOLDER)
+
+    # Validamos que los archivos no tengan sufijos de duplicado generados por Windows
+    validate_duplicate_suffix(folder_path=parameters.FTTH_HFC_CAPACITY_FOLDER)
+    validate_duplicate_suffix(folder_path=parameters.FTTH_HFC_DISPATCH_FOLDER)
+    validate_duplicate_suffix(folder_path=parameters.FO_FOLDER)
+
+    # Validamos que los archivos tengan fechas válidas en su nombre según el formato esperado
+    validate_file_dates(
+        folder_path=parameters.FTTH_HFC_CAPACITY_FOLDER,
+        date_format=parameters.FTTH_HFC_CAPACITY_DATE_FORMAT,
+    )
+    validate_file_dates(
+        folder_path=parameters.FTTH_HFC_DISPATCH_FOLDER,
+        date_format=parameters.FTTH_HFC_DISPATCH_DATE_FORMAT,
+    )
+    validate_file_dates(
+        folder_path=parameters.FO_FOLDER,
+        date_format=parameters.FO_DATE_FORMAT,
+    )
+
+    # Validamos que archivos existan exactamente con el nombre y extensión esperados
+    validate_exact_file_path(path=parameters.RESIDENTIAL_PLANT_PATH)
+    validate_exact_file_path(path=parameters.GPON_BASES_PATH)
+    validate_exact_file_path(path=parameters.BROWNFIELD_BASES_PATH)
+
+    message = "Validaciones estructurales y de formato completadas exitosamente."
+    logging(message=message, level="INFO")
 
 
-def run_analysis(
+def __run_analysis(
     productivity_analysis: bool,
     reasoned_analysis: bool,
     contact_analysis: bool,
@@ -33,20 +78,13 @@ def run_analysis(
     migrations_analysis: bool,
 ) -> None:
 
-    validate_xlsx(folder_path=FTTH_HFC_CAPACITY_FOLDER)
-    validate_xlsx(folder_path=FTTH_HFC_DISPATCH_FOLDER)
-    validate_xlsx(folder_path=parameters.FO_FOLDER)
-    validate_duplicate_suffix(folder_path=FTTH_HFC_CAPACITY_FOLDER)
-    validate_duplicate_suffix(folder_path=FTTH_HFC_DISPATCH_FOLDER)
-    validate_duplicate_suffix(folder_path=parameters.FO_FOLDER)
-
     catalog_result = process_file_folders(
-        ftth_hfc_capacity_folder=FTTH_HFC_CAPACITY_FOLDER,
-        ftth_hfc_dispatch_folder=FTTH_HFC_DISPATCH_FOLDER,
+        ftth_hfc_capacity_folder=parameters.FTTH_HFC_CAPACITY_FOLDER,
+        ftth_hfc_dispatch_folder=parameters.FTTH_HFC_DISPATCH_FOLDER,
         fo_folder=parameters.FO_FOLDER,
-        date_format_ftth_hfc_capacity_folder="dmy",
-        date_format_ftth_hfc_dispatch_folder="mdy",
-        date_format_fo_folder="dmy",
+        date_format_ftth_hfc_capacity_folder=parameters.FTTH_HFC_CAPACITY_DATE_FORMAT,
+        date_format_ftth_hfc_dispatch_folder=parameters.FTTH_HFC_DISPATCH_DATE_FORMAT,
+        date_format_fo_folder=parameters.FO_DATE_FORMAT,
     )
 
     # Lista de DF que se usaran en otros análisis
@@ -254,6 +292,9 @@ def run_analysis(
         ):
             return None
 
+    logging(message="Datos procesados correctamente.", level="INFO")
+    print("Datos procesados correctamente.", flush=True)
+
     return None
 
 
@@ -285,12 +326,13 @@ if __name__ == "__main__":
         if migrations_analysis:
             analysis_to_run.append(f"\n    >> {MIGRATIONS_ANALYSIS}")
 
+        # Ejecutamos análisis solicitados
         message = "Preparando archivos para ejecutar los siguientes análisis:"
         message += "".join(analysis_to_run)
         logging(message=message, level="INFO")
 
-        # Ejecutamos análisis solicitados
-        run_analysis(
+        __run_validations()
+        __run_analysis(
             productivity_analysis=productivity_analysis,
             reasoned_analysis=reasoned_analysis,
             contact_analysis=contact_analysis,
@@ -298,8 +340,6 @@ if __name__ == "__main__":
             migrations_analysis=migrations_analysis,
         )
 
-        logging(message="Datos procesados correctamente.", level="INFO")
-        print("Datos procesados correctamente.", flush=True)
         sys.exit(0)
     except Exception as e:
         logging(message="Ocurrió un error:\n", level="ERROR")

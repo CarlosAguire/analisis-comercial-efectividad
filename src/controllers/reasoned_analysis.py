@@ -147,6 +147,7 @@ def run(
 
         cleaned_dfs_dispatch.append(cleaned_df_dispatch)
 
+    # Validamos que cada par de archivos tenga el mismo número de registros
     validate_row_counts(
         dfs_capacity=cleaned_dfs_capacity,
         dfs_dispatch=cleaned_dfs_dispatch,
@@ -184,7 +185,6 @@ def run(
     )
 
     # Renombramos los encabezados de df_output
-    print(df_output.columns)
     df_output.rename(columns=FINAL_COLUMNS, inplace=True)
 
     # Agregamos columnas para el análisis de las razones

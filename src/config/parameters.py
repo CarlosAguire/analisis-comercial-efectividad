@@ -8,9 +8,17 @@ PROJECT_ROOT = THIS_FILE.parent.parent.parent
 # Configuraciónes y rutas de archivos
 DATABASES_FOLDER = PROJECT_ROOT / "databases"
 FTTH_HFC_FOLDER = DATABASES_FOLDER / "FTTH-HFC"
+FTTH_HFC_CAPACITY_FOLDER = FTTH_HFC_FOLDER / "Capacidades"
+FTTH_HFC_DISPATCH_FOLDER = FTTH_HFC_FOLDER / "Despacho"
 FO_FOLDER = DATABASES_FOLDER / "FO"
 BACKLOG_FOLDER = DATABASES_FOLDER / "Backlog"
 LOGS_FOLDER = PROJECT_ROOT / "logs"
+
+
+# Configuración de formatos de fecha para cada tipo de análisis
+FTTH_HFC_CAPACITY_DATE_FORMAT = "dmy"
+FTTH_HFC_DISPATCH_DATE_FORMAT = "mdy"
+FO_DATE_FORMAT = "dmy"
 
 
 # Configuración de rutas de archivos

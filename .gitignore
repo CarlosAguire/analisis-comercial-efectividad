@@ -215,9 +215,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-databases/
 reports/
-debugging/
 *.xlsx
 *.csv
 *.xlsb

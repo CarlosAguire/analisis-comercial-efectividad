@@ -13,7 +13,6 @@ from operations.data_frame import (
     normalize_date,
     reorder_columns,
 )
-from operations.validations import validate_row_counts
 
 REASONED_ANALYSIS = parameters.REASONED_ANALYSIS
 COLUMN_ORDER = parameters.COLUMN_ORDER[REASONED_ANALYSIS]
@@ -38,6 +37,9 @@ def __prepare_df_capacity(df_capacity: pd.DataFrame) -> pd.DataFrame:
         columns_preserve=COLUMNS_TO_RESERVE["capacity_file"],
         df=cleaned_df_capacity,
     )
+
+    # Agregamos una columna con la ruta del archivo para futuras referencias
+    cleaned_df_capacity["Ruta del Archivo"] = df_capacity.attrs["file_path"]
 
     return cleaned_df_capacity
 
@@ -64,6 +66,9 @@ def __prepare_df_dispatch(df_dispatch: pd.DataFrame) -> pd.DataFrame:
         target_column="Notas de Cierre",
         df=cleaned_df_dispatch,
     )
+
+    # Agregamos una columna con la ruta del archivo para futuras referencias
+    cleaned_df_dispatch["Ruta del Archivo"] = df_dispatch.attrs["file_path"]
 
     return cleaned_df_dispatch
 
@@ -146,12 +151,6 @@ def run(
             continue
 
         cleaned_dfs_dispatch.append(cleaned_df_dispatch)
-
-    # Validamos que cada par de archivos tenga el mismo número de registros
-    validate_row_counts(
-        dfs_capacity=cleaned_dfs_capacity,
-        dfs_dispatch=cleaned_dfs_dispatch,
-    )
 
     # Unimos todos los dfs del área de capacidades en uno solo
     unified_df_capacity = pd.concat(

@@ -1,21 +1,14 @@
-[ 05-06-2026 09:44 AM ] [ INFO ] Preparando archivos para ejecutar los siguientes análisis:
+[ 09-06-2026 10:04 AM ] [ INFO ] Preparando archivos para ejecutar los siguientes análisis:
     >> análisis de razonadas
-    >> análisis de productividad
+    >> análisis de contacto
+    >> análisis de backlog
     >> análisis de migraciones
-[ 05-06-2026 09:44 AM ] [ INFO ] Ejecutando validaciones estructurales y de formato.
-[ 05-06-2026 09:44 AM ] [ INFO ] Validaciones estructurales y de formato completadas exitosamente.
-[ 05-06-2026 09:47 AM ] [ ERROR ] Ocurrió un error:
+[ 09-06-2026 10:04 AM ] [ INFO ] Ejecutando validaciones estructurales y de formato.
+[ 09-06-2026 10:04 AM ] [ INFO ] Validaciones estructurales y de formato completadas exitosamente.
+[ 09-06-2026 10:04 AM ] [ ERROR ] Ocurrió un error:
 
 Traceback (most recent call last):
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 792, in _handle_usecols
-    col_indices.append(usecols_key.index(col))
-                       ~~~~~~~~~~~~~~~~~^^^^^
-ValueError: 'Check Reserva RN' is not in list
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Proyectos\analisis-comercial-efectividad\src\main.py", line 332, in <module>
+  File "C:\Proyectos\analisis-comercial-efectividad\src\main.py", line 350, in <module>
     __run_analysis(
     ~~~~~~~~~~~~~~^
         productivity_analysis=productivity_analysis,
@@ -25,72 +18,13 @@ Traceback (most recent call last):
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     )
     ^
-  File "C:\Proyectos\analisis-comercial-efectividad\src\main.py", line 157, in __run_analysis
-    df_capacity = read_xlsx_file(
-        dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
-        path=file_path,
-        sheet=0,
-    )
-  File "C:\Proyectos\analisis-comercial-efectividad\src\operations\data_frame.py", line 26, in read_xlsx_file
-    return pd.read_excel(
-           ~~~~~~~~~~~~~^
-        io=path,
-        ^^^^^^^^
-    ...<3 lines>...
-        dtype=dtype,
-        ^^^^^^^^^^^^
-    )
-    ^
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\excel\_base.py", line 494, in read_excel
-    data = io.parse(
-        sheet_name=sheet_name,
-    ...<20 lines>...
-        dtype_backend=dtype_backend,
-    )
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\excel\_base.py", line 1780, in parse
-    return self._reader.parse(
-           ~~~~~~~~~~~~~~~~~~^
-        sheet_name=sheet_name,
-        ^^^^^^^^^^^^^^^^^^^^^^
-    ...<16 lines>...
-        **kwds,
-        ^^^^^^^
-    )
-    ^
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\excel\_base.py", line 768, in parse
-    output = self._parse_sheet(
-        data=data,
-    ...<19 lines>...
-        **kwds,
-    )
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\excel\_base.py", line 950, in _parse_sheet
-    raise err
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\excel\_base.py", line 913, in _parse_sheet
-    parser = TextParser(
-        data,
-    ...<19 lines>...
-        **kwds,
-    )
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\parsers\readers.py", line 2076, in TextParser
-    return TextFileReader(*args, **kwds)
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1645, in __init__
-    self._engine = self._make_engine(f, self.engine)
-                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\parsers\readers.py", line 1922, in _make_engine
-    return mapping[engine](f, **self.options)
-           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 156, in __init__
-    ) = self._infer_columns()
-        ~~~~~~~~~~~~~~~~~~~^^
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 727, in _infer_columns
-    columns = self._handle_usecols(
-        columns, columns[0], num_original_columns
-    )
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\parsers\python_parser.py", line 794, in _handle_usecols
-    self._validate_usecols_names(self.usecols, usecols_key)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Proyectos\analisis-comercial-efectividad\venv\Lib\site-packages\pandas\io\parsers\base_parser.py", line 662, in _validate_usecols_names
-    raise ValueError(
-    ...<2 lines>...
-    )
-ValueError: Usecols do not match columns, columns expected but not found: ['Check Reserva RN', 'Troncal FTTH', 'Check RN Migrada', 'Propietario RN Validado'] (sheet: 0)
+  File "C:\Proyectos\analisis-comercial-efectividad\src\main.py", line 124, in __run_analysis
+    file_path_fo = filter_files_by_date(
+                   ~~~~~~~~~~~~~~~~~~~~~
+        inventory=catalog_result.files_by_date_fo_folder,
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        exact_date=date.today(),
+        ~~~~~~~~~~~~~~~~~~~~~~~~
+    )[0]
+    ~^^^
+IndexError: list index out of range

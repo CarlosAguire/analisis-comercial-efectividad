@@ -2,8 +2,6 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-import pandas as pd
-
 
 def validate_xlsx(folder_path: Path) -> None:
     """
@@ -66,31 +64,6 @@ def validate_duplicate_suffix(folder_path: Path) -> None:
                     "(incluye múltiples como '(1) (1)').\n"
                     f"Ruta: '{file.parent}'"
                 )
-
-
-def validate_row_counts(
-    dfs_capacity: list[pd.DataFrame],
-    dfs_dispatch: list[pd.DataFrame],
-) -> None:
-    """Valida que cada par de archivos Excel tenga el mismo número de registros."""
-
-    for df_capacity, df_dispatch in zip(dfs_capacity, dfs_dispatch):  # noqa
-        rows_df_capacity = len(df_capacity)
-        rows_df_dispatch = len(df_dispatch)
-
-        if rows_df_capacity != rows_df_dispatch:
-            df_capacity_path: Path = df_capacity.attrs["file_path"]
-            df_dispatch_path: Path = df_dispatch.attrs["file_path"]
-            df_capacity_filename = df_capacity_path.name
-            df_dispatch_filename = df_dispatch_path.name
-
-            raise ValueError(
-                "Validación fallida: inconsistencia en el número de registros detectada.\n"
-                f"Archivo A: '{df_capacity_filename}' → {rows_df_capacity} filas\n"
-                f"Archivo B: '{df_dispatch_filename}' → {rows_df_dispatch} filas\n"
-                f"Ruta A: '{df_capacity_path}'\n"
-                f"Ruta B: '{df_dispatch_path}'"
-            )
 
 
 def validate_file_dates(folder_path: Path, date_format: str) -> bool:

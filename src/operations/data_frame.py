@@ -159,9 +159,7 @@ def join(
         df2 = df2[df2[foreign_key].notna()]
     else:
         if df1[foreign_key].isna().any() or df2[foreign_key].isna().any():
-            raise ValueError(
-                f"Existen valores nulos en la llave foránea '{foreign_key}'"
-            )
+            raise ValueError(f"Existen valores nulos en la llave foránea '{foreign_key}'")
 
     # ------------------------------------------------------------
     # Helpers
@@ -221,8 +219,7 @@ def join(
     if any_dups_fk:
         if date_column is None:
             raise ValueError(
-                "Se detectaron llaves foráneas duplicadas y no se proporcionó"
-                " 'date_column'."
+                "Se detectaron llaves foráneas duplicadas y no se proporcionó 'date_column'."
             )
 
         mask1 = dup1
@@ -297,17 +294,13 @@ def join(
 
         df1.drop(
             columns=[
-                c
-                for c in df1.columns
-                if c.startswith("_date_") or c.startswith("_time_")
+                c for c in df1.columns if c.startswith("_date_") or c.startswith("_time_")
             ],
             inplace=True,
         )
         df2.drop(
             columns=[
-                c
-                for c in df2.columns
-                if c.startswith("_date_") or c.startswith("_time_")
+                c for c in df2.columns if c.startswith("_date_") or c.startswith("_time_")
             ],
             inplace=True,
         )
@@ -316,17 +309,26 @@ def join(
     # Validaciones finales
     # ------------------------------------------------------------
     if verify_quantity and len(df1) != len(df2):
+        df1_path: Path = df1.attrs["file_path"]
+        df2_path: Path = df2.attrs["file_path"]
+
         raise ValueError(
-            f"DF1 y DF2 tienen diferente número de filas ({len(df1)} vs {len(df2)})"
+            "Validación fallida: inconsistencia en el número de registros detectada.\n"
+            f"Archivo A: {df1_path.name} → {len(df1)} filas\n"
+            f"Archivo B: {df2_path.name} → {len(df2)} filas\n"
+            f"Ruta A: {df1_path.parent}\n"
+            f"Ruta B: {df2_path.parent}"
         )
 
     if verify_keys:
         k1 = set(df1["__join_key__"])
         k2 = set(df2["__join_key__"])
 
-        if k1 != k2:
-            raise KeyError(
-                "Los conjuntos de llaves efectivas no coinciden entre DF1 y DF2"
+        if len(k1) != len(k2):
+            raise ValueError(
+                "Validación fallida: Los conjuntos de llaves efectivas no coinciden.\n"
+                f"Archivo A: {df1['Ruta del Archivo'].iloc[0]}\n"
+                f"Archivo B: {df2['Ruta del Archivo'].iloc[0]}"
             )
 
     validate_arg = "one_to_one" if verify_uniqueness else None
@@ -489,9 +491,7 @@ def normalize_date(df: pd.DataFrame, column: str, input_format: str) -> pd.DataF
     if key not in fmt_map:
         allowed = ", ".join(fmt_map.keys())
 
-        raise ValueError(
-            f"input_format inválido: '{input_format}'. Use uno de: {allowed}"
-        )
+        raise ValueError(f"input_format inválido: '{input_format}'. Use uno de: {allowed}")
 
     in_fmt = fmt_map[key]
 
@@ -606,7 +606,7 @@ def filter_df(
     for field, value in filters.get("include", {}).items():
         __validate_column(field)
 
-        if __is_iterable(value=value):
+        if __is_iterable(value=value):  # noqa
             mask = df[field].isin(value)
         else:
             mask = df[field] == value
@@ -617,7 +617,7 @@ def filter_df(
     for field, value in filters.get("exclude", {}).items():
         __validate_column(field)
 
-        if __is_iterable(value=value):
+        if __is_iterable(value=value):  # noqa
             mask = ~df[field].isin(value)
         else:
             mask = df[field] != value

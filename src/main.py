@@ -32,7 +32,7 @@ MIGRATIONS_ANALYSIS = parameters.MIGRATIONS_ANALYSIS
 def __run_validations() -> None:
     """Ejecuta todas las validaciones necesarias antes de procesar los datos."""
 
-    message = "Ejecutando validaciones estructurales y de formato."
+    message = "Ejecutando validaciones estructurales y de formato"
     logging(message=message, level="INFO")
 
     # Validamos que los archivos tengan extensión .xlsx
@@ -93,20 +93,35 @@ def __run_analysis(
 
     if reasoned_analysis or contact_analysis or backlog_analysis:
         # Creamos DF del archivo de planta residencial
-        df_residential_plant = read_csv_file(
-            path=parameters.RESIDENTIAL_PLANT_PATH,
-            dtype=parameters.RESIDENTIAL_PLANT_TYPES,
-        )
-        df_residential_plant.attrs["file_path"] = parameters.RESIDENTIAL_PLANT_PATH
+        try:
+            df_residential_plant = read_csv_file(
+                path=parameters.RESIDENTIAL_PLANT_PATH,
+                dtype=parameters.RESIDENTIAL_PLANT_TYPES,
+            )
+            df_residential_plant.attrs["file_path"] = parameters.RESIDENTIAL_PLANT_PATH
+        except PermissionError:
+            raise ValueError(  # noqa
+                "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"
+                f"Archivo: '{parameters.RESIDENTIAL_PLANT_PATH.name}'\n"
+                f"Ruta: '{parameters.RESIDENTIAL_PLANT_PATH.parent}'"
+            )
 
         if backlog_analysis:
             # Creamos DF del archivo del backlog
             file_path_backlog = get_latest_file(folder_path=parameters.BACKLOG_FOLDER)
-            df_backlog = read_csv_file(
-                path=file_path_backlog,
-                dtype=parameters.BACKLOG_TYPES,
-            )
-            df_backlog.attrs["file_path"] = file_path_backlog
+
+            try:
+                df_backlog = read_csv_file(
+                    path=file_path_backlog,
+                    dtype=parameters.BACKLOG_TYPES,
+                )
+                df_backlog.attrs["file_path"] = file_path_backlog
+            except PermissionError:
+                raise ValueError(  # noqa
+                    "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"
+                    f"Archivo: '{file_path_backlog.name}'\n"
+                    f"Ruta: '{file_path_backlog.parent}'"
+                )
 
             # Creamos DF del archivo de capacidades del arbol FTTH-HFC
             file_path_ftth_hfc = filter_files_by_date(
@@ -155,13 +170,20 @@ def __run_analysis(
             )
 
             for file_path in files_path_ftth_hfc_capacity:
-                df_capacity = read_xlsx_file(
-                    dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
-                    path=file_path,
-                    sheet=0,
-                )
-                df_capacity.attrs["file_path"] = file_path
-                dfs_capacity.append(df_capacity)
+                try:
+                    df_capacity = read_xlsx_file(
+                        dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
+                        path=file_path,
+                        sheet=0,
+                    )
+                    df_capacity.attrs["file_path"] = file_path
+                    dfs_capacity.append(df_capacity)
+                except PermissionError:
+                    raise ValueError(  # noqa
+                        "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"  # noqa
+                        f"Archivo: '{file_path.name}'\n"
+                        f"Ruta: '{file_path.parent}'"
+                    )
 
             files_path_ftth_hfc_dispatch = filter_files_by_date(
                 inventory=catalog_result.files_by_date_ftth_hfc_dispatch_folder,
@@ -171,13 +193,20 @@ def __run_analysis(
             dfs_dispatch: list[pd.DataFrame] = []
 
             for file_path in files_path_ftth_hfc_dispatch:
-                df_dispatch = read_xlsx_file(
-                    dtype=parameters.FTTH_HFC_DISPATCH_TYPES,
-                    path=file_path,
-                    sheet=0,
-                )
-                df_dispatch.attrs["file_path"] = file_path
-                dfs_dispatch.append(df_dispatch)
+                try:
+                    df_dispatch = read_xlsx_file(
+                        dtype=parameters.FTTH_HFC_DISPATCH_TYPES,
+                        path=file_path,
+                        sheet=0,
+                    )
+                    df_dispatch.attrs["file_path"] = file_path
+                    dfs_dispatch.append(df_dispatch)
+                except PermissionError:
+                    raise ValueError(  # noqa
+                        "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"  # noqa
+                        f"Archivo: '{file_path.name}'\n"
+                        f"Ruta: '{file_path.parent}'"
+                    )
 
             controllers.run_reasoned_analysis(
                 df_residential_plant=df_residential_plant,
@@ -202,13 +231,20 @@ def __run_analysis(
                 )
 
                 for file_path in files_path_ftth_hfc_capacity:
-                    df_capacity = read_xlsx_file(
-                        dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
-                        path=file_path,
-                        sheet=0,
-                    )
-                    df_capacity.attrs["file_path"] = file_path
-                    dfs_capacity.append(df_capacity)
+                    try:
+                        df_capacity = read_xlsx_file(
+                            dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
+                            path=file_path,
+                            sheet=0,
+                        )
+                        df_capacity.attrs["file_path"] = file_path
+                        dfs_capacity.append(df_capacity)
+                    except PermissionError:
+                        raise ValueError(  # noqa
+                            "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"  # noqa
+                            f"Archivo: '{file_path.name}'\n"
+                            f"Ruta: '{file_path.parent}'"
+                        )
 
             controllers.run_contact_analysis(
                 df_residential_plant=df_residential_plant,
@@ -232,13 +268,20 @@ def __run_analysis(
             )
 
             for file_path in files_path_ftth_hfc_capacity:
-                df_capacity = read_xlsx_file(
-                    dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
-                    path=file_path,
-                    sheet=0,
-                )
-                df_capacity.attrs["file_path"] = file_path
-                dfs_capacity.append(df_capacity)
+                try:
+                    df_capacity = read_xlsx_file(
+                        dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
+                        path=file_path,
+                        sheet=0,
+                    )
+                    df_capacity.attrs["file_path"] = file_path
+                    dfs_capacity.append(df_capacity)
+                except PermissionError:
+                    raise ValueError(  # noqa
+                        "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"  # noqa
+                        f"Archivo: '{file_path.name}'\n"
+                        f"Ruta: '{file_path.parent}'"
+                    )
 
         dfs_ftth_hfc = dfs_capacity
         dfs_fo = []
@@ -249,9 +292,16 @@ def __run_analysis(
         )
 
         for file_path in files_path_fo:
-            df_fo = read_xlsx_file(path=file_path, sheet=0, dtype=parameters.FO_TYPES)
-            df_fo.attrs["file_path"] = file_path
-            dfs_fo.append(df_fo)
+            try:
+                df_fo = read_xlsx_file(path=file_path, sheet=0, dtype=parameters.FO_TYPES)
+                df_fo.attrs["file_path"] = file_path
+                dfs_fo.append(df_fo)
+            except PermissionError:
+                raise ValueError(  # noqa
+                    "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"
+                    f"Archivo: '{file_path.name}'\n"
+                    f"Ruta: '{file_path.parent}'"
+                )
 
         controllers.run_productivity_analysis(dfs_ftth_hfc=dfs_ftth_hfc, dfs_fo=dfs_fo)
 
@@ -279,6 +329,12 @@ def __run_analysis(
                 f"Archivo: '{parameters.GPON_BASES_PATH.name}'\n"
                 f"Ruta: '{parameters.GPON_BASES_PATH.parent}'"
             )
+        except PermissionError:
+            raise ValueError(  # noqa
+                "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"
+                f"Archivo: '{parameters.GPON_BASES_PATH.name}'\n"
+                f"Ruta: '{parameters.GPON_BASES_PATH.parent}'"
+            )
 
         try:
             df_brownfield = read_xlsx_file(
@@ -291,6 +347,12 @@ def __run_analysis(
             raise ValueError(  # noqa
                 "Validación fallida: Archivo con restricción de permisos, por favor "
                 "cambiar la etiqueta de confidencialidad a Público.\n"
+                f"Archivo: '{parameters.BROWNFIELD_BASES_PATH.name}'\n"
+                f"Ruta: '{parameters.BROWNFIELD_BASES_PATH.parent}'"
+            )
+        except PermissionError:
+            raise ValueError(  # noqa
+                "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"
                 f"Archivo: '{parameters.BROWNFIELD_BASES_PATH.name}'\n"
                 f"Ruta: '{parameters.BROWNFIELD_BASES_PATH.parent}'"
             )
@@ -355,8 +417,8 @@ if __name__ == "__main__":
             migrations_analysis=migrations_analysis,
         )
 
-        logging(message="Datos procesados correctamente.", level="INFO")
-        print("Datos procesados correctamente.", flush=True)
+        logging(message="Datos procesados correctamente", level="INFO")
+        print("Datos procesados correctamente", flush=True)
 
         sys.exit(0)
     except Exception as e:

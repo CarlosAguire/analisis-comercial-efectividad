@@ -1,1 +1,2 @@
-Usecols do not match columns, columns expected but not found: ['Check Reserva RN', 'Troncal FTTH', 'Check RN Migrada', 'Propietario RN Validado'] (sheet: 0)
+<class 'IndexError'>
+list index out of range

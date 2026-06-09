@@ -2,6 +2,7 @@ import argparse
 import sys
 import traceback
 from datetime import date, timedelta
+from zipfile import BadZipFile
 
 import pandas as pd
 
@@ -264,18 +265,35 @@ def __run_analysis(
         ):
             return None
     if migrations_analysis:
-        df_gpon = read_xlsx_file(
-            path=parameters.GPON_BASES_PATH,
-            dtype=parameters.GPON_TYPES,
-            sheet="TOTAL",
-        )
-        df_gpon.attrs["file_path"] = parameters.GPON_BASES_PATH
-        df_brownfield = read_xlsx_file(
-            path=parameters.BROWNFIELD_BASES_PATH,
-            sheet="BASE BROWNFIELD 2025(BASE)",
-            dtype=parameters.BROWNFIELD_TYPES,
-        )
-        df_brownfield.attrs["file_path"] = parameters.BROWNFIELD_BASES_PATH
+        try:
+            df_gpon = read_xlsx_file(
+                path=parameters.GPON_BASES_PATH,
+                dtype=parameters.GPON_TYPES,
+                sheet="TOTAL",
+            )
+            df_gpon.attrs["file_path"] = parameters.GPON_BASES_PATH
+        except BadZipFile:
+            raise ValueError(  # noqa
+                "Validación fallida: Archivo con restricción de permisos, por favor "
+                "cambiar la etiqueta de confidencialidad a Público.\n"
+                f"Archivo: '{parameters.GPON_BASES_PATH.name}'\n"
+                f"Ruta: '{parameters.GPON_BASES_PATH.parent}'"
+            )
+
+        try:
+            df_brownfield = read_xlsx_file(
+                path=parameters.BROWNFIELD_BASES_PATH,
+                sheet="BASE BROWNFIELD 2025(BASE)",
+                dtype=parameters.BROWNFIELD_TYPES,
+            )
+            df_brownfield.attrs["file_path"] = parameters.BROWNFIELD_BASES_PATH
+        except BadZipFile:
+            raise ValueError(  # noqa
+                "Validación fallida: Archivo con restricción de permisos, por favor "
+                "cambiar la etiqueta de confidencialidad a Público.\n"
+                f"Archivo: '{parameters.BROWNFIELD_BASES_PATH.name}'\n"
+                f"Ruta: '{parameters.BROWNFIELD_BASES_PATH.parent}'"
+            )
 
         controllers.run_migrations_analysis(
             df_gpon=df_gpon,
@@ -291,9 +309,6 @@ def __run_analysis(
             and not backlog_analysis
         ):
             return None
-
-    logging(message="Datos procesados correctamente.", level="INFO")
-    print("Datos procesados correctamente.", flush=True)
 
     return None
 
@@ -340,8 +355,12 @@ if __name__ == "__main__":
             migrations_analysis=migrations_analysis,
         )
 
+        logging(message="Datos procesados correctamente.", level="INFO")
+        print("Datos procesados correctamente.", flush=True)
+
         sys.exit(0)
     except Exception as e:
+        print(type(e))
         logging(message="Ocurrió un error:\n", level="ERROR")
         print(f"{e}", flush=True)
         traceback.print_exc(file=sys.stderr)

@@ -98,6 +98,9 @@ def process_file_folders(
 
     # Indexar archivos del ftth_hfc_dispatch_folder
     for f in ftth_hfc_dispatch_folder.glob("*"):
+        if f.is_file() and f.suffix.lower() == ".txt":
+            continue
+
         real_date = __extract_date(
             filename=f.name,
             order=date_format_ftth_hfc_dispatch_folder,
@@ -111,6 +114,9 @@ def process_file_folders(
 
     # Procesar archivos del ftth_hfc_capacity_folder
     for f in ftth_hfc_capacity_folder.glob("*"):
+        if f.is_file() and f.suffix.lower() == ".txt":
+            continue
+
         real_date = __extract_date(
             filename=f.name,
             order=date_format_ftth_hfc_capacity_folder,
@@ -128,12 +134,14 @@ def process_file_folders(
             pairs_capacity_dispatch_folder.append((f, matches[0]))
         else:
             raise ValueError(
-                f"Múltiples coincidencias en dir2 para {f.name}:"
-                f"{[m.name for m in matches]}"
+                f"Múltiples coincidencias en dir2 para {f.name}:{[m.name for m in matches]}"
             )
 
     # Procesar archivos de fo_folder (únicamente para inventario)
     for f in fo_folder.glob("*"):
+        if f.is_file() and f.suffix.lower() == ".txt":
+            continue
+
         real_date = __extract_date(
             filename=f.name,
             order=date_format_fo_folder,

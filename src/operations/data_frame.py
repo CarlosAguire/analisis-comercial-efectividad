@@ -108,8 +108,8 @@ def join(
     verify_keys: bool = True,
     coercer_type: bool = True,
 ) -> pd.DataFrame:
-    """
-    Une DF1 y DF2 garantizando una relación 1:1 mediante una LLAVE EFECTIVA
+    """Une DF1 y DF2 garantizando una relación 1:1 mediante una LLAVE EFECTIVA
+
     construida progresivamente:
 
       1. foreign_key
@@ -117,6 +117,7 @@ def join(
       3. foreign_key + fecha + hora (hh:mm AM/PM)
 
     La hora SOLO se usa si FK+Fecha sigue duplicada.
+    Se asume que la fecha siempre viene en formato dd/mm/yyyy.
     """
 
     # ------------------------------------------------------------
@@ -164,45 +165,19 @@ def join(
     # ------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------
-    def __infer_dayfirst_by_12_rule(s: pd.Series) -> bool | None:
-
+    def __parse_date(s: pd.Series) -> pd.Series:
+        # Si ya es datetime, lo dejamos pasar; si es string, forzamos dd/mm/yyyy
         if pd.api.types.is_datetime64_any_dtype(s):
-            return True
+            return s
 
-        parts = s.dropna().astype(str).str.split("/", expand=True)
-
-        if parts.shape[1] != 3 or parts.empty:
-            return None
-
-        a = pd.to_numeric(parts[0], errors="coerce")
-        b = pd.to_numeric(parts[1], errors="coerce")
-
-        if (a > 12).any() and not (b > 12).any():
-            return True
-        if (b > 12).any() and not (a > 12).any():
-            return False
-
-        return None
-
-    def __parse_date(s: pd.Series, dayfirst: bool) -> pd.Series:
-        fmt = "%d/%m/%Y" if dayfirst else "%m/%d/%Y"
-
-        return pd.to_datetime(s, format=fmt, errors="coerce")
+        return pd.to_datetime(s, format="%d/%m/%Y", errors="coerce")
 
     def __parse_time_12h(s: pd.Series) -> pd.Series:
-
-        # 1. Convertir a texto y pasar a mayúsculas
         s_clean = s.astype(str).str.upper()
-
-        # 2. Eliminar los puntos (ej: "A. M." -> "A M")
         s_clean = s_clean.str.replace(".", "", regex=False)
-
-        # 3. Quitar el espacio entre la letra y la M (ej: "A M" -> "AM")
         s_clean = s_clean.str.replace("A M", "AM", regex=False)
         s_clean = s_clean.str.replace("P M", "PM", regex=False)
-
-        # 4. Ahora sí, Pandas lo podrá interpretar sin problemas
-        dt = pd.to_datetime(s_clean.str.strip(), errors="coerce")
+        dt = pd.to_datetime(s_clean.str.strip(), format="%I:%M %p", errors="coerce")
 
         return dt.dt.strftime("%I:%M %p")
 
@@ -225,22 +200,16 @@ def join(
         mask1 = dup1
         mask2 = dup2
 
-        df1_dayfirst = __infer_dayfirst_by_12_rule(df1.loc[mask1, date_column])
-        df2_dayfirst = __infer_dayfirst_by_12_rule(df2.loc[mask2, date_column])
-
-        if df1_dayfirst is None:
-            df1_dayfirst = True
-        if df2_dayfirst is None:
-            df2_dayfirst = False
-
-        df1["_date_tmp_"] = __parse_date(df1[date_column], df1_dayfirst)
-        df2["_date_tmp_"] = __parse_date(df2[date_column], df2_dayfirst)
+        # Parseo directo usando estrictamente dd/mm/yyyy
+        df1["_date_tmp_"] = __parse_date(df1[date_column])
+        df2["_date_tmp_"] = __parse_date(df2[date_column])
 
         if df1.loc[mask1, "_date_tmp_"].isna().any():
             raise ValueError("Fechas inválidas en DF1 para llaves duplicadas")
         if df2.loc[mask2, "_date_tmp_"].isna().any():
             raise ValueError("Fechas inválidas en DF2 para llaves duplicadas")
 
+        # Aseguramos un formato de texto homogéneo (con ceros a la izquierda) para la llave
         df1["_date_str_"] = df1["_date_tmp_"].dt.strftime("%d/%m/%Y")
         df2["_date_str_"] = df2["_date_tmp_"].dt.strftime("%d/%m/%Y")
 
@@ -269,16 +238,10 @@ def join(
             df1["_time_str_"] = __parse_time_12h(df1[time_column])
             df2["_time_str_"] = __parse_time_12h(df2[time_column])
 
-            # Validación para DF1
-            mask_invalid_df1 = df1.loc[dup1_after, "_time_str_"].isna()
-
-            if mask_invalid_df1.any():
+            if df1.loc[dup1_after, "_time_str_"].isna().any():
                 raise ValueError("Horas inválidas en DF1 para órdenes duplicadas.")
 
-            # Validación para DF2
-            mask_invalid_df2 = df2.loc[dup2_after, "_time_str_"].isna()
-
-            if mask_invalid_df2.any():
+            if df2.loc[dup2_after, "_time_str_"].isna().any():
                 raise ValueError("Horas inválidas en DF2 para órdenes duplicadas.")
 
             df1.loc[dup1_after, "__join_key__"] = (
@@ -292,6 +255,7 @@ def join(
                 + df2.loc[dup2_after, "_time_str_"]
             )
 
+        # Limpieza de columnas temporales
         df1.drop(
             columns=[
                 c for c in df1.columns if c.startswith("_date_") or c.startswith("_time_")
@@ -309,8 +273,8 @@ def join(
     # Validaciones finales
     # ------------------------------------------------------------
     if verify_quantity and len(df1) != len(df2):
-        df1_path: Path = df1.attrs["file_path"]
-        df2_path: Path = df2.attrs["file_path"]
+        df1_path: Path = df1.attrs.get("file_path", Path("Archivo_A"))
+        df2_path: Path = df2.attrs.get("file_path", Path("Archivo_B"))
 
         raise ValueError(
             "Validación fallida: inconsistencia en el número de registros detectada.\n"
@@ -324,11 +288,20 @@ def join(
         k1 = set(df1["__join_key__"])
         k2 = set(df2["__join_key__"])
 
-        if len(k1) != len(k2):
+        if k1 != k2:
+            only_df1 = k1 - k2
+            only_df2 = k2 - k1
+            if only_df1:
+                print("Muestra en DF1 no encontrada en DF2:")
+                print(df1[df1["__join_key__"] == next(iter(only_df1))])
+            if only_df2:
+                print("Muestra en DF2 no encontrada en DF1:")
+                print(df2[df2["__join_key__"] == next(iter(only_df2))])
+
             raise ValueError(
                 "Validación fallida: Los conjuntos de llaves efectivas no coinciden.\n"
-                f"Archivo A: {df1['Ruta del Archivo'].iloc[0]}\n"
-                f"Archivo B: {df2['Ruta del Archivo'].iloc[0]}"
+                f"Archivo A: {df1.get('Ruta del Archivo', pd.Series(['Desconocido'])).iloc[0]}\n"  # noqa
+                f"Archivo B: {df2.get('Ruta del Archivo', pd.Series(['Desconocido'])).iloc[0]}"  # noqa
             )
 
     validate_arg = "one_to_one" if verify_uniqueness else None

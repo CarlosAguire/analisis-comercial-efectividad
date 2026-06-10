@@ -67,7 +67,7 @@ def __run_validations() -> None:
     validate_exact_file_path(path=parameters.GPON_BASES_PATH)
     validate_exact_file_path(path=parameters.BROWNFIELD_BASES_PATH)
 
-    message = "Validaciones estructurales y de formato completadas exitosamente."
+    message = "Validaciones estructurales y de formato completadas exitosamente"
     logging(message=message, level="INFO")
 
 

@@ -26,7 +26,7 @@ def __prepare_df_capacity(df_capacity: pd.DataFrame) -> pd.DataFrame:
     message = f"Iniciando limpieza: {df_capacity.attrs['file_path']}"
     logging(message=message, level="INFO")
 
-    # Filtramos para eliminar filas que no necesitamos de df_capacity
+    # Filtramos para eliminar filas que no necesitamos
     cleaned_df_capacity = filter_df(
         filters=FILTERS["capacity_file"],
         df=df_capacity,
@@ -49,7 +49,7 @@ def __prepare_df_dispatch(df_dispatch: pd.DataFrame) -> pd.DataFrame:
     message = f"Iniciando limpieza: {df_dispatch.attrs['file_path']}"
     logging(message=message, level="INFO")
 
-    # Filtramos para eliminar filas que no necesitamos de df_dispatch
+    # Filtramos para eliminar filas que no necesitamos
     cleaned_df_dispatch = filter_df(
         filters=FILTERS["dispatch_file"],
         df=df_dispatch,
@@ -78,7 +78,7 @@ def __prepare_df_residential_plant(
     df_capacity: pd.DataFrame,
 ) -> pd.DataFrame:
 
-    # Filtramos para eliminar filas que no necesitamos de df_residential_plant
+    # Filtramos para eliminar filas que no necesitamos
     sellers = df_capacity["Asesor comercial"].unique().tolist()
     cleaned_df_residential_plant = filter_df(
         filters={"include": {"NOMBRE": sellers}},
@@ -91,7 +91,7 @@ def __prepare_df_residential_plant(
         df=cleaned_df_residential_plant,
     )
 
-    # Removemos filas duplicadas que no necesitamos de df_residential_plant
+    # Removemos filas duplicadas que no necesitamos
     # Para quedarnos solamente con los asesores comerciales únicos
     cleaned_df_residential_plant = drop_duplicate_rows_by_column(
         df=cleaned_df_residential_plant,

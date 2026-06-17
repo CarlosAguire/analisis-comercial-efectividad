@@ -2,11 +2,12 @@ import pandas as pd
 
 from config import parameters
 from logs_setup import logging
-from operations.data_frame import create_file, drop_columns, filter_df
+from operations.data_frame import create_file, drop_columns, filter_df, reorder_columns
 
 PRODUCTIVITY_ANALYSIS = parameters.PRODUCTIVITY_ANALYSIS
 COLUMNS_TO_RESERVE = parameters.COLUMNS_TO_RESERVE[PRODUCTIVITY_ANALYSIS]
 FILTERS = parameters.FILTERS[PRODUCTIVITY_ANALYSIS]
+COLUMN_ORDER = parameters.COLUMN_ORDER[PRODUCTIVITY_ANALYSIS]
 
 
 def __prepare_df_ftth_hfc(df_ftth_hfc: pd.DataFrame) -> pd.DataFrame:
@@ -65,6 +66,9 @@ def run(dfs_ftth_hfc: list[pd.DataFrame], dfs_fo: list[pd.DataFrame]) -> None:
         objs=cleaned_dfs_ftth_hfc + cleaned_dfs_fo,
         ignore_index=True,
     )
+
+    # Reordenamos las columnas
+    df_output = reorder_columns(df=df_output, order=COLUMN_ORDER)
 
     message = f"Creando archivo final: {parameters.PRODUCTIVITY_ANALYSIS_FILE_PATH}"
     logging(message=message, level="INFO")

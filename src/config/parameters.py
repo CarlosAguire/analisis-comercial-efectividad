@@ -539,6 +539,26 @@ COLUMN_ORDER = {
         "Código",
         "Fecha",
     ],
+    PRODUCTIVITY_ANALYSIS: [
+        "Técnico",
+        "Intervalos de tiempo",
+        "Actividad ID",
+        "Fecha",
+        "Tipo de Actividad",
+        "Subtipo de la Orden de Trabajo",
+        "Orden de trabajo",
+        "Estado",
+        "Duración",
+        "Ciudad",
+        "Nodo",
+        "Número de cuenta",
+        "Tipo de Red",
+        "Código de causa 3 del IIMS",
+        "Compañia",
+        "External ID",
+        "Coordenada X",
+        "Coordenada Y",
+    ],
 }
 
 

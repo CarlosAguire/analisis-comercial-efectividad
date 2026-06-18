@@ -130,6 +130,7 @@ BACKLOG_TYPES = {
     "Opera": "string",
     "Red": "string",
     "NODO": "string",
+    "REGIONAL": "string",
     "ESTADO_ORDEN": "string",
     "FECHA_AGENDA_FUTURO": "string",
     "ANTIGUEDAD_ULTIMA_VISITA": "string",
@@ -301,31 +302,6 @@ COLUMNS_TO_RESERVE = {
             "TCARGU",
         ],
     },
-    MIGRATIONS_ANALYSIS: {
-        "brownfield_bases": [
-            "ESTADO REGIONAL",
-            "DESMONTE DE NODOS 1",
-            "TIPIFICACION",
-            "CUENTA MATRIZ",
-            "CUENTA",
-            "TIPO DE RED",
-            "ALIADO",
-            "Mes",
-            "CIUDAD",
-            "NOTA",
-        ],
-        "gpon_bases": [
-            "CODIGO",
-            "CUENTA",
-            "ESTADO GENERAL DE  LA MIGRACION",
-            "TIPIFICACION REGIONAL",
-            "CUENTA MATRIZ",
-            "Tipo Red (GPON-Unifilar)",
-            "ALIADO",
-            "MES",
-            "Ciudad",
-        ],
-    },
 }
 
 
@@ -386,7 +362,11 @@ FILTERS = {
     BACKLOG_ANALYSIS: {
         "backlog_file": {
             "include": {
-                "Region": "REGION ORIENTE",
+                "combine": "or",
+                "fields": {
+                    "Region": "REGION ORIENTE",
+                    "REGIONAL": "ROR",
+                },
             },
             "exclude": {
                 "TIPO_TRABAJO": [

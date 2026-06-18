@@ -548,68 +548,83 @@ def drop_duplicate_rows_by_column(df: pd.DataFrame, column: str) -> pd.DataFrame
 
 def filter_df(
     df: pd.DataFrame,
-    filters: dict[str, dict[str, str | list[str]]],
-    combine: Literal["and", "or"] = "and",
+    filters: dict[str, Any],
+    global_combine: Literal["and", "or"] = "and",
 ) -> pd.DataFrame:
     """
-    Filtra un `DataFrame` con soporte para combinación AND / OR.
-    - "and": todas las condiciones deben cumplirse
-    - "or": al menos una condición debe cumplirse
+    Filtra un DataFrame calculando las máscaras por bloque (include, exclude, contains)
+    y permitiendo lógica AND/OR tanto a nivel de bloque (local) como entre bloques (global).
     """
-
-    final_mask = None
 
     def __is_iterable(value: Any) -> bool:
 
         return isinstance(value, Iterable) and not isinstance(value, str)
 
-    def __combine_masks(mask1: Any, mask2: Any) -> Any:
+    def __combine_masks(mask1: Any, mask2: Any, combine_method: str) -> Any:
 
         if mask1 is None:
             return mask2
 
-        return mask1 & mask2 if combine == "and" else mask1 | mask2
+        return mask1 & mask2 if combine_method == "and" else mask1 | mask2
 
     def __validate_column(field: str) -> None:
 
         if field not in df.columns:
             raise KeyError(f"Error crítico en filtro: La columna '{field}' no existe.")
 
-    # ---------- INCLUDE ----------
-    for field, value in filters.get("include", {}).items():
-        __validate_column(field)
+    final_mask = None
 
-        if __is_iterable(value=value):  # noqa
-            mask = df[field].isin(value)
+    # Procesar cada categoría de filtro admitida
+    for filter_type in ["include", "exclude", "contains"]:
+        if filter_type not in filters:
+            continue
+
+        block_data = filters[filter_type]
+
+        # Soportar la nueva estructura con 'fields' y 'combine'
+        if isinstance(block_data, dict) and "fields" in block_data:
+            fields = block_data["fields"]
+            local_combine = block_data.get("combine", "and")
         else:
-            mask = df[field] == value
+            # Fallback por si envían el dict plano (retrocompatibilidad)
+            fields = block_data
+            local_combine = "and"
 
-        final_mask = __combine_masks(mask1=final_mask, mask2=mask)
+        block_mask = None
 
-    # ---------- EXCLUDE ----------
-    for field, value in filters.get("exclude", {}).items():
-        __validate_column(field)
+        for field, value in fields.items():
+            __validate_column(field)
 
-        if __is_iterable(value=value):  # noqa
-            mask = ~df[field].isin(value)
-        else:
-            mask = df[field] != value
+            if filter_type == "include":
+                if __is_iterable(value):  # noqa
+                    mask = df[field].isin(value)
+                else:
+                    mask = df[field] == value
+            elif filter_type == "exclude":
+                if __is_iterable(value):  # noqa
+                    mask = ~df[field].isin(value)
+                else:
+                    mask = df[field] != value
+            elif filter_type == "contains":
+                series = df[field].astype("string")
+                if __is_iterable(value):
+                    # Un array en 'contains' siempre debería ser evaluado como un OR interno
+                    mask = None
+                    for v in value:
+                        v_mask = series.str.contains(str(v), regex=False, na=False)
+                        mask = v_mask if mask is None else mask | v_mask
+                else:
+                    mask = series.str.contains(str(value), regex=False, na=False)
 
-        final_mask = __combine_masks(mask1=final_mask, mask2=mask)
+            # Combinamos la máscara generada con la máscara acumulada del bloque
+            block_mask = __combine_masks(block_mask, mask, local_combine)  # type: ignore
 
-    # ---------- CONTAINS ----------
-    for field, value in filters.get("contains", {}).items():
-        __validate_column(field)
+        # Si el bloque generó una máscara, la combinamos con la máscara final del DF
+        if block_mask is not None:
+            final_mask = __combine_masks(final_mask, block_mask, global_combine)
 
-        series = df[field].astype("string")
-
-        if __is_iterable(value=value):
-            mask = False
-            for v in value:
-                mask |= series.str.contains(str(v), regex=False, na=False)
-        else:
-            mask = series.str.contains(str(value), regex=False, na=False)
-
-        final_mask = __combine_masks(mask1=final_mask, mask2=mask)
+    # Si no se aplicó ningún filtro válido, retornar el DF original
+    if final_mask is None:
+        return df
 
     return df[final_mask]  # type: ignore

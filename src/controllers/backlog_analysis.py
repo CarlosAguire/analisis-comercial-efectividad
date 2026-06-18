@@ -44,7 +44,7 @@ def __prepare_df_backlog(
     cleaned_df_residential_plant = filter_df(
         df=df_residential_plant,
         filters={"contains": {"CC_COMPLETA": sellers, "TCARGU": sellers}},
-        combine="or",
+        global_combine="or",
     )
 
     # Completamos las columnas de df_backlog con la información de df_residential_plant

@@ -1,4 +1,5 @@
 import argparse
+import os
 import shutil
 import sys
 import traceback
@@ -95,7 +96,8 @@ def __update_file_history(
         )
 
         if contact_analysis:
-            destination = Path()
+            destination_path = os.getenv("ONDEDRIVE_FTTH_HFC_CAPACITY_FOLDER")
+            destination = Path(destination_path)  # type: ignore
             files_path_ftth_hfc_capacity = filter_files_by_date(
                 inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
                 end_date=date.today() - timedelta(days=1),
@@ -104,7 +106,8 @@ def __update_file_history(
             for file_path in files_path_ftth_hfc_capacity:
                 shutil.copy2(src=file_path, dst=destination / file_path.name)
         if reasoned_analysis:
-            destination = Path()
+            destination_path = os.getenv("ONDEDRIVE_FTTH_HFC_CAPACITY_FOLDER")
+            destination = Path(destination_path)  # type: ignore
             files_path_ftth_hfc_capacity = filter_files_by_date(
                 inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
                 end_date=date.today() - timedelta(days=1),
@@ -113,7 +116,8 @@ def __update_file_history(
             for file_path in files_path_ftth_hfc_capacity:
                 shutil.copy2(src=file_path, dst=destination / file_path.name)
 
-            destination = Path()
+            destination_path = os.getenv("ONDEDRIVE_FTTH_HFC_DISPATCH_FOLDER")
+            destination = Path(destination_path)  # type: ignore
             files_path_ftth_hfc_dispatch = filter_files_by_date(
                 inventory=catalog_result.files_by_date_ftth_hfc_dispatch_folder,
                 end_date=date.today() - timedelta(days=1),
@@ -122,7 +126,8 @@ def __update_file_history(
             for file_path in files_path_ftth_hfc_dispatch:
                 shutil.copy2(src=file_path, dst=destination / file_path.name)
         if productivity_analysis:
-            destination = Path()
+            destination_path = os.getenv("ONDEDRIVE_FTTH_HFC_CAPACITY_FOLDER")
+            destination = Path(destination_path)  # type: ignore
             files_path_ftth_hfc_capacity = filter_files_by_date(
                 inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
                 end_date=date.today() - timedelta(days=1),
@@ -131,7 +136,8 @@ def __update_file_history(
             for file_path in files_path_ftth_hfc_capacity:
                 shutil.copy2(src=file_path, dst=destination / file_path.name)
 
-            destination = Path()
+            destination_path = os.getenv("ONDEDRIVE_FO_FOLDER")
+            destination = Path(destination_path)  # type: ignore
             files_path_fo = filter_files_by_date(
                 inventory=catalog_result.files_by_date_fo_folder,
                 end_date=date.today() - timedelta(days=1),
@@ -140,7 +146,8 @@ def __update_file_history(
             for file_path in files_path_fo:
                 shutil.copy2(src=file_path, dst=destination / file_path.name)
         if backlog_analysis:
-            destination = Path()
+            destination_path = os.getenv("ONDEDRIVE_BACKLOG_FOLDER")
+            destination = Path(destination_path)  # type: ignore
             file_backlog = get_latest_file(folder_path=parameters.BACKLOG_FOLDER)
             shutil.copy2(src=file_backlog, dst=destination / file_backlog.name)
 

@@ -1,8 +1,15 @@
 from pathlib import Path
 
+from config.env import get_bool_env, load_env
+
 # Configuración de ruta raíz del proyecto
 THIS_FILE = Path(__file__).resolve()
 PROJECT_ROOT = THIS_FILE.parent.parent.parent
+
+
+# Cargar variables de entorno desde el archivo .env
+load_env(env_path=PROJECT_ROOT / ".env")
+DEBUG = get_bool_env(key="DEBUG", default=False)
 
 
 # Configuraciónes y rutas de archivos

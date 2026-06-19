@@ -1,7 +1,9 @@
 import argparse
+import shutil
 import sys
 import traceback
 from datetime import date, timedelta
+from pathlib import Path
 from zipfile import BadZipFile
 
 import pandas as pd
@@ -13,7 +15,11 @@ from operations.data_frame import (
     read_csv_file,
     read_xlsx_file,
 )
-from operations.files import filter_files_by_date, get_latest_file, process_file_folders
+from operations.files import (
+    filter_files_by_date,
+    get_latest_file,
+    process_file_folders,
+)
 from operations.validations import (
     validate_csv,
     validate_duplicate_suffix,
@@ -69,6 +75,74 @@ def __run_validations() -> None:
 
     message = "Validaciones estructurales y de formato completadas exitosamente"
     logging(message=message, level="INFO")
+
+
+def __update_file_history(
+    backlog_analysis: bool,
+    contact_analysis: bool,
+    reasoned_analysis: bool,
+    productivity_analysis: bool,
+) -> None:
+
+    if not parameters.DEBUG:
+        catalog_result = process_file_folders(
+            ftth_hfc_capacity_folder=parameters.FTTH_HFC_CAPACITY_FOLDER,
+            ftth_hfc_dispatch_folder=parameters.FTTH_HFC_DISPATCH_FOLDER,
+            fo_folder=parameters.FO_FOLDER,
+            date_format_ftth_hfc_capacity_folder=parameters.FTTH_HFC_CAPACITY_DATE_FORMAT,
+            date_format_ftth_hfc_dispatch_folder=parameters.FTTH_HFC_DISPATCH_DATE_FORMAT,
+            date_format_fo_folder=parameters.FO_DATE_FORMAT,
+        )
+
+        if contact_analysis:
+            destination = Path()
+            files_path_ftth_hfc_capacity = filter_files_by_date(
+                inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
+                end_date=date.today() - timedelta(days=1),
+            )
+
+            for file_path in files_path_ftth_hfc_capacity:
+                shutil.copy2(src=file_path, dst=destination / file_path.name)
+        if reasoned_analysis:
+            destination = Path()
+            files_path_ftth_hfc_capacity = filter_files_by_date(
+                inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
+                end_date=date.today() - timedelta(days=1),
+            )
+
+            for file_path in files_path_ftth_hfc_capacity:
+                shutil.copy2(src=file_path, dst=destination / file_path.name)
+
+            destination = Path()
+            files_path_ftth_hfc_dispatch = filter_files_by_date(
+                inventory=catalog_result.files_by_date_ftth_hfc_dispatch_folder,
+                end_date=date.today() - timedelta(days=1),
+            )
+
+            for file_path in files_path_ftth_hfc_dispatch:
+                shutil.copy2(src=file_path, dst=destination / file_path.name)
+        if productivity_analysis:
+            destination = Path()
+            files_path_ftth_hfc_capacity = filter_files_by_date(
+                inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
+                end_date=date.today() - timedelta(days=1),
+            )
+
+            for file_path in files_path_ftth_hfc_capacity:
+                shutil.copy2(src=file_path, dst=destination / file_path.name)
+
+            destination = Path()
+            files_path_fo = filter_files_by_date(
+                inventory=catalog_result.files_by_date_fo_folder,
+                end_date=date.today() - timedelta(days=1),
+            )
+
+            for file_path in files_path_fo:
+                shutil.copy2(src=file_path, dst=destination / file_path.name)
+        if backlog_analysis:
+            destination = Path()
+            file_backlog = get_latest_file(folder_path=parameters.BACKLOG_FOLDER)
+            shutil.copy2(src=file_backlog, dst=destination / file_backlog.name)
 
 
 def __run_analysis(
@@ -415,6 +489,12 @@ if __name__ == "__main__":
             contact_analysis=contact_analysis,
             backlog_analysis=backlog_analysis,
             migrations_analysis=migrations_analysis,
+        )
+        __update_file_history(
+            productivity_analysis=productivity_analysis,
+            reasoned_analysis=reasoned_analysis,
+            contact_analysis=contact_analysis,
+            backlog_analysis=backlog_analysis,
         )
 
         logging(message="Datos procesados correctamente", level="INFO")

@@ -184,7 +184,7 @@ def __run_analysis(
             raise ValueError(  # noqa
                 "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"
                 f"Archivo: '{parameters.RESIDENTIAL_PLANT_PATH.name}'\n"
-                f"Ruta: '{parameters.RESIDENTIAL_PLANT_PATH.parent}'"
+                f"Carpeta: '{parameters.RESIDENTIAL_PLANT_PATH.parent}'"
             )
 
         if backlog_analysis:
@@ -201,32 +201,44 @@ def __run_analysis(
                 raise ValueError(  # noqa
                     "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"
                     f"Archivo: '{file_path_backlog.name}'\n"
-                    f"Ruta: '{file_path_backlog.parent}'"
+                    f"Carpeta: '{file_path_backlog.parent}'"
                 )
 
-            # Creamos DF del archivo de capacidades del arbol FTTH-HFC
-            file_path_ftth_hfc = filter_files_by_date(
-                inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
-                exact_date=date.today(),
-            )[0]
-            df_ftth_hfc = read_xlsx_file(
-                dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
-                path=file_path_ftth_hfc,
-                sheet=0,
-            )
-            df_ftth_hfc.attrs["file_path"] = file_path_ftth_hfc
+            try:
+                # Creamos DF del archivo de capacidades del arbol FTTH-HFC
+                file_path_ftth_hfc = filter_files_by_date(
+                    inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
+                    exact_date=date.today(),
+                )[0]
+                df_ftth_hfc = read_xlsx_file(
+                    dtype=parameters.FTTH_HFC_CAPACITY_TYPES,
+                    path=file_path_ftth_hfc,
+                    sheet=0,
+                )
+                df_ftth_hfc.attrs["file_path"] = file_path_ftth_hfc
+            except IndexError:
+                raise ValueError(  # noqa
+                    "Búsqueda fallida: No se encontró el archivo con fecha de hoy.\n"
+                    f"Carpeta: '{parameters.FTTH_HFC_CAPACITY_FOLDER}'"
+                )
 
-            # Creamos DF del archivo del arbol FO
-            file_path_fo = filter_files_by_date(
-                inventory=catalog_result.files_by_date_fo_folder,
-                exact_date=date.today(),
-            )[0]
-            df_fo = read_xlsx_file(
-                dtype=parameters.FO_TYPES,
-                path=file_path_fo,
-                sheet=0,
-            )
-            df_fo.attrs["file_path"] = file_path_fo
+            try:
+                # Creamos DF del archivo del arbol FO
+                file_path_fo = filter_files_by_date(
+                    inventory=catalog_result.files_by_date_fo_folder,
+                    exact_date=date.today(),
+                )[0]
+                df_fo = read_xlsx_file(
+                    dtype=parameters.FO_TYPES,
+                    path=file_path_fo,
+                    sheet=0,
+                )
+                df_fo.attrs["file_path"] = file_path_fo
+            except IndexError:
+                raise ValueError(  # noqa
+                    "Búsqueda fallida: No se encontró el archivo con fecha de hoy.\n"
+                    f"Carpeta: '{parameters.FO_FOLDER}'"
+                )
 
             controllers.run_backlog_analysis(
                 df_residential_plant=df_residential_plant,
@@ -250,6 +262,13 @@ def __run_analysis(
                 end_date=date.today() - timedelta(days=1),
             )
 
+            if not files_path_ftth_hfc_capacity:
+                raise ValueError(  # noqa
+                    "Búsqueda fallida: No se encontraron archivos con las fechas esperadas.\n"
+                    f"Carpeta: '{parameters.FTTH_HFC_CAPACITY_FOLDER}'\n"
+                    f"Fecha esperada: {date.today() - timedelta(days=1)}"
+                )
+
             for file_path in files_path_ftth_hfc_capacity:
                 try:
                     df_capacity = read_xlsx_file(
@@ -271,6 +290,13 @@ def __run_analysis(
                 end_date=date.today() - timedelta(days=1),
             )
 
+            if not files_path_ftth_hfc_dispatch:
+                raise ValueError(  # noqa
+                    "Búsqueda fallida: No se encontraron archivos con las fechas esperadas.\n"
+                    f"Carpeta: '{parameters.FTTH_HFC_DISPATCH_FOLDER}'\n"
+                    f"Fecha esperada: {date.today() - timedelta(days=1)}"
+                )
+
             dfs_dispatch: list[pd.DataFrame] = []
 
             for file_path in files_path_ftth_hfc_dispatch:
@@ -286,7 +312,7 @@ def __run_analysis(
                     raise ValueError(  # noqa
                         "Lectura fallida: El archivo esta siendo usado por otra aplicación.\n"  # noqa
                         f"Archivo: '{file_path.name}'\n"
-                        f"Ruta: '{file_path.parent}'"
+                        f"Carpeta: '{file_path.parent}'"
                     )
 
             controllers.run_reasoned_analysis(
@@ -310,6 +336,13 @@ def __run_analysis(
                     inventory=catalog_result.files_by_date_ftth_hfc_capacity_folder,
                     end_date=date.today() - timedelta(days=1),
                 )
+
+                if not files_path_ftth_hfc_capacity:
+                    raise ValueError(  # noqa
+                        "Búsqueda fallida: No se encontraron archivos con las fechas esperadas.\n"
+                        f"Carpeta: '{parameters.FTTH_HFC_CAPACITY_FOLDER}'\n"
+                        f"Fecha esperada: {date.today() - timedelta(days=1)}"
+                    )
 
                 for file_path in files_path_ftth_hfc_capacity:
                     try:
@@ -348,6 +381,13 @@ def __run_analysis(
                 end_date=date.today() - timedelta(days=1),
             )
 
+            if not files_path_ftth_hfc_capacity:
+                raise ValueError(  # noqa
+                    "Búsqueda fallida: No se encontraron archivos con las fechas esperadas.\n"
+                    f"Carpeta: '{parameters.FTTH_HFC_CAPACITY_FOLDER}'\n"
+                    f"Fecha esperada: {date.today() - timedelta(days=1)}"
+                )
+
             for file_path in files_path_ftth_hfc_capacity:
                 try:
                     df_capacity = read_xlsx_file(
@@ -371,6 +411,13 @@ def __run_analysis(
             inventory=catalog_result.files_by_date_fo_folder,
             end_date=date.today() - timedelta(days=1),
         )
+
+        if not files_path_fo:
+            raise ValueError(  # noqa
+                "Búsqueda fallida: No se encontraron archivos con las fechas esperadas.\n"
+                f"Carpeta: '{parameters.FO_FOLDER}'\n"
+                f"Fecha esperada: {date.today() - timedelta(days=1)}"
+            )
 
         for file_path in files_path_fo:
             try:

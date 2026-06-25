@@ -61,9 +61,7 @@ def __prepare_df_backlog(
         column="CEDULA_VENDEDOR",
         key_match="contains",
     )
-    cleaned_df_residential_plant = cleaned_df_residential_plant.drop(
-        columns=["CEDULA_VENDEDOR"]
-    )
+    cleaned_df_residential_plant = cleaned_df_residential_plant.drop(columns=["CEDULA_VENDEDOR"])
     cleaned_df_residential_plant = cleaned_df_residential_plant.rename(
         columns={"TCARGU": "CEDULA_VENDEDOR"},
     )
@@ -84,6 +82,9 @@ def __prepare_df_backlog(
     cleaned_df_backlog["Ventana de servicio"] = None
     cleaned_df_backlog["Estado"] = None
     cleaned_df_backlog.rename(columns={"OT/LL": "OT"}, inplace=True)
+    cleaned_df_backlog.rename(columns={"Aliado Zonificado": "Aliado"}, inplace=True)
+    unified_df_ofsc.rename(columns={"Compañia": "Aliado"}, inplace=True)
+    cleaned_df_backlog.rename(columns={"Comunidad": "Ciudad"}, inplace=True)
     cleaned_df_backlog = complete_data(
         df_dictionary=unified_df_ofsc,
         df=cleaned_df_backlog,
